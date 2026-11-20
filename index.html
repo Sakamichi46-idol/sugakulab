@@ -61,6 +61,7 @@ p.note{font-size:12.5px;color:var(--sub);margin:4px 0}
 .viewwrap{display:flex;gap:12px}
 .viewbox{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;flex:1 1 0;min-width:0}
 .viewbox .vhead{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px}
+.viewbox .vhead .panreset{flex:none;white-space:nowrap}
 .viewbox .vhead span{font-weight:400;color:var(--sub);font-size:12px}
 #gl{width:100%;height:520px;display:block;touch-action:none;background:radial-gradient(circle at 50% 38%,#fdfcf8,#e9e7db)}
 @media (prefers-color-scheme: dark){#gl{background:radial-gradient(circle at 50% 38%,#23282d,#14171a)}}
@@ -372,6 +373,30 @@ body.wide-on{overflow:hidden}
   .d-note{display:none}
   .m-only{display:block}
 }
+/* ===== 案1：作図キャンバスが主役の構造（常時表示の帯＋案内ページは存続） ===== */
+/* サイト名タップで全体の案内が開くことを見た目でも示す */
+#ttlGuide{cursor:pointer}
+#ttlGuide:hover{color:var(--accent)}
+/* 主役の「作図キャンバス」タブは、選ばれていないときも枠と地色で目立たせる */
+.mode-tabs button#tabCustom{border:2px solid var(--accent);background:var(--accent-soft);color:var(--ink)}
+.mode-tabs button#tabCustom.on{background:var(--accent);color:var(--accent-ink)}
+/* 案内ページ表示中は「全体の案内」ボタンを点灯 */
+#btnHome.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+/* PC・タブレット（横並び）では自由キャンバスを大きく：縦は画面高に合わせて伸ばす */
+@media (min-width:901px){
+  #custSvg{height:clamp(520px,calc(100dvh - 280px),820px)}
+}
+/* タブレット（縦並び）でもスマホより高く見せる */
+@media (min-width:601px) and (max-width:900px){
+  #custSvg{height:460px}
+}
+@media (max-width:600px){
+  /* スマホでも帯は常時表示（上に固定）。場所を取りすぎないよう一段小さくする */
+  .topbar{position:sticky;top:0;z-index:30}
+  #btnHome,#btnUnits{flex:1 1 auto}
+  .mode-tabs{grid-template-columns:repeat(4,1fr);width:100%}
+  .mode-tabs button{min-height:38px;font-size:12.5px;padding:5px 2px}
+}
 </style>
 <link rel="canonical" href="https://sugakulab.pages.dev/" />
 <meta property="og:url" content="https://sugakulab.pages.dev/" />
@@ -381,15 +406,17 @@ body.wide-on{overflow:hidden}
 </head>
 <body>
 <header class="topbar">
-  <div class="ttl"><h1>数学ビジュアルラボ</h1><span>立体・平面図形・関数・定理・データを、動かして目で見て確かめる</span></div>
+  <div class="ttl"><h1 id="ttlGuide" role="button" tabindex="0" title="全体の案内（何をしたい？＋単元一覧）を開く">数学ビジュアルラボ</h1><span>作図キャンバスで図を作り、立体・平面図形・関数・定理・データを動かして目で見て確かめる</span></div>
   <div class="mode-actions">
-    <button class="btn hidden" id="btnHome" type="button">← トップへもどる</button>
-    <nav class="mode-tabs hidden" id="modeTabs" aria-label="モード切替">
-    <button id="tabCustom" type="button">自分で作る（カスタム）</button>
-    <button id="tabSolid" type="button">立体モード</button>
-    <button id="tabPlane" type="button">平面図形モード</button>
+    <button class="btn" id="btnHome" type="button">全体の案内</button>
+    <button class="btn" id="btnUnits" type="button">習ったところから探す</button>
+    <nav class="mode-tabs" id="modeTabs" aria-label="モード切替">
+    <button id="tabCustom" type="button">作図キャンバス</button>
+    <button id="tabSolid" type="button">立体</button>
+    <button id="tabPlane" type="button">平面図形</button>
+    <button id="tabCons" type="button">定規で作図</button>
     <button id="tabGraph" type="button">関数グラフ</button>
-    <button id="tabTheorem" type="button">定理を見る</button>
+    <button id="tabTheorem" type="button">定理</button>
     <button id="tabData" type="button">データ</button>
     <button id="tabNum" type="button">数と式</button>
     </nav>
@@ -397,11 +424,11 @@ body.wide-on{overflow:hidden}
 </header>
 <div id="homeView">
 <section class="entrygate" id="entryGate" aria-label="何をしたい？">
-  <div class="entry-head"><strong>何をしたい？</strong><span>まずは1つ選んでね。選ぶと、その画面だけが表示されます。</span></div>
+  <div class="entry-head"><strong>何をしたい？（全体の案内）</strong><span>このページは全体の案内です。選ぶと、その画面だけが表示されます。作図キャンバスへは上の「作図キャンバス」からいつでも戻れます。</span></div>
   <div class="entrygrid" id="entryGrid">
     <button type="button" data-entry="watch">図を動かして見たい<small>定理の図をドラッグして、変わらないことを確かめる</small></button>
     <button type="button" data-entry="cons">作図したい<small>コンパスと定規で、垂直二等分線などを描く</small></button>
-    <button type="button" data-entry="custom">自分で作りたい<small>点と線を置いて、好きな図を自分で作る</small></button>
+    <button type="button" data-entry="custom">作図キャンバスで作りたい<small>点と線を置いて、好きな図を自分で作る</small></button>
     <button type="button" data-entry="solid">立体を見たい<small>立体を回したり、展開図で見たりする</small></button>
     <button type="button" data-entry="graph">グラフを見たい<small>関数のグラフを描いて、交わりを見つける</small></button>
     <button type="button" data-entry="data">データを見たい<small>ヒストグラム・箱ひげ図・確率・標本調査を、動かして確かめる</small></button>
@@ -669,7 +696,7 @@ body.wide-on{overflow:hidden}
     <!-- プリセット -->
     <div id="presetPane">
       <div class="viewbox">
-        <div class="vhead">プリセット作図 <span>長さの単位は1目盛り分＝1</span></div>
+        <div class="vhead">プリセット作図 <span>長さの単位は1目盛り分＝1</span><button class="btn small panreset" type="button" id="panResetPreset">表示をもどす</button></div>
         <svg id="presetSvg" viewBox="-10 -10 20 20" preserveAspectRatio="xMidYMid meet"></svg>
       </div>
       <div id="presetError"></div>
@@ -682,7 +709,7 @@ body.wide-on{overflow:hidden}
     <!-- コンパス・定規 -->
     <div id="consPane" class="hidden">
       <div class="viewbox">
-        <div class="vhead">コンパス・定規作図 <span id="consStatus">道具を選んでキャンバスをタップ</span></div>
+        <div class="vhead">コンパス・定規作図 <span id="consStatus">道具を選んでキャンバスをタップ</span><button class="btn small panreset" type="button" id="panResetCons">表示をもどす</button></div>
         <svg id="consSvg" viewBox="-10 -10 20 20" preserveAspectRatio="xMidYMid meet"></svg>
       </div>
       <p class="note">定規は、キャンバスに出た定規そのものを動かして、縁に沿って線を引く道具として扱います（目盛りは学習用の確かめ表示で、「長さ・角度ラベル」をOFFにすると数字が隠れます）。コンパスも道具そのものが出て、針を立てる→足を開く→回して描く、本物の操作で使います。</p>
@@ -715,7 +742,7 @@ body.wide-on{overflow:hidden}
     <!-- 重ねて確かめる（合同・相似） -->
     <div id="ovlPane" class="hidden">
       <div class="viewbox">
-        <div class="vhead"><span id="ovlHead">合同の確かめ</span> <span>オレンジの図形を動かして、青い図形に重ねてみよう</span></div>
+        <div class="vhead"><span id="ovlHead">合同の確かめ</span> <span>オレンジの図形を動かして、青い図形に重ねてみよう</span><button class="btn small panreset" type="button" id="panResetOvl">表示をもどす</button></div>
         <svg id="ovlSvg" viewBox="-10 -10 20 20" preserveAspectRatio="xMidYMid meet" aria-label="重ねて確かめるキャンバス"></svg>
       </div>
       <div id="ovlVerdict" style="margin-top:12px"></div>
@@ -1002,10 +1029,11 @@ body.wide-on{overflow:hidden}
 <div class="layout">
   <div class="stage">
     <div class="viewbar">
-      <span style="font-size:14.5px;font-weight:600;color:var(--ink)">三角形の頂点をドラッグして動かしてみよう。点や線はボタンで増やせます。</span>
+      <span style="font-size:14.5px;font-weight:600;color:var(--ink)">白紙のキャンバスです。右の道具で点や線を置いて、好きな図を作れます。初めてのときは「お手本を出す」がおすすめです。</span>
       <span style="margin-left:auto;display:inline-flex;gap:6px;flex-wrap:wrap">
         <button class="btn small" type="button" id="custUndo" disabled>元に戻す</button>
         <button class="btn small" type="button" id="custRedo" disabled>やり直し</button>
+        <button class="btn small" type="button" id="custExample">お手本を出す</button>
         <button class="btn small" type="button" id="custResetAll">全部消して最初から</button>
         <button class="btn small btn-wide" type="button" data-wide="customMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
         <button class="btn small wide-tools-btn" type="button" data-wide-tools="customMode">道具を開く</button>
@@ -1020,7 +1048,7 @@ body.wide-on{overflow:hidden}
       </div>
     </div>
     <div class="viewbox">
-      <div class="vhead">自由キャンバス <span id="custSelHead">点Aが選ばれています</span></div>
+      <div class="vhead">自由キャンバス <span id="custSelHead">点が選ばれていません</span><button class="btn small panreset" type="button" id="panResetCust">表示をもどす</button></div>
       <svg id="custSvg" viewBox="-10 -10 20 20" preserveAspectRatio="xMidYMid meet" aria-label="カスタムキャンバス"></svg>
     </div>
     <div class="card" style="margin-top:12px">
@@ -2112,12 +2140,25 @@ function shade(hex,f){var c=new THREE.Color(hex);c.multiplyScalar(f);return "#"+
 /* ===== トップタブ ===== */
 $("tabSolid").onclick=function(){setTopMode("solid");};
 $("tabPlane").onclick=function(){setTopMode("plane");};
+$("tabCons").onclick=function(){setTopMode("plane"); if(typeof setPlaneSub==="function")setPlaneSub("cons");};
 $("tabGraph").onclick=function(){setTopMode("graph");};
 $("tabTheorem").onclick=function(){setTopMode("theorem");};
 $("tabCustom").onclick=function(){setTopMode("custom");};
 $("tabData").onclick=function(){setTopMode("data");};
 $("tabNum").onclick=function(){setTopMode("num");};
 $("btnHome").onclick=function(){showHome();};
+/* 「習ったところから探す」：案内ページを開き、単元一覧まで移動する（どの画面からでも1タップ） */
+$("btnUnits").onclick=function(){
+  showHome();
+  var ub=$("unitBar"), tg=$("unitToggle");
+  if(ub&&!ub.classList.contains("open")){ub.classList.add("open"); if(tg){tg.setAttribute("aria-expanded","true"); tg.textContent="習ったところから探す（学年・単元） ▴";}}
+  if(ub)ub.scrollIntoView({behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"),block:"start"});
+};
+/* サイト名タップ／キー操作でも全体の案内が開く */
+(function(){var h=$("ttlGuide"); if(!h)return;
+  h.addEventListener("click",function(){showHome();});
+  h.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault(); showHome();}});
+})();
 function showHome(){setTopMode("home");}
 (function(){
   var tg=$("unitToggle"), ub=$("unitBar"); if(!tg||!ub)return;
@@ -2135,6 +2176,7 @@ function setTopMode(m){
   $("tabGraph").classList.toggle("on",m==="graph");
   $("tabTheorem").classList.toggle("on",m==="theorem");
   $("tabCustom").classList.toggle("on",m==="custom");
+  $("tabCons").classList.toggle("on",false); /* 定規作図の点灯は syncPlaneTabs が平面サブに合わせて付け直す */
   $("tabData").classList.toggle("on",m==="data");
   $("tabNum").classList.toggle("on",m==="num");
   $("solidMode").classList.toggle("hidden",m!=="solid");
@@ -2144,10 +2186,11 @@ function setTopMode(m){
   $("customMode").classList.toggle("hidden",m!=="custom");
   $("dataMode").classList.toggle("hidden",m!=="data");
   $("numMode").classList.toggle("hidden",m!=="num");
-  /* トップ画面（何をしたい？＋単元一覧）とモード画面は排他表示：ページ切り替え式 */
+  /* 案内ページ（何をしたい？＋単元一覧）とモード画面は排他表示：ページ切り替え式。
+     ただしモード切替の帯と「全体の案内」ボタンは常時表示し、どの画面からでも1タップで移動できる */
   var hv=$("homeView"); if(hv)hv.classList.toggle("hidden",!home);
-  var mt=$("modeTabs"); if(mt)mt.classList.toggle("hidden",home);
-  var bh=$("btnHome"); if(bh)bh.classList.toggle("hidden",home);
+  var bh=$("btnHome"); if(bh)bh.classList.toggle("on",home);
+  if(typeof window.syncPlaneTabs==="function")window.syncPlaneTabs();
   window.scrollTo(0,0);
   if(home)return;
   if(m==="solid"){resizeGL();}
@@ -4815,12 +4858,15 @@ function genPreset(){
   else if(s==="sector"){pState.sector={cx:0,cy:0,r:P.sr,ang:P.sa};}
   drawPreset();
 }
-function drawGrid(svg,show){
+function drawGrid(svg,show,b){
   var g=svgEl("g",{"class":"grid"},svg);
   if(!show)return g;
-  for(var i=-10;i<=10;i++){
-    svgEl("line",{x1:i,y1:-10,x2:i,y2:10,stroke:i===0?"var(--sub)":"var(--line)","stroke-width":i===0?0.05:0.025},g);
-    svgEl("line",{x1:-10,y1:i,x2:10,y2:i,stroke:i===0?"var(--sub)":"var(--line)","stroke-width":i===0?0.05:0.025},g);
+  var x0=b?b.x0:-10, x1=b?b.x1:10, y0=b?b.y0:-10, y1=b?b.y1:10;
+  for(var i=x0;i<=x1;i++){
+    svgEl("line",{x1:i,y1:y0,x2:i,y2:y1,stroke:i===0?"var(--sub)":"var(--line)","stroke-width":i===0?0.05:0.025},g);
+  }
+  for(var j=y0;j<=y1;j++){
+    svgEl("line",{x1:x0,y1:j,x2:x1,y2:j,stroke:j===0?"var(--sub)":"var(--line)","stroke-width":j===0?0.05:0.025},g);
   }
   return g;
 }
@@ -4828,6 +4874,35 @@ function svgPoint(svg,evt){
   var pt=svg.createSVGPoint(); pt.x=evt.clientX; pt.y=evt.clientY;
   var m=svg.getScreenCTM(); if(!m)return{x:0,y:0};
   var p=pt.matrixTransform(m.inverse()); return {x:p.x,y:p.y};
+}
+/* ===== 2Dキャンバスのパン（白紙を引っぱって表示をずらす） =====
+   ずらすのは viewBox の始点だけ。点や図形の実座標は一切変えないので、
+   svgPoint() で逆変換する既存の操作（ドラッグ・スナップ・計測・作図）は
+   パンした状態でもそのまま正しい座標で動き続ける。 */
+var PAN2D={preset:{x:0,y:0},cons:{x:0,y:0},cust:{x:0,y:0},ovl:{x:0,y:0}};
+function panVB(key){var p=PAN2D[key];return (-10+p.x)+" "+(-10+p.y)+" 20 20";}
+function panBounds(key){var p=PAN2D[key];return {x0:Math.floor(-10+p.x)-1,x1:Math.ceil(10+p.x)+1,y0:Math.floor(-10+p.y)-1,y1:Math.ceil(10+p.y)+1};}
+function panClamp(v){return Math.max(-12,Math.min(12,v));}
+function panScaleOf(svg){var m=svg.getScreenCTM();if(m&&m.a)return m.a;var r=svg.getBoundingClientRect();return (Math.min(r.width,r.height)||520)/20;}
+function panIsBg(svg,e){
+  var n=e.target;
+  if(n===svg)return true;
+  while(n&&n!==svg){if(n.classList&&n.classList.contains("grid"))return true;n=n.parentNode;}
+  return false;
+}
+function panBegin(svg,key,e){
+  var p=PAN2D[key];
+  return {key:key,sx:e.clientX,sy:e.clientY,ox:p.x,oy:p.y,k:panScaleOf(svg),moved:false};
+}
+/* ドラッグ量に応じて PAN2D を更新する。実際にパンが始まったら true */
+function panMove(st,e){
+  var dx=e.clientX-st.sx, dy=e.clientY-st.sy;
+  if(!st.moved&&Math.hypot(dx,dy)<6)return false;
+  st.moved=true;
+  var p=PAN2D[st.key];
+  p.x=panClamp(st.ox-dx/st.k);
+  p.y=panClamp(st.oy-dy/st.k);
+  return true;
 }
 function snapV(v,on){return on?Math.round(v*2)/2:v;}
 function polyMetrics(pts){
@@ -4883,7 +4958,8 @@ function resetTransformUI(){
 function drawPreset(){
   var svg=$("presetSvg");
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  drawGrid(svg,$("pGrid").checked);
+  svg.setAttribute("viewBox",panVB("preset"));
+  drawGrid(svg,$("pGrid").checked,panBounds("preset"));
   var errBox=$("presetError"), info=$("presetInfo");
   errBox.innerHTML = pState.error? '<div class="err">'+pState.error+"</div>" : "";
   var color=$("pColor").value, sw=2.5, fo=0.35;
@@ -4974,6 +5050,19 @@ window.addEventListener("pointermove",function(e){
 });
 window.addEventListener("pointerup",function(){presetDrag=null;});
 window.addEventListener("pointercancel",function(){presetDrag=null;});
+/* 白紙を引っぱるパン（頂点ドラッグは stopPropagation で先に処理されるので競合しない） */
+var presetPan=null;
+$("presetSvg").addEventListener("pointerdown",function(e){
+  if(presetDrag||presetPan)return;
+  presetPan=panBegin(this,"preset",e);
+});
+window.addEventListener("pointermove",function(e){
+  if(!presetPan)return;
+  if(panMove(presetPan,e))drawPreset();
+});
+window.addEventListener("pointerup",function(){presetPan=null;});
+window.addEventListener("pointercancel",function(){presetPan=null;});
+$("panResetPreset").onclick=function(){PAN2D.preset.x=0;PAN2D.preset.y=0;drawPreset();};
 ["pColor","pGrid","pSnap","pLabels"].forEach(function(id){
   $(id).addEventListener("input",function(){
     drawPreset();
@@ -5257,7 +5346,8 @@ function drawCons(){
   resolveCons();
   var svg=$("consSvg");
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  drawGrid(svg,$("consGrid").checked);
+  svg.setAttribute("viewBox",panVB("cons"));
+  drawGrid(svg,$("consGrid").checked,panBounds("cons"));
   var showAux=$("consAux").checked, showMeas=$("consMeasure").checked;
   var g=svgEl("g",{},svg);
   cons.elems.forEach(function(e){
@@ -5378,6 +5468,27 @@ window.addEventListener("pointercancel",function(){
   if(consDrag&&consDrag.moved)consSuppressClick=true;
   consDrag=null;
 });
+/* 白紙を引っぱるパン：点・図形・コンパス・定規の操作は先に処理される（stopPropagation／
+   ツール判定）ので、ここに来るのは対象のない場所のドラッグだけ。
+   動かさなかった場合は通常のクリックとして道具の処理に渡す（パン後に click を抑止）。 */
+var consPan=null;
+$("consSvg").addEventListener("pointerdown",function(e){
+  if(consPan||consDrag)return;
+  if(cpIsActive())return;
+  if(cp.drag||rl.drag||rl.ptDrag)return;
+  if(!panIsBg(this,e))return;
+  consPan=panBegin(this,"cons",e);
+});
+window.addEventListener("pointermove",function(e){
+  if(!consPan)return;
+  if(panMove(consPan,e))drawCons();
+});
+window.addEventListener("pointerup",function(){
+  if(consPan&&consPan.moved)consSuppressClick=true;
+  consPan=null;
+});
+window.addEventListener("pointercancel",function(){consPan=null;});
+$("panResetCons").onclick=function(){PAN2D.cons.x=0;PAN2D.cons.y=0;drawCons();};
 function consPushHistorySilent(){if(consPlayPos>=0)consPlayExit();consUndoStack.push(consSnapshot());if(consUndoStack.length>80)consUndoStack.shift();consRedoStack=[];}
 /* 依存関係の見える化：作図で決まる点が「何から決まっているか」を言葉で返す */
 function consDepText(p){
@@ -5648,6 +5759,7 @@ function consElemClick(eid){
   drawCons(); renderConsSteps();
 }
 $("consSvg").addEventListener("click",function(e){
+  if(consSuppressClick){consSuppressClick=false;return;}
   if(guide.active)exitGuideIfAny();
   if(cons.tool==="compass"||cons.tool==="compassT")return; /* コンパスは pointer 操作で描く */
   if(rlIsActive())return; /* 定規も pointer 操作で扱う */
@@ -7849,7 +7961,7 @@ function ovlNames(){return ovlState.A.length===3?{a:["A","B","C"],b:["D","E","F"
 function drawOvl(){
   var svg=$("ovlSvg"); if(!svg||!ovlState.A.length)return;
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  svg.setAttribute("viewBox","-10 -10 20 20");
+  svg.setAttribute("viewBox",panVB("ovl"));
   var g=svgEl("g",{},svg);
   var ACC="var(--accent)", SELC="var(--sel)", INK="var(--ink)";
   var names=ovlNames(), n=ovlState.A.length;
@@ -8008,6 +8120,19 @@ window.addEventListener("pointerup",function(){
   }
 });
 window.addEventListener("pointercancel",function(){ovlDrag=null;});
+/* 白紙を引っぱるパン（オレンジ図形・頂点・回転つまみは stopPropagation で先に処理される） */
+var ovlPan=null;
+$("ovlSvg").addEventListener("pointerdown",function(e){
+  if(ovlDrag||ovlPan)return;
+  ovlPan=panBegin(this,"ovl",e);
+});
+window.addEventListener("pointermove",function(e){
+  if(!ovlPan)return;
+  if(panMove(ovlPan,e))drawOvl();
+});
+window.addEventListener("pointerup",function(){ovlPan=null;});
+window.addEventListener("pointercancel",function(){ovlPan=null;});
+$("panResetOvl").onclick=function(){PAN2D.ovl.x=0;PAN2D.ovl.y=0;drawOvl();};
 $("ovlModeGodo").onclick=function(){ovlSetMode("godo");};
 $("ovlModeSim").onclick=function(){ovlSetMode("sim");};
 $("ovlScenario").addEventListener("change",function(){ovlLoadScenario(parseInt(this.value,10)||0); drawOvl();});
@@ -8087,6 +8212,9 @@ $("custResetYes").onclick=function(){
   drawCust(); syncCustForms();
   var b=$("custResetAll"); if(b)b.focus();
 };
+/* 「お手本を出す」：従来の初期図（二等辺三角形ABC＋辺BCの中点M）を出す。
+   custSet が変更前の状態を履歴へ積むので、「元に戻す」で出す前の図に戻れる */
+$("custExample").onclick=function(){custTplDefault();};
 /* 点の編集欄・図形リストでの変更（数値入力や条件の変更）は、フォーカスが入った時点の状態を控えておき、変更が確定したときに履歴へ積む */
 ["custPointEdit","custShapeList"].forEach(function(id){
   var el=$(id); if(!el)return;
@@ -8632,7 +8760,7 @@ function custDefText(p){
   if(d.type==="divpt")return "円周の "+(+d.n||4)+" 等分点の "+(+d.k||0)+" 番目（連動）";
   return "";
 }
-var custDrag=null;
+var custDrag=null, custPan=null;
 function custToMath(sx,sy){return {x:sx,y:-sy};}
 function custDraggable(p){return p&&(p.def.type==="free"||p.def.type==="online"||p.def.type==="oncircle"||p.def.type==="onarc"||p.def.type==="onfunc"||p.def.type==="ondist"||(p.def.type==="ext"&&p.def.mode!=="ratio"));}
 function custApplyDrag(p,m){
@@ -8714,7 +8842,8 @@ function custPickOffset(anchor,obstacles){
 function drawCust(){
   var svg=$("custSvg");
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  drawGrid(svg,true);
+  svg.setAttribute("viewBox",panVB("cust"));
+  drawGrid(svg,true,panBounds("cust"));
   /* 写真の下絵：グリッドの上・図形の下に敷く */
   if(TRACE.show&&TRACE.dataUrl){
     var tw=TRACE.w, th=tw*TRACE.aspect;
@@ -9091,6 +9220,12 @@ function thmLabelSafe(parent,x,y,text,color){
   t.textContent=text; return t;
 }
 $("custSvg").addEventListener("pointerdown",function(e){
+  if(panIsBg(this,e)){
+    /* 白紙のドラッグ＝パン。動かさなかった（クリック）場合は、離したときに
+       従来どおり「選ばれている点をその場所へ動かす」処理を行う */
+    if(!custPan)custPan=panBegin(this,"cust",e);
+    return;
+  }
   var p=custPoint(CUST.sel);
   if(!custDraggable(p))return;
   e.preventDefault();
@@ -9126,6 +9261,25 @@ window.addEventListener("pointercancel",function(){
   custLabelDrag=null; custShapeLabelDrag=null; custDragSnap=null;
   if(custDrag){custDrag=null; syncCustForms();}
 });
+/* 自由キャンバスのパン（白紙ドラッグ）と、クリック時の従来動作の振り分け */
+window.addEventListener("pointermove",function(e){
+  if(!custPan)return;
+  if(panMove(custPan,e))drawCust();
+});
+window.addEventListener("pointerup",function(e){
+  if(!custPan)return;
+  var st=custPan; custPan=null;
+  if(st.moved)return;
+  /* 動かさなかった＝クリック：従来どおり、選ばれている点をその場所へ動かす */
+  var p=custPoint(CUST.sel);
+  if(!custDraggable(p))return;
+  var snap=custSnapshot();
+  var s=svgPoint($("custSvg"),e);
+  custApplyDrag(p,custToMath(s.x,s.y)); drawCust(); syncCustForms();
+  if(snap!==custSnapshot())custPushSnap(snap);
+});
+window.addEventListener("pointercancel",function(){custPan=null;});
+$("panResetCust").onclick=function(){PAN2D.cust.x=0;PAN2D.cust.y=0;drawCust();};
 /* ---- カスタム：右側フォームの同期 ---- */
 function custFillSelect(sel,options,val){
   var cur=val!==undefined?val:sel.value;
@@ -9915,10 +10069,12 @@ $("tplSolid").onclick=function(){
   if(typeof setViewMode==="function")setViewMode("both");
   window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")});
 };
-/* 初期表示はトップ画面（何をしたい？＋学年・単元の一覧）だけ。
-   自由キャンバスの例は裏で用意しておき、「自分で作りたい」を選んだときだけ表示する */
-custTplDefault();
-setTopMode("home");
+/* 初期表示は作図キャンバス（自由キャンバス）が主役。初期状態は白紙で、
+   二等辺三角形の例は置きっぱなしにせず「お手本を出す」ボタンから出す。
+   「何をしたい？＋単元一覧」は全体の案内ページとして残し、
+   上の帯の「全体の案内」ボタンやサイト名からいつでも開ける（setTopMode("home")） */
+custSet([],[],null);
+setTopMode("custom");
 </script>
 <script>
 "use strict";
@@ -10752,8 +10908,24 @@ syncTraceUI();
 "use strict";
 /* ===== 初見の入口「何をしたい？」と段階表示（基本だけ見せ、細かいものは開いて出す） ===== */
 (function(){
-  /* トップ画面とモード画面は setTopMode("home") / setTopMode(モード名) で切り替わる。
-     入口で選ぶとトップ画面は隠れ、選んだモードだけが別画面のように表示される */
+  /* 案内ページとモード画面は setTopMode("home") / setTopMode(モード名) で切り替わる。
+     入口で選ぶと案内ページは隠れ、選んだモードだけが別画面のように表示される */
+  /* 「定規で作図」タブの点灯を、平面モードのサブ表示（形を選ぶ／作図／重ねて確かめる）に同期する */
+  function syncPlaneTabs(){
+    var pm=document.getElementById("planeMode"), cp=document.getElementById("consPane");
+    var tp=document.getElementById("tabPlane"), tc=document.getElementById("tabCons");
+    if(!pm||!tp||!tc)return;
+    var planeOn=!pm.classList.contains("hidden");
+    var consOn=planeOn&&!!cp&&!cp.classList.contains("hidden");
+    tc.classList.toggle("on",consOn);
+    if(planeOn)tp.classList.toggle("on",!consOn);
+  }
+  window.syncPlaneTabs=syncPlaneTabs;
+  if(typeof setPlaneSub==="function"){
+    var _spsForTabs=setPlaneSub;
+    setPlaneSub=function(m){_spsForTabs(m); syncPlaneTabs();};
+  }
+  syncPlaneTabs();
   document.querySelectorAll("[data-entry]").forEach(function(b){
     b.addEventListener("click",function(){
       document.querySelectorAll("[data-entry]").forEach(function(x){x.classList.toggle("on",x===b);});
