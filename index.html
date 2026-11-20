@@ -43,6 +43,16 @@
 #customMode:not(.is-wide) #custDimBar{order:-1}
 #customMode:not(.is-wide) #c3ResetConfirm{order:-1}
 .c3-viewtoggles{margin-left:auto}
+/* ===== 展開図と紐の最短距離（立体で作る） ===== */
+#customMode.c3d-on #c3StageRow{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+#customMode:not(.c3d-on) #c3StageRow{display:block}
+#c3StageRow>.viewbox{flex:1 1 330px;min-width:0}
+#c3NetSvg{width:100%;height:auto;display:block}
+#c3NetSvg text{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif;font-weight:700}
+.c3-patlist{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 2px}
+.c3-patlist .btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.c3-patlist .btn.best{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+#c3StrResult .rowline,#c3CurveResult .rowline{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:2px 0;font-size:13.5px}
 @media (max-width:600px){#c3Wrap{height:400px}#c3Viewbox .vhead{flex-wrap:wrap}.c3-viewtoggles{margin-left:0}}
 </style>
 <link rel="canonical" href="https://sugakulab.pages.dev/" />
@@ -708,6 +718,7 @@
       <div class="vhead">自由キャンバス <span id="custSelHead">点が選ばれていません</span><span class="cust-disp" style="display:inline-flex;gap:10px;align-items:center;font-weight:400;font-size:12.5px"><label class="chk"><input type="checkbox" id="custGrid" checked> グリッド</label><label class="chk"><input type="checkbox" id="custAxes" checked> 座標軸</label></span><button class="btn small panreset" type="button" id="panResetCust" title="ドラッグでずらした表示を、最初の位置・大きさに戻します">最初の表示にもどす</button></div>
       <svg id="custSvg" viewBox="-10 -10 20 20" preserveAspectRatio="xMidYMid meet" aria-label="カスタムキャンバス"></svg>
     </div>
+    <div id="c3StageRow">
     <div class="viewbox c3d-only" id="c3Viewbox">
       <div class="vhead">立体キャンバス <span id="c3SelHead">点が選ばれていません</span>
         <span class="c3-viewtoggles">
@@ -719,6 +730,12 @@
       </div>
       <div id="c3Wrap"><canvas id="c3Gl" aria-label="立体作図キャンバス"></canvas><div id="c3Fallback" class="hidden">3D表示の読み込みに失敗しました。通信環境を確認して、ページを開き直してください。</div></div>
       <p class="note" style="margin:8px 2px 0">ドラッグで360°回転、ホイール／ピンチで拡大・縮小できます（立体モードと同じ操作です）。点をクリックすると、その点が選ばれます。</p>
+    </div>
+    <div class="viewbox c3d-only hidden" id="c3NetBox">
+      <div class="vhead">展開図 <span id="c3NetHead">3D表示と並べて表示しています</span></div>
+      <svg id="c3NetSvg" preserveAspectRatio="xMidYMid meet" aria-label="展開図"></svg>
+      <p class="note" id="c3NetNote" style="margin:8px 10px 10px"></p>
+    </div>
     </div>
 
     <div class="card" id="custMeasureCard2d" style="margin-top:12px">
@@ -1197,6 +1214,31 @@
       <h2>はかる（立体）</h2>
       <div id="c3MeasureSide"></div>
       <p class="note">くわしい一覧（辺の長さ・面の面積）は、キャンバスの下の「計測（立体）」に出ます。座標軸・床グリッド・面の表示は、キャンバスの上のボタンで切り替えます（面を消すと辺だけ見られます）。</p>
+    </section>
+    <section class="card c3d-sec" id="c3SecNet">
+      <h2>展開図と紐の最短距離（立体）</h2>
+      <p class="note" style="margin-top:0">面で閉じた立体（形を選んで置いた角柱・角錐・立方体・直方体や、面で閉じた自作の多面体）と、円柱・円錐の展開図を、3D表示の横（狭い画面では下）に並べて出せます。表面の2点を選ぶと、展開図の上で2点を結ぶ直線が最短の紐になり、その長さが常時出ます。3D側にも、面をまたぐごとに折れる紐の道筋が描かれます。</p>
+      <div class="row"><button class="btn primary" type="button" id="c3NetToggle" aria-pressed="false">展開図を並べる</button><span class="val" id="c3NetMsg" role="status"></span></div>
+      <div id="c3NetPanel" class="hidden">
+        <div class="row"><label for="c3NetTarget">対象の立体</label><select id="c3NetTarget"></select></div>
+        <div id="c3NetPolyUI">
+          <h3>開き方のパターン</h3>
+          <div id="c3NetPatList" class="c3-patlist" role="group" aria-label="展開図のパターン"></div>
+          <p class="note">パターンを変えると展開図が組み替わり、紐の長さも変わることがあります。★最短 は、いちばん短くなるパターンです。</p>
+          <h3>紐の2点（表面の点）</h3>
+          <p class="note" style="margin-top:0">頂点のほか、辺の上に置いた点も選べます。3D側で点をクリックしても、1点目→2点目の順に指定できます。</p>
+          <div class="row"><label for="c3StrA">点1</label><select id="c3StrA"></select></div>
+          <div class="row"><label for="c3StrB">点2</label><select id="c3StrB"></select></div>
+          <div class="row"><button class="btn small" type="button" id="c3StrClear">2点をクリア</button></div>
+          <div id="c3StrResult" style="margin-top:6px"></div>
+        </div>
+        <div id="c3NetCurveUI" class="hidden">
+          <p class="note">側面の2点を、角度（まわりの位置・度）と高さで指定します。3D側で側面をクリックしても、1点目→2点目の順に指定できます。展開図は、側面を開いた図（円柱は長方形、円錐は扇形）です。</p>
+          <div class="row"><label for="c3CvTh1">点1の角度</label><input type="number" id="c3CvTh1" min="0" max="360" step="5" value="0" style="width:74px"><span>°</span><label for="c3CvZ1">高さ</label><input type="number" id="c3CvZ1" min="0" max="10" step="0.5" value="0" style="width:74px"></div>
+          <div class="row"><label for="c3CvTh2">点2の角度</label><input type="number" id="c3CvTh2" min="0" max="360" step="5" value="180" style="width:74px"><span>°</span><label for="c3CvZ2">高さ</label><input type="number" id="c3CvZ2" min="0" max="10" step="0.5" value="0" style="width:74px"></div>
+          <div id="c3CurveResult" style="margin-top:6px"></div>
+        </div>
+      </div>
     </section>
   </aside>
 </div>
@@ -1841,13 +1883,207 @@
 <script>"use strict";(function(){function $(id){return document.getElementById(id)}function isShown(el){var n=el;while(n&&n!==document.body){if(n.classList&&n.classList.contains("hidden"))return false;if(n.style&&n.style.display==="none")return false;n=n.parentElement}return!!el}function inField(e){var t=e.target;if(!t||!t.tagName)return false;if(t.isContentEditable)return true;return t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"}function curMode(){if(isShown($("customMode")))return"custom";if(isShown($("planeMode")))return"plane";if(isShown($("solidMode")))return"solid";if(isShown($("graphMode")))return"graph";if(isShown($("theoremMode")))return"theorem";if(isShown($("dataMode")))return"data";if(isShown($("numMode")))return"num";return"home"}function clickBtn(b){if(b&&!b.disabled){b.click();return true}return false}document.querySelectorAll("[data-print]").forEach(function(b){if(!b.getAttribute("title"))b.setAttribute("title","印刷（Ctrl+P）")});document.addEventListener("keydown",function(e){if(e.isComposing)return;if(inField(e))return;var mod=e.ctrlKey||e.metaKey,key=e.key,lower=key?key.toLowerCase():"";if(mod&&lower==="p"){var pb=null;document.querySelectorAll("[data-print]").forEach(function(b){if(!pb&&isShown(b))pb=b});if(pb){e.preventDefault();pb.click()}return}if(mod&&!e.altKey&&(lower==="z"||lower==="y")){var redo=lower==="y"||lower==="z"&&e.shiftKey;var m=curMode(),done=false;if(m==="custom")done=clickBtn($(redo?"custRedo":"custUndo"));else if(m==="plane"){var cb=$(redo?"consRedo":"consUndo");if(cb&&isShown(cb))done=clickBtn(cb)}if(done)e.preventDefault();return}if(key==="Delete"||key==="Backspace"){if(curMode()!=="custom")return;var handled=false;try{if(typeof CUST!=="undefined"&&CUST.selShape!=null&&CUST.shapes[CUST.selShape]){var sl=$("custShapeList"),item=sl?sl.children[CUST.selShape]:null;if(item){var bs=item.querySelectorAll("button");for(var i=0;i<bs.length;i++){if(bs[i].textContent==="消す"){bs[i].click();handled=true;break}}}}if(!handled&&typeof CUST!=="undefined"&&CUST.sel&&typeof custPoint==="function"&&custPoint(CUST.sel)){handled=clickBtn($("custDelPoint"))}}catch(err){}if(handled)e.preventDefault();return}});document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;if(e.isComposing||inField(e))return;var pv=$("printPreview"),cf=$("confirmOverlay"),mm=$("modeMenu");if(pv&&!pv.classList.contains("hidden"))return;if(cf&&!cf.classList.contains("hidden"))return;if(mm&&!mm.classList.contains("hidden"))return;if(document.querySelector(".is-wide"))return;if(curMode()!=="custom")return;var rc=$("custResetConfirm");if(rc&&!rc.classList.contains("hidden")){if(typeof custHideResetConfirm==="function")custHideResetConfirm();return}try{if(typeof CUST!=="undefined"&&(CUST.selShape!=null||CUST.sel!=null)){CUST.selShape=null;CUST.sel=null;if(typeof drawCust==="function")drawCust();if(typeof syncCustForms==="function")syncCustForms()}}catch(err){}},true)})();</script>
 <script>
 "use strict";
+/* ===== 展開図と表面の最短距離：純粋計算（DOMに触れない） =====
+   points: {名前:[x,y,z]}, faces: [[名前,...],...] を受け取る。 */
+window.NetMath=(function(){
+function sub(a,b){return[a[0]-b[0],a[1]-b[1],a[2]-b[2]]}
+function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+function norm(a){var l=Math.sqrt(dot(a,a));return l<1e-12?[0,0,0]:[a[0]/l,a[1]/l,a[2]/l]}
+function edgeKey(a,b){return a<b?a+"|"+b:b+"|"+a}
+function faceEdgePairs(f){var e=[],i;for(i=0;i<f.length;i++)e.push([f[i],f[(i+1)%f.length]]);return e}
+function buildAdj(faces){
+  var adj=faces.map(function(){return[]}),i,j,k;
+  var edgeMap={};
+  faces.forEach(function(f,i){faceEdgePairs(f).forEach(function(e){var key=edgeKey(e[0],e[1]);(edgeMap[key]=edgeMap[key]||[]).push({f:i,a:e[0],b:e[1]})})});
+  Object.keys(edgeMap).forEach(function(key){var L=edgeMap[key];if(L.length===2){adj[L[0].f].push({j:L[1].f,a:L[0].a,b:L[0].b});adj[L[1].f].push({j:L[0].f,a:L[0].a,b:L[0].b})}});
+  return adj;
+}
+function checkClosed(points,faces){
+  if(!faces||faces.length<4)return{ok:false,reason:"面が4枚未満です（閉じた立体には最低4枚の面が要ります）"};
+  var cnt={},i;var missing=false;
+  faces.forEach(function(f){f.forEach(function(n){if(!points[n])missing=true});faceEdgePairs(f).forEach(function(e){var k=edgeKey(e[0],e[1]);cnt[k]=(cnt[k]||0)+1})});
+  if(missing)return{ok:false,reason:"面に使う点が見つかりません"};
+  var keys=Object.keys(cnt);if(!keys.length)return{ok:false,reason:"面がありません"};
+  for(i=0;i<keys.length;i++)if(cnt[keys[i]]!==2)return{ok:false,reason:"面でぴったり閉じていません（1つの辺を2枚の面で共有できていない辺があります）"};
+  var adj=buildAdj(faces),seen={},stack=[0],count=0;seen[0]=1;
+  while(stack.length){var u=stack.pop();count++;adj[u].forEach(function(e){if(!seen[e.j]){seen[e.j]=1;stack.push(e.j)}})}
+  if(count<faces.length)return{ok:false,reason:"面同士がつながっていません（別々の立体に分かれています）"};
+  return{ok:true,reason:""};
+}
+function genPatterns(faces,adj){
+  var pats=[],sigs={},F=faces.length,root;
+  function addTree(r,tree){
+    if(Object.keys(tree).length<F-1)return;
+    var sig=Object.keys(tree).sort().join(";");
+    if(sigs[sig])return;sigs[sig]=1;pats.push({root:r,tree:tree});
+  }
+  for(root=0;root<F;root++){ /* BFS木 */
+    var seen={},tree={},queue=[root];seen[root]=1;
+    while(queue.length){var u=queue.shift();adj[u].forEach(function(e){if(!seen[e.j]){seen[e.j]=1;tree[Math.min(u,e.j)+"-"+Math.max(u,e.j)]=1;queue.push(e.j)}})}
+    addTree(root,tree);
+  }
+  for(root=0;root<F;root++){ /* DFS木（細長い開き方） */
+    var seen2={},tree2={},stack2=[root];seen2[root]=1;
+    while(stack2.length){var u2=stack2.pop();adj[u2].forEach(function(e){if(!seen2[e.j]){seen2[e.j]=1;tree2[Math.min(u2,e.j)+"-"+Math.max(u2,e.j)]=1;stack2.push(e.j)}})}
+    addTree(root,tree2);
+  }
+  return pats.slice(0,12);
+}
+function newell(pts){var n=[0,0,0],i;for(i=0;i<pts.length;i++){var a=pts[i],b=pts[(i+1)%pts.length];n[0]+=(a[1]-b[1])*(a[2]+b[2]);n[1]+=(a[2]-b[2])*(a[0]+b[0]);n[2]+=(a[0]-b[0])*(a[1]+b[1])}return n}
+function faceLocal(pts){
+  var o=pts[0],u=norm(sub(pts[1],pts[0])),n=norm(newell(pts)),w=cross(n,u);
+  return pts.map(function(p){var d=sub(p,o);return[dot(d,u),dot(d,w)]});
+}
+function applyT(T,p){return[T[0]*p[0]+T[1]*p[1]+T[4],T[2]*p[0]+T[3]*p[1]+T[5]]}
+function unfold(points,faces,pattern){
+  var adj=buildAdj(faces),F=faces.length,i;
+  var locals=faces.map(function(f){return faceLocal(f.map(function(n){return points[n]}))});
+  var localOf=faces.map(function(f,fi){var m={};f.forEach(function(n,k){m[n]=locals[fi][k]});return m});
+  var T=[];for(i=0;i<F;i++)T.push(null);
+  T[pattern.root]=[1,0,0,1,0,0];
+  var queue=[pattern.root];
+  while(queue.length){
+    var u=queue.shift();
+    adj[u].forEach(function(e){
+      var v=e.j,key=Math.min(u,v)+"-"+Math.max(u,v);
+      if(!pattern.tree[key]||T[v])return;
+      var A2=applyT(T[u],localOf[u][e.a]),B2=applyT(T[u],localOf[u][e.b]);
+      var aL=localOf[v][e.a],bL=localOf[v][e.b];
+      var ang=Math.atan2(B2[1]-A2[1],B2[0]-A2[0])-Math.atan2(bL[1]-aL[1],bL[0]-aL[0]);
+      var ca=Math.cos(ang),sa=Math.sin(ang);
+      var tx=A2[0]-(ca*aL[0]-sa*aL[1]),ty=A2[1]-(sa*aL[0]+ca*aL[1]);
+      var Trot=[ca,-sa,sa,ca,tx,ty];
+      /* 反射候補：共有辺の直線で折り返してから回転 */
+      var phi=Math.atan2(bL[1]-aL[1],bL[0]-aL[0]),c2=Math.cos(2*phi),s2=Math.sin(2*phi);
+      function refl(p){var dx=p[0]-aL[0],dy=p[1]-aL[1];return[aL[0]+c2*dx+s2*dy,aL[1]+s2*dx-c2*dy]}
+      var cenV=[0,0];faces[v].forEach(function(n){var g=applyT(Trot,localOf[v][n]);cenV[0]+=g[0];cenV[1]+=g[1]});cenV=[cenV[0]/faces[v].length,cenV[1]/faces[v].length];
+      var cenU=[0,0];faces[u].forEach(function(n){var g=applyT(T[u],localOf[u][n]);cenU[0]+=g[0];cenU[1]+=g[1]});cenU=[cenU[0]/faces[u].length,cenU[1]/faces[u].length];
+      function sideOf(X){return(B2[0]-A2[0])*(X[1]-A2[1])-(B2[1]-A2[1])*(X[0]-A2[0])}
+      var useRefl=sideOf(cenV)*sideOf(cenU)>0;
+      if(useRefl){
+        /* T = Trot ∘ refl。refl はアフィン [c2,s2, s2,-c2] + 平行移動 */
+        var rtx=aL[0]-(c2*aL[0]+s2*aL[1]),rty=aL[1]-(s2*aL[0]-c2*aL[1]);
+        var M=[c2,s2,s2,-c2];
+        T[v]=[Trot[0]*M[0]+Trot[1]*M[2],Trot[0]*M[1]+Trot[1]*M[3],Trot[2]*M[0]+Trot[3]*M[2],Trot[2]*M[1]+Trot[3]*M[3],Trot[0]*rtx+Trot[1]*rty+Trot[4],Trot[2]*rtx+Trot[3]*rty+Trot[5]];
+      }else T[v]=Trot;
+      queue.push(v);
+    });
+  }
+  var placements=faces.map(function(f,fi){
+    if(!T[fi])return null;
+    var poly=f.map(function(n){return applyT(T[fi],localOf[fi][n])});
+    var cen=[0,0];poly.forEach(function(p){cen[0]+=p[0];cen[1]+=p[1]});cen=[cen[0]/poly.length,cen[1]/poly.length];
+    return{face:f.slice(),poly:poly,centroid:cen};
+  });
+  var sharedSegs=[];
+  adj.forEach(function(list,u){list.forEach(function(e){var v=e.j;if(u<v&&pattern.tree[u+"-"+v]&&placements[u]&&placements[v]){
+    var ia=faces[u].indexOf(e.a),ib=faces[u].indexOf(e.b);
+    sharedSegs.push({a:e.a,b:e.b,x1:placements[u].poly[ia][0],y1:placements[u].poly[ia][1],x2:placements[u].poly[ib][0],y2:placements[u].poly[ib][1]});
+  }})});
+  return{placements:placements,sharedSegs:sharedSegs};
+}
+function pointOnSeg3(p,a,b){
+  var ab=sub(b,a),ap=sub(p,a),l2=dot(ab,ab);if(l2<1e-12)return null;
+  var t=dot(ap,ab)/l2;if(t<-1e-9||t>1+1e-9)return null;
+  var q=[a[0]+ab[0]*t,a[1]+ab[1]*t,a[2]+ab[2]*t],d=sub(p,q);
+  if(dot(d,d)>1e-12)return null;
+  return Math.min(1,Math.max(0,t));
+}
+function pointCopies(points,faces,placements,name){
+  var out=[],P0=points[name];if(!P0)return out;
+  placements.forEach(function(pl,fi){
+    if(!pl)return;var f=faces[fi];
+    var vi=f.indexOf(name);
+    if(vi>=0){out.push({face:fi,x:pl.poly[vi][0],y:pl.poly[vi][1]});return}
+    for(var i=0;i<f.length;i++){
+      var a=f[i],b=f[(i+1)%f.length],t=pointOnSeg3(P0,points[a],points[b]);
+      if(t!=null){var A=pl.poly[i],B=pl.poly[(i+1)%f.length];out.push({face:fi,x:A[0]+(B[0]-A[0])*t,y:A[1]+(B[1]-A[1])*t});return}
+    }
+  });
+  return out;
+}
+function distPtSeg(px,py,x1,y1,x2,y2){
+  var dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy,t=l2<1e-18?0:((px-x1)*dx+(py-y1)*dy)/l2;t=Math.min(1,Math.max(0,t));
+  var qx=x1+dx*t,qy=y1+dy*t;return Math.hypot(px-qx,py-qy);
+}
+function pointInPoly(px,py,poly){
+  var i;for(i=0;i<poly.length;i++){var A=poly[i],B=poly[(i+1)%poly.length];if(distPtSeg(px,py,A[0],A[1],B[0],B[1])<1e-7)return true}
+  var inside=false;
+  for(i=0;i<poly.length;i++){var A2=poly[i],B2=poly[(i+1)%poly.length];
+    if((A2[1]>py)!==(B2[1]>py)){var x=A2[0]+(py-A2[1])/(B2[1]-A2[1])*(B2[0]-A2[0]);if(px<x)inside=!inside}}
+  return inside;
+}
+function segInt(p1,p2,p3,p4){
+  var d1=[p2[0]-p1[0],p2[1]-p1[1]],d2=[p4[0]-p3[0],p4[1]-p3[1]];
+  var den=d1[0]*d2[1]-d1[1]*d2[0];if(Math.abs(den)<1e-12)return null;
+  var t=((p3[0]-p1[0])*d2[1]-(p3[1]-p1[1])*d2[0])/den;
+  var s=((p3[0]-p1[0])*d1[1]-(p3[1]-p1[1])*d1[0])/den;
+  return{t:t,s:s};
+}
+function stringSolve(points,faces,unfolded,nameA,nameB){
+  var placements=unfolded.placements,sharedSegs=unfolded.sharedSegs;
+  var cA=pointCopies(points,faces,placements,nameA),cB=pointCopies(points,faces,placements,nameB);
+  if(!cA.length||!cB.length)return null;
+  var allEdges=[];
+  placements.forEach(function(pl){if(!pl)return;for(var i=0;i<pl.poly.length;i++){var A=pl.poly[i],B=pl.poly[(i+1)%pl.poly.length];allEdges.push([A,B])}});
+  var best=null;
+  cA.forEach(function(A){cB.forEach(function(B){
+    var P1=[A.x,A.y],P2=[B.x,B.y];
+    var ts=[0,1];
+    allEdges.forEach(function(e){var r=segInt(P1,P2,e[0],e[1]);if(r&&r.t>1e-9&&r.t<1-1e-9&&r.s>-1e-9&&r.s<1+1e-9)ts.push(r.t)});
+    ts.sort(function(a,b){return a-b});
+    var ok=true,i;
+    for(i=0;i<ts.length-1;i++){
+      var tm=(ts[i]+ts[i+1])/2,mx=P1[0]+(P2[0]-P1[0])*tm,my=P1[1]+(P2[1]-P1[1])*tm,inside=false;
+      for(var k=0;k<placements.length;k++){if(placements[k]&&pointInPoly(mx,my,placements[k].poly)){inside=true;break}}
+      if(!inside){ok=false;break}
+    }
+    if(!ok)return;
+    var len=Math.hypot(P2[0]-P1[0],P2[1]-P1[1]);
+    if(best&&len>=best.len-1e-12)return;
+    var crossings=[];
+    sharedSegs.forEach(function(sg){
+      var r=segInt(P1,P2,[sg.x1,sg.y1],[sg.x2,sg.y2]);
+      if(r&&r.t>1e-9&&r.t<1-1e-9&&r.s>1e-9&&r.s<1-1e-9){
+        var PA=points[sg.a],PB=points[sg.b];
+        crossings.push({t:r.t,p3:[PA[0]+(PB[0]-PA[0])*r.s,PA[1]+(PB[1]-PA[1])*r.s,PA[2]+(PB[2]-PA[2])*r.s]});
+      }
+    });
+    crossings.sort(function(a,b){return a.t-b.t});
+    var path3=[points[nameA].slice()];crossings.forEach(function(c){path3.push(c.p3)});path3.push(points[nameB].slice());
+    best={len:len,ax:A.x,ay:A.y,bx:B.x,by:B.y,faceA:A.face,faceB:B.face,path3:path3};
+  })});
+  return best;
+}
+function wrapPi(a){while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;return a}
+function cylSolve(r,h,th1,z1,th2,z2){
+  var dth=wrapPi(th2-th1);
+  var dx=r*dth,dz=z2-z1;
+  return{len:Math.hypot(dx,dz),dth:dth};
+}
+function coneSolve(r,h,th1,z1,th2,z2){
+  var l=Math.sqrt(r*r+h*h),k=r/l,Phi=2*Math.PI*k;
+  function rep(th){var ph=th*k;ph=((ph%Phi)+Phi)%Phi;if(ph>Phi/2)ph-=Phi;return ph}
+  var ph1=rep(th1),ph2=rep(th2);
+  var dph=ph2-ph1;
+  ph2=ph1+dph;
+  var d1=l*(1-z1/h),d2=l*(1-z2/h);
+  var p1=[d1*Math.sin(ph1),d1*Math.cos(ph1)],p2=[d2*Math.sin(ph2),d2*Math.cos(ph2)];
+  return{len:Math.hypot(p2[0]-p1[0],p2[1]-p1[1]),slant:l,sector:2*Math.PI*k,ph1:ph1,ph2:ph2,d1:d1,d2:d2,p1:p1,p2:p2,k:k};
+}
+return{checkClosed:checkClosed,buildAdj:buildAdj,genPatterns:genPatterns,unfold:unfold,pointCopies:pointCopies,stringSolve:stringSolve,cylSolve:cylSolve,coneSolve:coneSolve,pointOnSeg3:pointOnSeg3};
+})();
+</script>
+<script>
+"use strict";
 /* ===== 作図キャンバス：立体で作る（3D自由作図） ===== */
 (function(){
 var DRAFT3_KEY="sugakulab.draft.cust3d.v1";
-var C3={points:[],edges:[],faces:[],curved:[],selPoint:null,showAxes:true,showGrid:true,showFaces:true};
+var C3={points:[],edges:[],faces:[],curved:[],selPoint:null,showAxes:true,showGrid:true,showFaces:true,net:{on:false,pat:0,target:"",strA:"",strB:"",alt:0,calt:0,cv:{th1:0,z1:0,th2:180,z2:0}}};
 var C3MODE=false,c3Ready=false,c3FirstOpen=true;
 var c3UndoStack=[],c3RedoStack=[],c3FacePickSel=[],c3RatioMode="t",c3CurveArm=true;
-var renderer=null,scene=null,camera=null,controls=null,group=null,axesObj=null,gridObj=null,c3Pick=[];
+var renderer=null,scene=null,camera=null,controls=null,group=null,axesObj=null,gridObj=null,c3Pick=[],c3CurvePick=[],netPath3=[],netData=null;
 function el(id){return document.getElementById(id)}
 function clamp(v,a,b){return Math.min(b,Math.max(a,v))}
 function snap05(v){return Math.round(v*2)/2}
@@ -1884,13 +2120,13 @@ function solidInfo(){ /* 面で閉じた立体なら {vol,surf}、そうでな�
   return{vol:vol,surf:surf};
 }
 /* ---------- 履歴と下書き ---------- */
-function c3Snapshot(){return JSON.stringify({points:C3.points,edges:C3.edges,faces:C3.faces,curved:C3.curved,selPoint:C3.selPoint})}
+function c3Snapshot(){return JSON.stringify({points:C3.points,edges:C3.edges,faces:C3.faces,curved:C3.curved,selPoint:C3.selPoint,net:C3.net})}
 function c3HasContent(){return !!(C3.points.length||C3.edges.length||C3.faces.length||C3.curved.length)}
 function c3SyncHistBtns(){var u=el("c3Undo"),r=el("c3Redo");if(u)u.disabled=!c3UndoStack.length;if(r)r.disabled=!c3RedoStack.length}
 function c3PushHistory(){c3UndoStack.push(c3Snapshot());if(c3UndoStack.length>60)c3UndoStack.shift();c3RedoStack=[];c3SyncHistBtns()}
 var c3SaveTimer=null;
 function c3Save(){if(c3SaveTimer)clearTimeout(c3SaveTimer);c3SaveTimer=setTimeout(function(){c3SaveTimer=null;try{if(c3HasContent())localStorage.setItem(DRAFT3_KEY,c3Snapshot());else localStorage.removeItem(DRAFT3_KEY)}catch(e){}},400)}
-function c3Restore(j){try{var o=JSON.parse(j);C3.points=o.points||[];C3.edges=o.edges||[];C3.faces=o.faces||[];C3.curved=(o.curved||[]).filter(function(s){return s&&(s.kind==="cyl"||s.kind==="cone")&&isFinite(s.r)&&isFinite(s.h)}).map(function(s){return{kind:s.kind,name:(typeof s.name==="string"&&s.name)?s.name:(s.kind==="cyl"?"円柱":"円錐"),r:clamp(snap05(s.r),0.5,5),h:clamp(snap05(s.h),0.5,10)}});C3.selPoint=o.selPoint||null;if(C3.selPoint&&!P(C3.selPoint))C3.selPoint=null;c3FacePickSel=[];c3CurveArm=true;c3SyncAll()}catch(e){}}
+function c3Restore(j){try{var o=JSON.parse(j);C3.points=o.points||[];C3.edges=o.edges||[];C3.faces=o.faces||[];C3.curved=(o.curved||[]).filter(function(s){return s&&(s.kind==="cyl"||s.kind==="cone")&&isFinite(s.r)&&isFinite(s.h)}).map(function(s){return{kind:s.kind,name:(typeof s.name==="string"&&s.name)?s.name:(s.kind==="cyl"?"円柱":"円錐"),r:clamp(snap05(s.r),0.5,5),h:clamp(snap05(s.h),0.5,10)}});C3.selPoint=o.selPoint||null;if(C3.selPoint&&!P(C3.selPoint))C3.selPoint=null;if(o.net&&typeof o.net==="object"){var nn=o.net;C3.net.on=!!nn.on;C3.net.pat=(typeof nn.pat==="number"&&isFinite(nn.pat))?Math.max(0,Math.floor(nn.pat)):0;C3.net.target=(typeof nn.target==="string")?nn.target:"";C3.net.strA=(typeof nn.strA==="string")?nn.strA:"";C3.net.strB=(typeof nn.strB==="string")?nn.strB:"";C3.net.alt=0;C3.net.calt=0;if(nn.cv&&typeof nn.cv==="object")["th1","z1","th2","z2"].forEach(function(k){if(isFinite(nn.cv[k]))C3.net.cv[k]=nn.cv[k]})}c3FacePickSel=[];c3CurveArm=true;c3SyncAll()}catch(e){}}
 function c3UndoFn(){if(!c3UndoStack.length)return;c3RedoStack.push(c3Snapshot());c3Restore(c3UndoStack.pop());c3SyncHistBtns();c3Save()}
 function c3RedoFn(){if(!c3RedoStack.length)return;c3UndoStack.push(c3Snapshot());c3Restore(c3RedoStack.pop());c3SyncHistBtns();c3Save()}
 /* ---------- 3D描画 ---------- */
@@ -1900,7 +2136,7 @@ function makeTextLabel(text,color){var cv=document.createElement("canvas");cv.wi
 function buildScene3(){
   if(!c3Ready)return;
   while(group.children.length){var ch=group.children.pop();group.remove(ch)}
-  c3Pick=[];
+  c3Pick=[];c3CurvePick=[];
   /* 面 */
   if(C3.showFaces){C3.faces.forEach(function(f){
     var pts=f.map(function(n){return toThree(P(n))});
@@ -1929,15 +2165,36 @@ function buildScene3(){
     var lab=makeLabel(p.name,sel?"#d6455a":"#1d2422");lab.position.copy(toThree(p)).add(new THREE.Vector3(0.16,0.22,0));group.add(lab);
   });
   /* 円柱・円錐（曲面の立体。点・辺・面の仕組みには乗せない） */
-  C3.curved.forEach(function(s){
+  C3.curved.forEach(function(s,ci){
     var geo=s.kind==="cyl"?new THREE.CylinderGeometry(s.r,s.r,s.h,44,1,false):new THREE.CylinderGeometry(0.001,s.r,s.h,44,1,false);
     var grp=new THREE.Group();grp.position.set(0,s.h/2,0);
     var mesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x2f7fd0,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false}));
+    mesh.userData.c3curve=ci;c3CurvePick.push(mesh);
     grp.add(mesh);
     grp.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,10),new THREE.LineBasicMaterial({color:0x2f7fd0})));
     var lab=makeTextLabel(s.name,"#1d4e79");lab.position.set(0,s.h/2+0.5,0);grp.add(lab);
     group.add(grp);
   });
+  /* 展開図の紐：3D側の道筋（面をまたぐごとに折れる線） */
+  if(netPath3&&netPath3.length>1){
+    var npts=netPath3.map(function(p){return toThree({x:p[0],y:p[1],z:p[2]})});
+    var ng=new THREE.BufferGeometry().setFromPoints(npts);
+    group.add(new THREE.Line(ng,new THREE.LineBasicMaterial({color:0xd6455a})));
+    for(var nsi=0;nsi<npts.length-1;nsi++){
+      var na=npts[nsi],nb=npts[nsi+1],ndir=new THREE.Vector3().subVectors(nb,na),nlen=ndir.length();
+      if(nlen<1e-6)continue;
+      var ncm=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,nlen,8),new THREE.MeshBasicMaterial({color:0xd6455a}));
+      ncm.position.copy(na).addScaledVector(ndir,0.5);
+      ncm.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),ndir.normalize());
+      group.add(ncm);
+    }
+    npts.forEach(function(p,pi2){
+      var endm=(pi2===0||pi2===npts.length-1);
+      if(!endm&&npts.length>10)return;
+      var nmm=new THREE.Mesh(new THREE.SphereGeometry(endm?0.11:0.07,16,12),new THREE.MeshBasicMaterial({color:0xd6455a}));
+      nmm.position.copy(p);group.add(nmm);
+    });
+  }
   axesObj.visible=C3.showAxes;gridObj.visible=C3.showGrid;
 }
 function initC3GL(){
@@ -1977,8 +2234,12 @@ function initC3GL(){
     var r=cv.getBoundingClientRect();if(!r.width)return;
     var ptr=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
     var ray=new THREE.Raycaster();ray.params.Points={threshold:0.2};ray.setFromCamera(ptr,camera);
+    if(C3.net.on&&C3.net.target&&C3.net.target.charAt(0)==="c"){
+      var chits=ray.intersectObjects(c3CurvePick);
+      if(chits.length&&chits[0].object.userData.c3curve===parseInt(C3.net.target.slice(1),10)){netCurveClick(chits[0].point);return}
+    }
     var hits=ray.intersectObjects(c3Pick);
-    if(hits.length){selectPoint3(hits[0].object.userData.c3name,true)}
+    if(hits.length){selectPoint3(hits[0].object.userData.c3name,true);netAssignPoint(hits[0].object.userData.c3name)}
   });
   (function loop(){requestAnimationFrame(loop);if(!C3MODE||!c3Ready)return;if(el("customMode").classList.contains("hidden"))return;controls.update();renderer.render(scene,camera)})();
 }
@@ -1986,7 +2247,7 @@ function c3Resize(){if(!c3Ready)return;var w=el("c3Wrap");if(!w)return;var cw=w.
 /* ---------- 画面の同期 ---------- */
 function lenText(a,b){var d=distP(a,b);var sq=d*d,ri=Math.round(sq);var t=fmt(d);if(Math.abs(sq-ri)<1e-6&&ri>0){var r=Math.round(Math.sqrt(ri));if(r*r!==ri)t+="（√"+ri+"）"}return t}
 function opts(sel,items,cur){sel.innerHTML="";items.forEach(function(it){var o=document.createElement("option");o.value=it.v;o.textContent=it.t;sel.appendChild(o)});if(cur!=null&&items.some(function(it){return it.v===cur}))sel.value=cur}
-function c3SyncAll(){buildScene3();c3SyncForms();c3SyncCurvedList();c3SyncMeasure()}
+function c3SyncAll(){c3NetCompute();buildScene3();c3SyncForms();c3SyncCurvedList();c3SyncMeasure();c3NetRender()}
 function c3SyncForms(){
   var names=C3.points.map(function(p){return{v:p.name,t:"点"+p.name}});
   /* 点ボタン */
@@ -2151,6 +2412,218 @@ function c3SyncCurvedList(){
     box.appendChild(wrap);
   });
 }
+/* ---------- 展開図と紐の最短距離 ---------- */
+function netPtsObj(){var o={};C3.points.forEach(function(p){o[p.name]=[p.x,p.y,p.z]});return o}
+function netTargets(){
+  var list=[];
+  if(C3.faces.length)list.push({v:"poly",t:"多面体（点・辺・面の立体）"});
+  C3.curved.forEach(function(s,i){list.push({v:"c"+i,t:s.name})});
+  return list;
+}
+function netSurfacePoints(){
+  var pts=netPtsObj(),set={};
+  C3.faces.forEach(function(f){
+    f.forEach(function(n){set[n]=1});
+    for(var i=0;i<f.length;i++){var a=f[i],b=f[(i+1)%f.length];
+      C3.points.forEach(function(p){if(!set[p.name]&&pts[a]&&pts[b]&&NetMath.pointOnSeg3(pts[p.name],pts[a],pts[b])!=null)set[p.name]=1});
+    }
+  });
+  return C3.points.filter(function(p){return set[p.name]}).map(function(p){return p.name});
+}
+function fmtLen(d){var sq=d*d,ri=Math.round(sq),t=fmt(d);if(Math.abs(sq-ri)<1e-6&&ri>0){var r=Math.round(Math.sqrt(ri));if(r*r!==ri)t+="（√"+ri+"）"}return t}
+function c3NetCompute(){
+  netPath3=[];netData=null;
+  if(!C3.net.on)return;
+  if(typeof NetMath==="undefined"){netData={error:"展開図の計算を読み込めませんでした。ページを開き直してください"};return}
+  var targets=netTargets();
+  if(!targets.length){netData={error:"展開図にできる立体がまだありません。形を選んで置くか、面で閉じた立体を作ってください"};return}
+  if(!targets.some(function(t){return t.v===C3.net.target}))C3.net.target=targets[0].v;
+  if(C3.net.target==="poly"){
+    var pts=netPtsObj();
+    var chk=NetMath.checkClosed(pts,C3.faces);
+    if(!chk.ok){netData={error:chk.reason};return}
+    var adj=NetMath.buildAdj(C3.faces);
+    var pats=NetMath.genPatterns(C3.faces,adj);
+    if(!pats.length){netData={error:"展開図のパターンが作れませんでした"};return}
+    if(C3.net.pat>=pats.length||C3.net.pat<0)C3.net.pat=0;
+    var surf=netSurfacePoints();
+    if(C3.net.strA&&surf.indexOf(C3.net.strA)<0)C3.net.strA="";
+    if(C3.net.strB&&surf.indexOf(C3.net.strB)<0)C3.net.strB="";
+    var unfs=pats.map(function(p){return NetMath.unfold(pts,C3.faces,p)});
+    var solves=null;
+    if(C3.net.strA&&C3.net.strB&&C3.net.strA!==C3.net.strB)
+      solves=unfs.map(function(u){return NetMath.stringSolve(pts,C3.faces,u,C3.net.strA,C3.net.strB)});
+    var curSolve=solves?solves[C3.net.pat]:null;
+    if(curSolve)netPath3=curSolve.path3;
+    netData={kind:"poly",patterns:pats,unfs:unfs,solves:solves,cur:unfs[C3.net.pat],curSolve:curSolve,surf:surf};
+  }else{
+    var ci=parseInt(C3.net.target.slice(1),10),s=C3.curved[ci];
+    if(!s){netData={error:"対象の立体が見つかりません"};return}
+    var cv=C3.net.cv;
+    cv.z1=clamp(cv.z1,0,s.h);cv.z2=clamp(cv.z2,0,s.h);
+    var th1=cv.th1*Math.PI/180,th2=cv.th2*Math.PI/180,path=[],i;
+    if(s.kind==="cyl"){
+      var sol=NetMath.cylSolve(s.r,s.h,th1,cv.z1,th2,cv.z2);
+      for(i=0;i<=40;i++){var t=i/40,th=th1+sol.dth*t;path.push([s.r*Math.cos(th),s.r*Math.sin(th),cv.z1+(cv.z2-cv.z1)*t])}
+      netData={kind:"cyl",curve:s,sol:sol};
+    }else{
+      var sol2=NetMath.coneSolve(s.r,s.h,th1,cv.z1,th2,cv.z2);
+      for(i=0;i<=40;i++){var t2=i/40,nx=sol2.p1[0]+(sol2.p2[0]-sol2.p1[0])*t2,ny=sol2.p1[1]+(sol2.p2[1]-sol2.p1[1])*t2;
+        var dd=Math.hypot(nx,ny),ph=Math.atan2(nx,ny),ss=sol2.slant>0?dd/sol2.slant:0,thA=ph/sol2.k;
+        path.push([s.r*ss*Math.cos(thA),s.r*ss*Math.sin(thA),s.h*(1-ss)])}
+      netData={kind:"cone",curve:s,sol:sol2};
+    }
+    netPath3=path;
+  }
+}
+function netRefresh(){c3NetCompute();buildScene3();c3NetRender();c3Save();setTimeout(c3Resize,30)}
+function netAssignPoint(name){
+  if(!C3.net.on||C3.net.target!=="poly"||!netData||netData.kind!=="poly")return;
+  if(netData.surf.indexOf(name)<0)return;
+  if(C3.net.alt%2===0){C3.net.strA=name;C3.net.alt=1}else{C3.net.strB=name;C3.net.alt=0}
+  netRefresh();
+}
+function netCurveClick(p){
+  var ci=parseInt(C3.net.target.slice(1),10),s=C3.curved[ci];if(!s)return;
+  var mx=p.x,my=-p.z,mz=p.y;
+  var th=Math.round(((Math.atan2(my,mx)*180/Math.PI)%360+360)%360);
+  var zz=snap05(clamp(mz,0,s.h));
+  if(C3.net.calt%2===0){C3.net.cv.th1=th;C3.net.cv.z1=zz;C3.net.calt=1}else{C3.net.cv.th2=th;C3.net.cv.z2=zz;C3.net.calt=0}
+  netRefresh();
+}
+function c3NetRender(){
+  var on=C3.net.on;
+  var tgl=el("c3NetToggle");if(!tgl)return;
+  tgl.textContent=on?"展開図を閉じる":"展開図を並べる";tgl.setAttribute("aria-pressed",on?"true":"false");
+  var panel=el("c3NetPanel");if(panel)panel.classList.toggle("hidden",!on);
+  var box=el("c3NetBox");if(box)box.classList.toggle("hidden",!on);
+  var msg=el("c3NetMsg"),note=el("c3NetNote"),head=el("c3NetHead");
+  if(!on){if(msg)msg.textContent="";return}
+  var targets=netTargets();
+  opts(el("c3NetTarget"),targets,C3.net.target);
+  var polyUI=el("c3NetPolyUI"),curveUI=el("c3NetCurveUI");
+  if(!netData||netData.error){
+    if(msg)msg.textContent=netData?netData.error:"";
+    if(note)note.textContent=netData?netData.error:"";
+    if(head)head.textContent="展開図は出せませんでした";
+    var svgE=el("c3NetSvg");if(svgE)svgE.innerHTML="";
+    polyUI.classList.add("hidden");curveUI.classList.add("hidden");
+    return;
+  }
+  if(msg)msg.textContent="";
+  if(netData.kind==="poly"){
+    polyUI.classList.remove("hidden");curveUI.classList.add("hidden");
+    if(head)head.textContent="多面体の展開図（パターン "+(C3.net.pat+1)+" / "+netData.patterns.length+"）";
+    var sopts=[{v:"",t:"（選んでください）"}].concat(netData.surf.map(function(n){return{v:n,t:"点"+n}}));
+    opts(el("c3StrA"),sopts,C3.net.strA);opts(el("c3StrB"),sopts,C3.net.strB);
+    var pl=el("c3NetPatList");pl.innerHTML="";
+    var bestI=-1,bestL=Infinity;
+    if(netData.solves)netData.solves.forEach(function(sv,i){if(sv&&sv.len<bestL){bestL=sv.len;bestI=i}});
+    netData.patterns.forEach(function(p,i){
+      var b=document.createElement("button");b.type="button";
+      b.className="btn small"+(i===C3.net.pat?" on":"")+(i===bestI?" best":"");
+      var sv=netData.solves?netData.solves[i]:null;
+      b.textContent="パターン"+(i+1)+(sv?" ・ "+fmtLen(sv.len):"")+(i===bestI?" ★最短":"");
+      b.setAttribute("aria-pressed",i===C3.net.pat?"true":"false");
+      b.addEventListener("click",function(){C3.net.pat=i;netRefresh()});
+      pl.appendChild(b);
+    });
+    var res=el("c3StrResult");
+    if(!C3.net.strA||!C3.net.strB)res.innerHTML="<p class='note' style='margin:0'>紐の両端の2点を選ぶと、展開図の上に直線が引かれて長さが出ます。</p>";
+    else if(C3.net.strA===C3.net.strB)res.innerHTML="<p class='note' style='margin:0'>点1と点2には、ちがう2点を選んでください。</p>";
+    else if(!netData.curSolve)res.innerHTML="<p class='note' style='margin:0'>このパターンでは、2点を結ぶ直線が展開図の外にはみ出してしまいます。別のパターンを試してください。</p>";
+    else{
+      var rh="<div class='rowline'><span>紐の最短距離（パターン"+(C3.net.pat+1)+"）</span><strong>"+fmtLen(netData.curSolve.len)+"</strong></div>";
+      if(bestI>=0&&bestI!==C3.net.pat)rh+="<p class='note'>いちばん短くなるのは パターン"+(bestI+1)+"（"+fmtLen(bestL)+"）です。</p>";
+      else if(bestI===C3.net.pat)rh+="<p class='note'>この開き方が、いちばん短くなります。</p>";
+      res.innerHTML=rh;
+    }
+    if(note)note.textContent="各面の頂点名は、3D側の点と対応しています。赤い直線が紐（最短距離）です。";
+    drawNetSvgPoly();
+  }else{
+    polyUI.classList.add("hidden");curveUI.classList.remove("hidden");
+    var s=netData.curve,cv=C3.net.cv;
+    if(head)head.textContent=s.name+" の展開図（側面を開いた図）";
+    el("c3CvTh1").value=cv.th1;el("c3CvZ1").value=cv.z1;el("c3CvTh2").value=cv.th2;el("c3CvZ2").value=cv.z2;
+    el("c3CvZ1").max=s.h;el("c3CvZ2").max=s.h;
+    el("c3CurveResult").innerHTML="<div class='rowline'><span>紐の最短距離（"+s.name+" の側面）</span><strong>"+fmtLen(netData.sol.len)+"</strong></div>"
+      +(netData.kind==="cyl"
+        ?"<p class='note'>開いた長方形の上で、横のずれ＝半径×角度の差（短い回り）、たてのずれ＝高さの差として、直線の長さをはかっています。</p>"
+        :"<p class='note'>開いた扇形の上で2点を結ぶ直線の長さです（母線の長さ "+fmtLen(netData.sol.slant)+"）。</p>");
+    if(note)note.textContent=netData.kind==="cyl"?"長方形が側面、上下の円が底面とふたです。赤い点が選んだ2点、赤い直線が紐です。":"扇形が側面、下の円が底面です。赤い点が選んだ2点、赤い直線が紐です。";
+    drawNetSvgCurve();
+  }
+}
+function drawNetSvgPoly(){
+  var svg=el("c3NetSvg");if(!svg)return;var un=netData?netData.cur:null;
+  if(!un){svg.innerHTML="";return}
+  var minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  un.placements.forEach(function(pl){if(pl)pl.poly.forEach(function(p){minx=Math.min(minx,p[0]);miny=Math.min(miny,p[1]);maxx=Math.max(maxx,p[0]);maxy=Math.max(maxy,p[1])})});
+  if(minx>maxx){svg.innerHTML="";return}
+  var pad=0.55,W=(maxx-minx)+pad*2,H=(maxy-miny)+pad*2;
+  function X(x){return(x-minx+pad).toFixed(3)}
+  function Y(y){return(maxy-y+pad).toFixed(3)}
+  var cols=["rgba(47,127,208,0.20)","rgba(14,122,109,0.20)","rgba(192,122,18,0.22)","rgba(214,69,90,0.15)"];
+  var h="";
+  un.placements.forEach(function(pl,fi){if(!pl)return;
+    h+="<polygon points='"+pl.poly.map(function(p){return X(p[0])+","+Y(p[1])}).join(" ")+"' fill='"+cols[fi%4]+"' stroke='#2f7fd0' stroke-width='0.03'/>";
+  });
+  var sv=netData.curSolve;
+  if(sv){
+    h+="<line x1='"+X(sv.ax)+"' y1='"+Y(sv.ay)+"' x2='"+X(sv.bx)+"' y2='"+Y(sv.by)+"' stroke='#d6455a' stroke-width='0.05'/>";
+    h+="<circle cx='"+X(sv.ax)+"' cy='"+Y(sv.ay)+"' r='0.09' fill='#d6455a'/><circle cx='"+X(sv.bx)+"' cy='"+Y(sv.by)+"' r='0.09' fill='#d6455a'/>";
+  }
+  un.placements.forEach(function(pl){if(!pl)return;
+    pl.face.forEach(function(n,k){var p=pl.poly[k],cen=pl.centroid;
+      var dx=p[0]-cen[0],dy=p[1]-cen[1],l=Math.hypot(dx,dy)||1;
+      h+="<text x='"+X(p[0]+dx/l*0.17)+"' y='"+Y(p[1]+dy/l*0.17)+"' font-size='0.30' text-anchor='middle' dominant-baseline='central' style='fill:var(--ink)'>"+n+"</text>";
+    });
+  });
+  svg.setAttribute("viewBox","0 0 "+W.toFixed(3)+" "+H.toFixed(3));
+  svg.innerHTML=h;
+}
+function drawNetSvgCurve(){
+  var svg=el("c3NetSvg");if(!svg||!netData||!netData.curve)return;
+  var s=netData.curve,cv=C3.net.cv,pad=0.4,h="";
+  function f(v){return v.toFixed(3)}
+  if(netData.kind==="cyl"){
+    var W=2*Math.PI*s.r,H=s.h,R=s.r,totW=W+pad*2,totH=H+4*R+pad*2;
+    var rx=pad,ry=pad+2*R;
+    h+="<circle cx='"+f(rx+W/2)+"' cy='"+f(pad+R)+"' r='"+f(R)+"' fill='rgba(14,122,109,0.18)' stroke='#2f7fd0' stroke-width='0.03'/>";
+    h+="<rect x='"+f(rx)+"' y='"+f(ry)+"' width='"+f(W)+"' height='"+f(H)+"' fill='rgba(47,127,208,0.16)' stroke='#2f7fd0' stroke-width='0.03'/>";
+    h+="<circle cx='"+f(rx+W/2)+"' cy='"+f(ry+H+R)+"' r='"+f(R)+"' fill='rgba(14,122,109,0.18)' stroke='#2f7fd0' stroke-width='0.03'/>";
+    function normTh(deg){var t=deg*Math.PI/180;return((t%(2*Math.PI))+2*Math.PI)%(2*Math.PI)}
+    var x1=rx+s.r*normTh(cv.th1),y1=ry+(s.h-cv.z1),x2=rx+s.r*normTh(cv.th2),y2=ry+(s.h-cv.z2);
+    var x2v=x1+s.r*netData.sol.dth;
+    if(x2v>=rx-1e-9&&x2v<=rx+W+1e-9){
+      h+="<line x1='"+f(x1)+"' y1='"+f(y1)+"' x2='"+f(x2v)+"' y2='"+f(y2)+"' stroke='#d6455a' stroke-width='0.05'/>";
+    }else{
+      var bx=x2v>rx+W?rx+W:rx,tt=(bx-x1)/(x2v-x1),ym=y1+(y2-y1)*tt;
+      var bx2=bx===rx?rx+W:rx;
+      h+="<line x1='"+f(x1)+"' y1='"+f(y1)+"' x2='"+f(bx)+"' y2='"+f(ym)+"' stroke='#d6455a' stroke-width='0.05'/>";
+      h+="<line x1='"+f(bx2)+"' y1='"+f(ym)+"' x2='"+f(x2)+"' y2='"+f(y2)+"' stroke='#d6455a' stroke-width='0.05'/>";
+    }
+    h+="<circle cx='"+f(x1)+"' cy='"+f(y1)+"' r='0.10' fill='#d6455a'/><circle cx='"+f(x2)+"' cy='"+f(y2)+"' r='0.10' fill='#d6455a'/>";
+    h+="<text x='"+f(x1)+"' y='"+f(y1-0.22)+"' font-size='0.32' text-anchor='middle' style='fill:var(--ink)'>点1</text>";
+    h+="<text x='"+f(x2)+"' y='"+f(y2-0.22)+"' font-size='0.32' text-anchor='middle' style='fill:var(--ink)'>点2</text>";
+    svg.setAttribute("viewBox","0 0 "+f(totW)+" "+f(totH));
+  }else{
+    var sol=netData.sol,L=sol.slant,Phi=sol.sector,R2=s.r;
+    var halfW=L*Math.sin(Math.min(Phi/2,Math.PI/2));
+    if(Phi>=Math.PI)halfW=L;
+    var cx=halfW+pad,top=pad,totW2=2*halfW+pad*2,totH2=L+R2*2+pad*2+0.3;
+    var a1=[cx+L*Math.sin(-Phi/2),top+L*Math.cos(-Phi/2)],a2=[cx+L*Math.sin(Phi/2),top+L*Math.cos(Phi/2)];
+    h+="<path d='M "+f(cx)+" "+f(top)+" L "+f(a1[0])+" "+f(a1[1])+" A "+f(L)+" "+f(L)+" 0 "+(Phi>Math.PI?1:0)+" 0 "+f(a2[0])+" "+f(a2[1])+" Z' fill='rgba(47,127,208,0.16)' stroke='#2f7fd0' stroke-width='0.03'/>";
+    h+="<circle cx='"+f(cx)+"' cy='"+f(top+L+R2)+"' r='"+f(R2)+"' fill='rgba(14,122,109,0.18)' stroke='#2f7fd0' stroke-width='0.03'/>";
+    var q1=[cx+sol.p1[0],top+sol.p1[1]],q2=[cx+sol.p2[0],top+sol.p2[1]];
+    h+="<line x1='"+f(q1[0])+"' y1='"+f(q1[1])+"' x2='"+f(q2[0])+"' y2='"+f(q2[1])+"' stroke='#d6455a' stroke-width='0.05'/>";
+    h+="<circle cx='"+f(q1[0])+"' cy='"+f(q1[1])+"' r='0.10' fill='#d6455a'/><circle cx='"+f(q2[0])+"' cy='"+f(q2[1])+"' r='0.10' fill='#d6455a'/>";
+    h+="<text x='"+f(q1[0])+"' y='"+f(q1[1]-0.22)+"' font-size='0.32' text-anchor='middle' style='fill:var(--ink)'>点1</text>";
+    h+="<text x='"+f(q2[0])+"' y='"+f(q2[1]-0.22)+"' font-size='0.32' text-anchor='middle' style='fill:var(--ink)'>点2</text>";
+    svg.setAttribute("viewBox","0 0 "+f(totW2)+" "+f(totH2));
+  }
+  svg.innerHTML=h;
+}
 function wire(){
   /* 座標スライダーと数値入力の連動 */
   [["c3X","c3XNum"],["c3Y","c3YNum"],["c3Z","c3ZNum"],["c3RatioT","c3RatioTNum"]].forEach(function(pair){
@@ -2253,11 +2726,37 @@ function wire(){
     C3.points=Object.keys(pts).map(function(k){return{name:k,x:pts[k][0],y:pts[k][1],z:pts[k][2]}});
     C3.edges=[["A","B"],["B","C"],["C","D"],["D","A"],["E","F"],["F","G"],["G","H"],["H","E"],["A","E"],["B","F"],["C","G"],["D","H"],["A","G"]];
     C3.faces=[["A","D","C","B"],["E","F","G","H"],["A","B","F","E"],["B","C","G","F"],["C","D","H","G"],["D","A","E","H"]];
-    C3.selPoint="A";c3FacePickSel=[];c3After();
+    C3.selPoint="A";c3FacePickSel=[];C3.net.strA="";C3.net.strB="";C3.net.pat=0;c3After();
   });
   el("c3ResetAll").addEventListener("click",function(){var c=el("c3ResetConfirm");if(!c)return;var willShow=c.classList.contains("hidden");c.classList.toggle("hidden",!willShow);if(willShow)el("c3ResetYes").focus()});
   el("c3ResetNo").addEventListener("click",function(){el("c3ResetConfirm").classList.add("hidden");el("c3ResetAll").focus()});
-  el("c3ResetYes").addEventListener("click",function(){el("c3ResetConfirm").classList.add("hidden");c3PushHistory();C3.points=[];C3.edges=[];C3.faces=[];C3.curved=[];C3.selPoint=null;c3FacePickSel=[];c3After();el("c3ResetAll").focus()});
+  el("c3ResetYes").addEventListener("click",function(){el("c3ResetConfirm").classList.add("hidden");c3PushHistory();C3.points=[];C3.edges=[];C3.faces=[];C3.curved=[];C3.selPoint=null;c3FacePickSel=[];C3.net.strA="";C3.net.strB="";C3.net.pat=0;C3.net.target="";c3After();el("c3ResetAll").focus()});
+  /* 展開図と紐の最短距離 */
+  el("c3NetToggle").addEventListener("click",function(){
+    if(C3.net.on){C3.net.on=false;netRefresh();return}
+    var targets=netTargets();
+    if(!targets.length){el("c3NetMsg").textContent="展開図にできる立体がまだありません。形を選んで置くか、面で閉じた立体を作ってください";return}
+    var hasCurve=targets.some(function(t){return t.v!=="poly"});
+    if(!hasCurve&&typeof NetMath!=="undefined"){
+      var chk=NetMath.checkClosed(netPtsObj(),C3.faces);
+      if(!chk.ok){el("c3NetMsg").textContent=chk.reason+"（展開図は、面で閉じた立体でだけ作れます）";return}
+    }
+    C3.net.on=true;el("c3NetMsg").textContent="";
+    netRefresh();
+    if(window.openSideSection)window.openSideSection(el("c3SecNet"));
+  });
+  el("c3NetTarget").addEventListener("change",function(){C3.net.target=this.value;C3.net.pat=0;netRefresh()});
+  el("c3StrA").addEventListener("change",function(){C3.net.strA=this.value;C3.net.alt=1;netRefresh()});
+  el("c3StrB").addEventListener("change",function(){C3.net.strB=this.value;C3.net.alt=0;netRefresh()});
+  el("c3StrClear").addEventListener("click",function(){C3.net.strA="";C3.net.strB="";C3.net.alt=0;netRefresh()});
+  [["c3CvTh1","th1"],["c3CvZ1","z1"],["c3CvTh2","th2"],["c3CvZ2","z2"]].forEach(function(cfg){
+    el(cfg[0]).addEventListener("change",function(){
+      var v=parseFloat(this.value);if(!isFinite(v))v=0;
+      if(cfg[1].charAt(0)==="t")C3.net.cv[cfg[1]]=((v%360)+360)%360;
+      else C3.net.cv[cfg[1]]=Math.max(0,v);
+      netRefresh();
+    });
+  });
   /* 平面／立体の切替 */
   var introEl=el("custIntro"),intro2D=introEl?introEl.textContent:"";
   function setDim(on){
