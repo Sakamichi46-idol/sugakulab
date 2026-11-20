@@ -8,7 +8,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:title" content="数学ビジュアルラボ" />
 <meta property="og:description" content="中学生のための数学学習サイト。立体・平面図形・関数のグラフや定理を、ドラッグして動かしながら目で見て確かめられます。" />
-<meta name="theme-color" content="#0e7a6d" /><link rel="canonical" href="https://sugakulab.pages.dev/" /><meta property="og:url" content="https://sugakulab.pages.dev/" /><meta property="og:image" content="https://sugakulab.pages.dev/og-image.png" /><link rel="icon" type="image/svg+xml" href="/favicon.svg" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#0e7a6d" />
 <link rel="icon" href="data:," />
 <title>数学ビジュアルラボ</title>
 <style>
@@ -234,6 +234,21 @@ details.card>summary{margin-bottom:2px}
 .entrygate.collapsed .entrygrid{display:none}
 .entrygate.collapsed{padding:6px 12px}
 .entrygate.collapsed .entry-head{margin-bottom:0}
+/* ===== ページ切り替え式：トップ画面（選択だけ）とモード画面を分ける ===== */
+#homeView{max-width:1240px;margin:0 auto;padding:0 12px 18px}
+#homeView .entrygate{margin:14px 0 0}
+#homeView .unitbar{display:block;margin-top:12px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+#homeView .unitbar .unit-toggle{font-size:15px;padding:2px 0 6px}
+.topbar .mode-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
+#btnHome{white-space:nowrap;font-weight:700;border-color:var(--accent);color:var(--accent)}
+@media (min-width:1100px){
+  .entrygrid{grid-template-columns:repeat(4,1fr)}
+  .entrygrid button{min-height:64px}
+}
+@media (max-width:600px){
+  .topbar .mode-actions{width:100%;margin-left:0}
+  #homeView{padding:0 8px 12px}
+}
 .firsthint{font-size:13.5px;font-weight:700}
 .toolgrid button.adv-hidden{display:none}
 .advtoggle-row{margin-top:8px}
@@ -313,23 +328,32 @@ details.card>summary{margin-bottom:2px}
   .m-only{display:block}
 }
 </style>
+<link rel="canonical" href="https://sugakulab.pages.dev/" />
+<meta property="og:url" content="https://sugakulab.pages.dev/" />
+<meta property="og:image" content="https://sugakulab.pages.dev/og-image.png" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
 </head>
 <body>
 <header class="topbar">
   <div class="ttl"><h1>数学ビジュアルラボ</h1><span>立体・平面図形・関数・定理・データを、動かして目で見て確かめる</span></div>
-  <nav class="mode-tabs" aria-label="モード切替">
-    <button id="tabCustom" class="on" type="button">自分で作る（カスタム）</button>
+  <div class="mode-actions">
+    <button class="btn hidden" id="btnHome" type="button">← トップへもどる</button>
+    <nav class="mode-tabs hidden" id="modeTabs" aria-label="モード切替">
+    <button id="tabCustom" type="button">自分で作る（カスタム）</button>
     <button id="tabSolid" type="button">立体モード</button>
     <button id="tabPlane" type="button">平面図形モード</button>
     <button id="tabGraph" type="button">関数グラフ</button>
     <button id="tabTheorem" type="button">定理を見る</button>
     <button id="tabData" type="button">データ</button>
     <button id="tabNum" type="button">数と式</button>
-  </nav>
+    </nav>
+  </div>
 </header>
+<div id="homeView">
 <section class="entrygate" id="entryGate" aria-label="何をしたい？">
-  <div class="entry-head"><strong>何をしたい？</strong><span>まずは1つ選んでね。あとからでも、上のボタンで切り替えられます。</span>
-    <button class="btn small hidden" type="button" id="entryReopen">入口をもう一度出す</button></div>
+  <div class="entry-head"><strong>何をしたい？</strong><span>まずは1つ選んでね。選ぶと、その画面だけが表示されます。</span></div>
   <div class="entrygrid" id="entryGrid">
     <button type="button" data-entry="watch">図を動かして見たい<small>定理の図をドラッグして、変わらないことを確かめる</small></button>
     <button type="button" data-entry="cons">作図したい<small>コンパスと定規で、垂直二等分線などを描く</small></button>
@@ -341,8 +365,8 @@ details.card>summary{margin-bottom:2px}
     <button type="button" data-entry="unit">習ったところから探す<small>学年・単元の一覧から選ぶ</small></button>
   </div>
 </section>
-<nav class="unitbar" id="unitBar" aria-label="習ったところから探す（学年・単元）">
-  <button type="button" class="unit-toggle" id="unitToggle" aria-expanded="false">習ったところから探す（学年・単元） ▾</button>
+<nav class="unitbar open" id="unitBar" aria-label="習ったところから探す（学年・単元）">
+  <button type="button" class="unit-toggle" id="unitToggle" aria-expanded="true">習ったところから探す（学年・単元） ▴</button>
   <div class="unit-chips" id="unitChips">
   <div class="cov-wrap">
   <div class="cov-tabs" role="group" aria-label="学年の切り替え">
@@ -398,9 +422,10 @@ details.card>summary{margin-bottom:2px}
   </div>
   </div>
 </nav>
+</div><!-- /#homeView -->
 
 <!-- ================= 立体モード ================= -->
-<div id="solidMode">
+<div id="solidMode" class="hidden">
 <div class="layout">
   <div class="stage">
     <div class="viewbar">
@@ -896,7 +921,7 @@ details.card>summary{margin-bottom:2px}
 </div>
 
 <!-- ================= カスタムモード（問題再現） ================= -->
-<div id="customMode">
+<div id="customMode" class="hidden">
 <div class="layout">
   <div class="stage">
     <div class="viewbar">
@@ -1919,6 +1944,8 @@ $("tabTheorem").onclick=function(){setTopMode("theorem");};
 $("tabCustom").onclick=function(){setTopMode("custom");};
 $("tabData").onclick=function(){setTopMode("data");};
 $("tabNum").onclick=function(){setTopMode("num");};
+$("btnHome").onclick=function(){showHome();};
+function showHome(){setTopMode("home");}
 (function(){
   var tg=$("unitToggle"), ub=$("unitBar"); if(!tg||!ub)return;
   tg.addEventListener("click",function(){
@@ -1928,6 +1955,7 @@ $("tabNum").onclick=function(){setTopMode("num");};
   });
 })();
 function setTopMode(m){
+  var home=(m==="home");
   $("tabSolid").classList.toggle("on",m==="solid");
   $("tabPlane").classList.toggle("on",m==="plane");
   $("tabGraph").classList.toggle("on",m==="graph");
@@ -1942,6 +1970,12 @@ function setTopMode(m){
   $("customMode").classList.toggle("hidden",m!=="custom");
   $("dataMode").classList.toggle("hidden",m!=="data");
   $("numMode").classList.toggle("hidden",m!=="num");
+  /* トップ画面（何をしたい？＋単元一覧）とモード画面は排他表示：ページ切り替え式 */
+  var hv=$("homeView"); if(hv)hv.classList.toggle("hidden",!home);
+  var mt=$("modeTabs"); if(mt)mt.classList.toggle("hidden",home);
+  var bh=$("btnHome"); if(bh)bh.classList.toggle("hidden",home);
+  window.scrollTo(0,0);
+  if(home)return;
   if(m==="solid"){resizeGL();}
   if(m==="graph"&&typeof drawGraph==="function"){drawGraph();}
   if(m==="theorem"&&typeof drawThm==="function"){drawThm();}
@@ -6828,9 +6862,8 @@ function unitTheorem(id){
 document.querySelectorAll("[data-unit]").forEach(function(b){
   b.onclick=function(){
     var u=b.dataset.unit;
-    /* 単元を選んだら対応表は閉じて、図がスクロールなしで見えるようにする */
-    var ub=$("unitBar"), tg=$("unitToggle");
-    if(ub&&ub.classList.contains("open")){ub.classList.remove("open"); if(tg){tg.setAttribute("aria-expanded","false"); tg.textContent="習ったところから探す（学年・単元） ▾";}}
+    /* 単元を選んだらトップ画面は隠れ、対応するモード画面だけが表示される（setTopMode側で切り替え）。
+       対応表の開閉状態はそのまま残し、トップへ戻ったときに同じ状態で見られるようにする */
     if(u==="custom"){setTopMode("custom");window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")});return;}
     if(u==="g1-func")unitGraph([["prop",2],["hyp",6]]);
     else if(u==="g2-func")unitGraph([["lin",2,1],["lin",-1,4]]);
@@ -8976,9 +9009,10 @@ $("tplSolid").onclick=function(){
   if(typeof setViewMode==="function")setViewMode("both");
   window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")});
 };
-/* 初期表示はカスタム（最優先）＋整った三角形の例 */
+/* 初期表示はトップ画面（何をしたい？＋学年・単元の一覧）だけ。
+   自由キャンバスの例は裏で用意しておき、「自分で作りたい」を選んだときだけ表示する */
 custTplDefault();
-setTopMode("custom");
+setTopMode("home");
 </script>
 <script>
 "use strict";
@@ -9811,25 +9845,20 @@ syncTraceUI();
 "use strict";
 /* ===== 初見の入口「何をしたい？」と段階表示（基本だけ見せ、細かいものは開いて出す） ===== */
 (function(){
-  var gate=document.getElementById("entryGate"), reopen=document.getElementById("entryReopen");
-  function collapseGate(){ if(gate)gate.classList.add("collapsed"); if(reopen)reopen.classList.remove("hidden"); }
-  if(reopen)reopen.addEventListener("click",function(){
-    if(gate)gate.classList.remove("collapsed"); reopen.classList.add("hidden");
-    window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")});
-  });
+  /* トップ画面とモード画面は setTopMode("home") / setTopMode(モード名) で切り替わる。
+     入口で選ぶとトップ画面は隠れ、選んだモードだけが別画面のように表示される */
   document.querySelectorAll("[data-entry]").forEach(function(b){
     b.addEventListener("click",function(){
       document.querySelectorAll("[data-entry]").forEach(function(x){x.classList.toggle("on",x===b);});
       var k=b.getAttribute("data-entry");
-      if(k==="watch"){ setTopMode("theorem"); collapseGate(); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
-      else if(k==="cons"){ setTopMode("plane"); if(typeof setPlaneSub==="function")setPlaneSub("cons"); collapseGate(); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
-      else if(k==="custom"){ setTopMode("custom"); collapseGate(); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
-      else if(k==="solid"){ setTopMode("solid"); collapseGate(); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
-      else if(k==="graph"){ setTopMode("graph"); collapseGate(); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
-      else if(k==="data"){ setTopMode("data"); collapseGate(); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
-      else if(k==="num"){ setTopMode("num"); collapseGate(); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
+      if(k==="watch"){ setTopMode("theorem"); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
+      else if(k==="cons"){ setTopMode("plane"); if(typeof setPlaneSub==="function")setPlaneSub("cons"); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
+      else if(k==="custom"){ setTopMode("custom"); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
+      else if(k==="solid"){ setTopMode("solid"); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
+      else if(k==="graph"){ setTopMode("graph"); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
+      else if(k==="data"){ setTopMode("data"); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
+      else if(k==="num"){ setTopMode("num"); window.scrollTo({top:0,behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth")}); }
       else if(k==="unit"){
-        collapseGate();
         var ub=document.getElementById("unitBar"), tg=document.getElementById("unitToggle");
         if(ub&&!ub.classList.contains("open")){ ub.classList.add("open"); if(tg){tg.setAttribute("aria-expanded","true"); tg.textContent="習ったところから探す（学年・単元） ▴";} }
         if(ub)ub.scrollIntoView({behavior:(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"),block:"start"});
