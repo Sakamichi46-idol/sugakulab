@@ -230,6 +230,37 @@ details.card>summary{margin-bottom:2px}
 .chkcoef{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:15px;font-weight:600;margin:8px 0}
 .chkcoef input{width:64px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);text-align:center;font-variant-numeric:tabular-nums}
 .chkans{font-size:15.5px;min-height:2.6em}
+/* ===== 広く見る（キャンバスを画面いっぱいに広げる） ===== */
+.btn-wide{white-space:nowrap}
+.btn-wide svg{vertical-align:-3px;margin-right:5px}
+.wide-tools-btn{display:none}
+.wide-edge-tab{display:none}
+.wide-drawer-head{display:none}
+body.wide-on{overflow:hidden}
+#solidMode.is-wide,#planeMode.is-wide,#customMode.is-wide,#graphMode.is-wide{position:fixed;inset:0;z-index:120;background:var(--bg);overflow:hidden}
+.is-wide .layout{height:100dvh;max-height:100dvh;padding:8px;gap:8px;align-items:stretch;flex-direction:row}
+.is-wide .stage{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.is-wide .viewbar{flex:none;margin-bottom:8px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:6px 8px}
+.is-wide .wide-tools-btn{display:inline-flex;align-items:center}
+.is-wide .btn-wide{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.is-wide .viewwrap{flex:1 1 auto;min-height:0}
+.is-wide .viewbox{display:flex;flex-direction:column;min-height:0}
+.is-wide .viewbox .vhead{flex:none}
+.is-wide .viewbox .glwrap{flex:1 1 auto;min-height:0;display:flex}
+.is-wide #gl,.is-wide #custGl{flex:1 1 auto;height:auto !important;min-height:0}
+.is-wide #netSvg,.is-wide #presetSvg,.is-wide #consSvg,.is-wide #custSvg,.is-wide #graphSvg,.is-wide #custNetSvg,.is-wide #ovlSvg,.is-wide #projSvg{flex:1 1 auto;height:auto !important;min-height:0}
+.is-wide #presetPane,.is-wide #consPane,.is-wide #ovlPane{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.is-wide #presetPane .viewbox,.is-wide #consPane .viewbox,.is-wide #ovlPane .viewbox{flex:1 1 auto}
+.is-wide .stage>.viewbox{flex:1 1 auto}
+.is-wide .stage .card{flex:none;max-height:24dvh;overflow-y:auto}
+.is-wide #presetPane .card,.is-wide #consPane .card,.is-wide #ovlPane .card{flex:none;max-height:24dvh;overflow-y:auto}
+.is-wide #custSolidPanel{flex:none;max-height:40dvh;overflow-y:auto;width:100%}
+.is-wide .side{position:fixed;top:0;right:0;bottom:0;width:min(360px,94vw);flex:none;z-index:140;background:var(--bg);border-left:1px solid var(--line);box-shadow:-8px 0 24px rgba(0,0,0,.18);padding:12px;overflow-y:auto;transform:translateX(105%);transition:transform .26s ease}
+.is-wide.wide-tools-open .side{transform:translateX(0)}
+.is-wide .wide-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:-12px;z-index:2;background:var(--bg);padding:10px 2px 8px;margin:-12px -2px 8px;font-weight:700}
+.is-wide .wide-edge-tab{display:flex;position:fixed;top:50%;right:0;transform:translateY(-50%);z-index:130;writing-mode:vertical-rl;align-items:center;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px 0 0 8px;padding:14px 7px;font-weight:700;font-size:13px;letter-spacing:.12em;box-shadow:-2px 2px 10px rgba(0,0,0,.2);cursor:pointer}
+.is-wide.wide-tools-open .wide-edge-tab{display:none}
+@media (prefers-reduced-motion: reduce){.is-wide .side{transition:none}}
 @media (max-width:900px){
   #numLineSvg{height:260px} #sqrtSvg{height:310px} #powSvg{height:280px} #areaSvg{height:310px} #sqCompSvg,#quadGraphSvg,#mojiSvg,#eq1Svg,#simulSvg{height:310px}
 }
@@ -439,6 +470,7 @@ details.card>summary{margin-bottom:2px}
 
 <!-- ================= 立体モード ================= -->
 <div id="solidMode" class="hidden">
+<button class="wide-edge-tab" type="button" data-wide-tools="solidMode">道具を開く</button>
 <div class="layout">
   <div class="stage">
     <div class="viewbar">
@@ -450,6 +482,8 @@ details.card>summary{margin-bottom:2px}
         <button id="viewBoth" type="button">両方並べて</button>
       </div>
       <button class="btn" id="btnResetView" type="button">視点リセット</button>
+      <button class="btn btn-wide" type="button" data-wide="solidMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
+      <button class="btn wide-tools-btn" type="button" data-wide-tools="solidMode">道具を開く</button>
       <span class="note d-note">ドラッグで360°回転／ホイール・ピンチで拡大縮小／右ドラッグで移動</span>
     </div>
     <div class="viewwrap">
@@ -482,6 +516,7 @@ details.card>summary{margin-bottom:2px}
   </div>
 
   <aside class="side">
+    <div class="wide-drawer-head"><span>道具・設定</span><button class="btn small" type="button" data-wide-tools="solidMode">閉じる</button></div>
     <section class="card">
       <h2>立体を選ぶ</h2>
       <div class="shapegrid" id="shapeGrid"></div>
@@ -615,6 +650,7 @@ details.card>summary{margin-bottom:2px}
 
 <!-- ================= 平面図形モード ================= -->
 <div id="planeMode" class="hidden">
+<button class="wide-edge-tab" type="button" data-wide-tools="planeMode">道具を開く</button>
 <div class="layout">
   <div class="stage">
     <div class="viewbar">
@@ -624,6 +660,10 @@ details.card>summary{margin-bottom:2px}
         <button id="subOvl" type="button">重ねて確かめる（合同・相似）</button>
       </div>
       <span class="note" id="planeHint">まず形を選んで、頂点をドラッグしてみよう。長さ・角度・面積がその場で変わります。作図をしたいときは「コンパス・定規で作図」へ。</span>
+      <span style="margin-left:auto;display:inline-flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-wide" type="button" data-wide="planeMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
+        <button class="btn wide-tools-btn" type="button" data-wide-tools="planeMode">道具を開く</button>
+      </span>
     </div>
 
     <!-- プリセット -->
@@ -691,6 +731,7 @@ details.card>summary{margin-bottom:2px}
   </div>
 
   <aside class="side">
+    <div class="wide-drawer-head"><span>道具・設定</span><button class="btn small" type="button" data-wide-tools="planeMode">閉じる</button></div>
     <!-- プリセット用コントロール -->
     <div id="presetSide">
       <section class="card">
@@ -957,6 +998,7 @@ details.card>summary{margin-bottom:2px}
 
 <!-- ================= カスタムモード（問題再現） ================= -->
 <div id="customMode" class="hidden">
+<button class="wide-edge-tab" type="button" data-wide-tools="customMode">道具を開く</button>
 <div class="layout">
   <div class="stage">
     <div class="viewbar">
@@ -965,6 +1007,8 @@ details.card>summary{margin-bottom:2px}
         <button class="btn small" type="button" id="custUndo" disabled>元に戻す</button>
         <button class="btn small" type="button" id="custRedo" disabled>やり直し</button>
         <button class="btn small" type="button" id="custResetAll">全部消して最初から</button>
+        <button class="btn small btn-wide" type="button" data-wide="customMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
+        <button class="btn small wide-tools-btn" type="button" data-wide-tools="customMode">道具を開く</button>
       </span>
     </div>
     <div class="card hidden" id="custResetConfirm" style="margin-bottom:12px;border-color:var(--warn)" role="alertdialog" aria-label="全部消す確認">
@@ -1050,6 +1094,7 @@ details.card>summary{margin-bottom:2px}
     </div>
   </div>
   <aside class="side">
+    <div class="wide-drawer-head"><span>道具・設定</span><button class="btn small" type="button" data-wide-tools="customMode">閉じる</button></div>
     <section class="card">
       <h2>動かす点（ボタンで選択）</h2>
       <div class="ptbtns" id="custPointBtns" role="group" aria-label="動かす点の選択"></div>
@@ -1937,6 +1982,7 @@ details.card>summary{margin-bottom:2px}
 
 <!-- ================= 関数グラフモード ================= -->
 <div id="graphMode" class="hidden">
+<button class="wide-edge-tab" type="button" data-wide-tools="graphMode">道具を開く</button>
 <div class="layout">
   <div class="stage">
     <div class="viewbar">
@@ -1944,6 +1990,8 @@ details.card>summary{margin-bottom:2px}
       <button class="btn" id="gResetView" type="button">表示範囲リセット</button>
       <button class="btn on" id="gToggleInter" type="button">交点：表示</button>
       <button class="btn on" id="gToggleVertex" type="button">頂点・軸：表示</button>
+      <button class="btn btn-wide" type="button" data-wide="graphMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
+      <button class="btn wide-tools-btn" type="button" data-wide-tools="graphMode">道具を開く</button>
       <span class="note d-note">ドラッグで表示範囲を移動／ホイール・ピンチで拡大縮小／グラフに合わせると座標が出ます</span>
     </div>
     <div class="viewbox">
@@ -1957,6 +2005,7 @@ details.card>summary{margin-bottom:2px}
     </div>
   </div>
   <aside class="side">
+    <div class="wide-drawer-head"><span>道具・設定</span><button class="btn small" type="button" data-wide-tools="graphMode">閉じる</button></div>
     <section class="card">
       <h2>関数リスト</h2>
       <div id="gList"></div>
@@ -2079,6 +2128,7 @@ function showHome(){setTopMode("home");}
   });
 })();
 function setTopMode(m){
+  document.querySelectorAll(".is-wide").forEach(function(el){if(el.id)setWide(el.id,false);});
   var home=(m==="home");
   $("tabSolid").classList.toggle("on",m==="solid");
   $("tabPlane").classList.toggle("on",m==="plane");
@@ -2107,6 +2157,65 @@ function setTopMode(m){
   if(m==="data"&&typeof drawDataAll==="function"){drawDataAll();}
   if(m==="num"&&typeof drawNumAll==="function"){drawNumAll();}
 }
+
+/* ===== 広く見る（キャンバスを画面いっぱいに広げる） =====
+   対象はキャンバスを持つ4モード（立体・平面図形・自由キャンバス・関数グラフ）。
+   広げ中はモード全体がビューポートを覆い、サイドのパネル類は右端に畳まれて
+   「道具を開く」（上部のボタン／右端のタブ）でキャンバスの上に重ねて出せる。
+   SVGは viewBox のため自動で追従し、WebGLと関数グラフは再描画で追従させる。 */
+function wideRedraw(modeId){
+  try{window.dispatchEvent(new Event("resize"));}catch(e){}
+  if(modeId==="solidMode"&&typeof resizeGL==="function")resizeGL();
+  if(modeId==="graphMode"&&typeof drawGraph==="function")drawGraph();
+  if(modeId==="customMode"){
+    if(typeof drawCust==="function")drawCust();
+    if(typeof resizeCustGL==="function")resizeCustGL();
+  }
+}
+function wideSyncBtns(modeId){
+  var root=$(modeId); if(!root)return;
+  var on=root.classList.contains("is-wide"), open=root.classList.contains("wide-tools-open");
+  document.querySelectorAll('[data-wide="'+modeId+'"]').forEach(function(b){
+    b.setAttribute("aria-pressed",on?"true":"false");
+    var lb=b.querySelector(".wide-label"); if(lb)lb.textContent=on?"通常表示に戻す":"広く見る";
+  });
+  document.querySelectorAll('[data-wide-tools="'+modeId+'"]').forEach(function(b){
+    if(b.classList.contains("wide-tools-btn"))b.textContent=open?"道具を閉じる":"道具を開く";
+  });
+}
+function setWide(modeId,on){
+  var root=$(modeId); if(!root)return;
+  root.classList.toggle("is-wide",!!on);
+  if(!on)root.classList.remove("wide-tools-open");
+  if(!document.querySelector(".is-wide"))document.body.classList.remove("wide-on");
+  else document.body.classList.add("wide-on");
+  wideSyncBtns(modeId);
+  var kick=function(){wideRedraw(modeId);};
+  if(window.requestAnimationFrame)requestAnimationFrame(kick);
+  setTimeout(kick,60); setTimeout(kick,320);
+}
+function toggleWideTools(modeId){
+  var root=$(modeId); if(!root||!root.classList.contains("is-wide"))return;
+  root.classList.toggle("wide-tools-open");
+  wideSyncBtns(modeId);
+  setTimeout(function(){wideRedraw(modeId);},300);
+}
+document.querySelectorAll("[data-wide]").forEach(function(b){
+  b.addEventListener("click",function(){
+    var id=b.getAttribute("data-wide"), root=$(id);
+    setWide(id,!(root&&root.classList.contains("is-wide")));
+  });
+});
+document.querySelectorAll("[data-wide-tools]").forEach(function(b){
+  b.addEventListener("click",function(){toggleWideTools(b.getAttribute("data-wide-tools"));});
+});
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Escape")return;
+  document.querySelectorAll(".is-wide").forEach(function(el){
+    if(el.classList.contains("wide-tools-open")){el.classList.remove("wide-tools-open"); wideSyncBtns(el.id);}
+    else setWide(el.id,false);
+  });
+});
 
 /* ============================================================
    立体モード
