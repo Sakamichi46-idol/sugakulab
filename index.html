@@ -2035,7 +2035,8 @@ function custAdjUpdate(){
   if(custAdjHold.len!=="len:"+n1+","+n2)custAdjSetMsg("custLenMsg",custAdjLenReason(n1,n2));
   var a1=$("custAng1").value,a2=$("custAng2").value,a3=$("custAng3").value,ar=$("custAngRange"),an=$("custAngNum"),curA=null;
   if(a1&&a2&&a3&&a1!==a2&&a3!==a2&&pos[a1]&&pos[a2]&&pos[a3])curA=angAt(pos[a1],pos[a2],pos[a3]);
-  if(curA!==null){if(document.activeElement!==ar)ar.value=Math.round(curA);if(document.activeElement!==an)an.value=Math.round(curA)}
+  if(curA!==null){var avA=Math.min(179,Math.max(1,Math.round(curA)));if(document.activeElement!==ar)ar.value=avA;if(document.activeElement!==an)an.value=avA}
+  else{var initA=parseFloat(ar?ar.value:"");if(!isFinite(initA))initA=90;initA=Math.min(179,Math.max(1,Math.round(initA)));if(ar&&document.activeElement!==ar)ar.value=initA;if(an&&document.activeElement!==an)an.value=initA}
   if(custAdjHold.ang!=="ang:"+a1+","+a2+","+a3)custAdjSetMsg("custAngMsg",custAdjAngReason(a1,a2,a3));
   var rsel=$("custRadShape"),rv=$("custRadVal"),rr=$("custRadRange"),rn=$("custRadNum"),curR=null,ridx=rsel&&rsel.value!==""?parseInt(rsel.value,10):-1;
   if(ridx>=0){var gmR=custResolve().geoms[ridx];if(gmR&&gmR.kind==="circle")curR=gmR.r}
