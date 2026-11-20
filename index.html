@@ -104,6 +104,12 @@ ol.howto li{margin:3px 0}
 .gfunc .ghead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .gfunc .formula{font-weight:700;font-size:15px;flex:1 1 auto}
 .gfunc.off{opacity:.55}
+.gfunc.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.gfunc .btn.selbtn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.gtable{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed;margin-top:4px}
+.gtable th,.gtable td{border:1px solid var(--line);padding:6px 1px;text-align:center;font-variant-numeric:tabular-nums;vertical-align:middle;line-height:1.25}
+.gtable th.rh{background:var(--panel2);font-weight:700;width:30px}
+.gtable td.undef{color:var(--warn);font-weight:700;font-size:12px}
 .row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
 .row label{flex:0 0 86px;font-size:13px;font-weight:600}
 .row input[type=range]{flex:1 1 90px;min-width:70px}
@@ -188,6 +194,10 @@ details.card>summary{margin-bottom:2px}
 .cutptrow input[type=text].ptname{width:52px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-weight:700;text-align:center}
 .cutptrow select{flex:1 1 auto;min-width:0;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
 .shapegrid button.on .advtag{color:inherit}
+/* ===== 表面の最短距離（B5） ===== */
+.spptrow{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-bottom:6px;font-size:13px;background:var(--panel)}
+.spptrow .ptdot{display:inline-block;width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+.spptrow select{flex:1 1 auto;min-width:0;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
 /* ===== データモード ===== */
 #distSvg{width:100%;height:340px;display:block;background:var(--panel);touch-action:none}
 #dotSvg{width:100%;height:170px;display:block;background:var(--panel);touch-action:none}
@@ -216,6 +226,10 @@ details.card>summary{margin-bottom:2px}
 .nvalgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
 .nvalgrid label{font-size:13px;color:var(--sub);display:flex;align-items:center;gap:6px}
 .nvalgrid input{flex:1 1 auto;min-width:0;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);text-align:center;font-variant-numeric:tabular-nums}
+/* ===== 答え合わせ（検算）コーナー ===== */
+.chkcoef{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:15px;font-weight:600;margin:8px 0}
+.chkcoef input{width:64px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);text-align:center;font-variant-numeric:tabular-nums}
+.chkans{font-size:15.5px;min-height:2.6em}
 @media (max-width:900px){
   #numLineSvg{height:260px} #sqrtSvg{height:310px} #powSvg{height:280px} #areaSvg{height:310px} #sqCompSvg,#quadGraphSvg,#mojiSvg,#eq1Svg,#simulSvg{height:310px}
 }
@@ -272,12 +286,13 @@ details.card>summary{margin-bottom:2px}
   #gl,#netSvg,#presetSvg,#consSvg,#graphSvg,#thmSvg,#custSvg,#ovlSvg{height:380px}
   #distSvg{height:300px} #probSvg{height:280px} #sampSvg{height:300px} #boxSvg{height:250px} #dotSvg{height:150px}
   #custGl,#custNetSvg{height:320px}
-  /* 縦並びでは「よく使う操作」を先に：立体は 選ぶ→サイズ→切断→対角線・動点→面の指定→色と表示→角度指定 の順 */
+  /* 縦並びでは「よく使う操作」を先に：立体は 選ぶ→サイズ→切断→対角線・動点→表面の最短距離→面の指定→色と表示→角度指定 の順 */
   #solidMode .side>*:nth-child(5){order:3}
   #solidMode .side>*:nth-child(6){order:4}
   #solidMode .side>*:nth-child(7){order:5}
-  #solidMode .side>*:nth-child(3){order:6}
-  #solidMode .side>*:nth-child(4){order:7}
+  #solidMode .side>*:nth-child(8){order:6}
+  #solidMode .side>*:nth-child(3){order:7}
+  #solidMode .side>*:nth-child(4){order:8}
   /* 定理は「定理の内容」を「定理を選ぶ」より先に読めるように */
   #theoremMode .side>*:nth-child(2){order:-1}
 }
@@ -416,7 +431,7 @@ details.card>summary{margin-bottom:2px}
   <ul class="cov-list" style="margin-top:4px">
     <li><button type="button" class="uname" data-unit="custom">自由キャンバス（入試の図を自分で作る）</button><span class="dom">全学年</span></li>
   </ul>
-  <p class="note cov-note"><strong>部分対応</strong>の単元は計算が中心の単元です。このサイトは「図・グラフを動かして目で確かめる」サイトなので、計算練習そのものではなく、図で理由が見える部分だけを扱っています。</p>
+  <p class="note cov-note"><strong>部分対応</strong>の単元は計算が中心の単元です。計算練習そのものは扱いませんが、自分で解いた答えの答え合わせ（検算）はできます（「数と式」モードの下の「答え合わせ（検算）」）。それ以外は、このサイトは「図・グラフを動かして目で確かめる」サイトなので、図で理由が見える部分だけを扱っています。</p>
   </div>
   </div>
 </nav>
@@ -564,6 +579,28 @@ details.card>summary{margin-bottom:2px}
         </div>
         <p class="note">Pは最初の頂点から底面の周を進み、Qは向かいの頂点から逆向きに進みます。どちらも底面を1周すると、出発した頂点に戻って止まります（回り続けません）。速さはPとQで別々に変えられます（入試では速さの違う2動点がよく出ます）。時刻 t（秒）は上のスライダーでも変えられます。</p>
         <div id="mvInfo"></div>
+      </div>
+    </section>
+
+    <section class="card" id="spCard">
+      <h2>表面の最短距離（ひもを巻く問題）</h2>
+      <p class="note" style="margin-top:0">立体の表面の2点A・Bを結ぶ、いちばん短い道のりを見ます。ひもを表面にそってぴんと張ったときの道です。コツは、<strong>経路が通る面を平らに広げた展開図の上では、その道が直線になる</strong>こと。直方体（立方体をふくむ）と円柱で使えます。</p>
+      <div class="row"><label class="chk"><input type="checkbox" id="spOn"> 最短経路を表示</label></div>
+      <div id="spControls" class="hidden">
+        <div id="spUnsupported" class="hidden"><p class="note" style="margin-top:0">この立体では使えません。直方体・立方体・円柱を選んでください。</p></div>
+        <div id="spMain">
+          <div id="spBoxControls"></div>
+          <div id="spCylControls" class="hidden"></div>
+          <div class="row">
+            <button class="btn small hidden" type="button" id="spPresetBox">例：向かい合う頂点どうし</button>
+            <button class="btn small hidden" type="button" id="spPresetCyl">例：反対側の点どうし</button>
+            <button class="btn small" type="button" id="spViewBoth">展開図と3Dを並べて見る</button>
+          </div>
+          <p class="note" id="spArmNote" style="margin:2px 0"></p>
+          <div class="row"><button class="btn" type="button" id="spAnswersBtn">答え合わせ表示：OFF</button></div>
+          <p class="note">最短距離の長さは「答え合わせ表示」をONにしたときだけ数値で出ます。経路そのものはON／OFFによらず表示されます。</p>
+          <div id="spInfo"></div>
+        </div>
       </div>
     </section>
 
@@ -974,6 +1011,10 @@ details.card>summary{margin-bottom:2px}
         <span class="val" id="custTimeVal">t ＝ 0 秒</span>
       </div>
       <div id="custTimeStatus" style="font-size:13.5px"></div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn small" type="button" id="custTimeClearTraces">通り道をすべて消す</button>
+        <span class="note">点の編集欄で「通り道を残す」をONにした点は、再生やスライダーに合わせて通り道が残ります</span>
+      </div>
       <div class="row" style="margin-top:8px"><label for="custGraphShape">面積グラフ</label>
         <select id="custGraphShape"></select></div>
       <svg id="custGraphSvg" viewBox="0 0 300 118" style="width:100%;height:118px;display:block" aria-label="時刻と面積のグラフ"></svg>
@@ -1016,6 +1057,10 @@ details.card>summary{margin-bottom:2px}
       <div class="row">
         <button class="btn small" type="button" id="custDelPoint">選択中の点を消す</button>
       </div>
+      <div class="row">
+        <button class="btn small" type="button" id="custClearAllTraces">通り道をすべて消す</button>
+      </div>
+      <p class="note">「通り道（軌跡）」：点の編集欄で「通り道を残す」をONにすると、その点が動いた道が薄い線でキャンバスに残ります。例えば、辺の上を動く点Pと、線分APの真ん中の点Mを作って、Mの通り道を残すと、Mがどんな道を通るかが見えます。</p>
     </section>
     <section class="card">
       <h2>点を追加（決め方を選ぶ）</h2>
@@ -1163,9 +1208,9 @@ details.card>summary{margin-bottom:2px}
       <details class="more"><summary>くわしく</summary>
       <p class="note">関数型：y＝ax² と反比例の上に点を置き、x座標をそろえた点・2点を通る直線を作ります。円型：BCを直径とする円と内接三角形、BA＝BDとなる点D（DはBC上でBD＝BA）、平行線と円の交点E、F＝AD×BE、G＝AC×BE、H＝直線ADと円の交点まで再現します。作図型：△ABCと頂点Aを通る直線ℓの土台です。交点型（関数）：y＝x² と y＝x＋2 の交点A(−1,1)・B(2,4)と原点Oで三角形を作ります（面積3）。係数を変えると交点と面積が連動します。</p></details>
       <details class="more"><summary>都立 大問3・4・5の図はどこまで作れる？</summary>
-      <p class="note">令和2〜8年度（共通＋第二次）の図を部品ごとに照らした結果です。<strong>関数（大問3）</strong>：放物線 y＝ax²（a＝1/4 のような分数も可）と直線、曲線上の点（xの変域つき）、軸との交点、2点を通る直線、垂線の足の点、x軸・y軸対称点、平行移動した点、傾きを指定した直線、中点、面積・面積比の計測まで作れます。<strong>平面図形（大問4）</strong>：辺上の点・中点・比の内分点・延長と延長の交点、CP＝CQ のような等長連動点、2点から等距離の点、線分を直径とする円、弧の範囲内だけを動く点、円周の等分点、時刻 t で経路を進む動点（速さ指定・再生・面積のグラフつき）、円の入れ子（OPを直径とする円は「中点＋直径の円」で作れます）。<strong>空間図形（大問5）</strong>：立体モードで直方体・三角柱（直角三角柱も追加）・正四面体・四角すいを選び、対角線上の点と、辺の周を動く動点P・Q（中点つき）が使えます。切り分けた小さい立体の体積は、3点切断の切り口表示と組み合わせて考えてください（体積の自動計算は角すい型のみ）。</p></details>
+      <p class="note">令和2〜8年度（共通＋第二次）の図を部品ごとに照らした結果です。<strong>関数（大問3）</strong>：放物線 y＝ax²（a＝1/4 のような分数も可）と直線、曲線上の点（xの変域つき）、軸との交点、2点を通る直線、垂線の足の点、x軸・y軸対称点、平行移動した点、傾きを指定した直線、中点、面積・面積比の計測まで作れます。<strong>平面図形（大問4）</strong>：辺上の点・中点・比の内分点・延長と延長の交点、CP＝CQ のような等長連動点、2点から等距離の点、線分を直径とする円、弧の範囲内だけを動く点、円周の等分点、時刻 t で経路を進む動点（速さ指定・再生・面積のグラフつき）、円の入れ子（OPを直径とする円は「中点＋直径の円」で作れます）。<strong>空間図形（大問5）</strong>：立体モードで直方体・三角柱（直角三角柱も追加）・正四面体・四角すいを選び、対角線上の点と、辺の周を動く動点P・Q（中点つき）と、直方体・円柱の表面の最短経路が使えます。切り分けた小さい立体の体積は、3点切断の切り口表示と組み合わせて考えてください（体積の自動計算は角すい型のみ）。</p></details>
       <details class="more"><summary>自校作成問題（10校）の新しい型はどこまで作れる？</summary>
-      <p class="note">自校作成の10校（日比谷・戸山・青山・西・八王子東・立川・国立・新宿・墨田川・国分寺）の令和2〜8年度・全51本で、共通問題には無かった型を照らした結果です。<strong>作図（平面図形モードのコンパス・定規作図）</strong>：角度を指定する作図は「同じ角度に見える点の集まり」ツールで対応（75°・120°・135°・25°など任意の角度。線分を見込む角が一定になる点の集まり＝円弧を描き、他の図形との交点も取れます）。∠APB＝∠ACB 型は、同じツールの「3点目に点を選ぶ」形で対応（点Cを通る円の弧がその集まり）。折り返し（対称移動）は「対称な点」ツールで、作図モード内でも連動点として作れます。接する円は「接する円」ツール（中心から直線までの距離が半径）で、中心を角の二等分線の上に置けば2直線に接する円も作れます。中心が示されていない円の中心の復元は、弦2本の垂直二等分線＋交点ツールで対応済み。ひし形・二等辺三角形・直角三角形そのものの作図は、プリセット作図（ひし形は対角線指定、三角形は3辺／2辺と間の角＋頂点ドラッグ）と自由キャンバスで対応。√2・√3 の長さと √3：1 の比は、お手本作図「√2・√3の長さ」（直角二等辺三角形の斜辺と正三角形の高さ経由、コンパスで長さを移す）で対応。線分の比例分割（5：1、1：3など）は「内分・外分点」ツールで対応（自由キャンバスの内分・外分点と同じものが作図モードでも使えます）。<strong>関数・平面図形（自由キャンバス）</strong>：放物線2本の併用（係数は数値で指定。文字 a のままの式変形は対象外）、反比例が主役の構成、格子点の数え上げ補助（多角形は格子点の数から求めた面積と、辺の上・内部の個数、関数は整数 x で y も整数になる点、線分は gcd で個数を表示）、x座標＝相手の y座標のような座標を介した連動点（「関数の上の点（x座標が他の点のy座標）」）、線分上の点、外角の二等分線を図形として追加（交点の定義に使えます）、二重半円（「半円（2点を直径・3点目の側）」を重ねる。テンプレート「二重半円の型」）、正六角形（円周の6等分点）、平面の対角線上の点（線分上の点で対応）まで作れます。<strong>立体（立体モード）</strong>：4点を通る平面での切断に対応（4点目が同じ平面の上にあるか自動で判定し、上にないときは理由を表示）。正五角柱・正六角柱を追加（展開図・3点／4点切断・対角線上の点・動点も使えます）。動点P・Qは速さを別々に変えられます。立体の内部・面上を動く点は、対角線上の点（面の対角線／空間の対角線）で対応。<strong>未対応（正直な一覧）</strong>：展開図の上での作図（新宿R3型。展開図は表示専用で、点や線は置けません）、立体の貼り合わせ・重ね合わせ（立方体＋正四角すい等）、平面上に置いた立体を転がして90°回転させる操作、回転体に接する球、立体での点から平面への垂線の足、面上・切断面上での最短経路（展開図に線が引けないため）。平面での垂線の足は自由キャンバスの「垂線の足の点（直線へ下ろした点）」で対応しています。</p></details>
+      <p class="note">自校作成の10校（日比谷・戸山・青山・西・八王子東・立川・国立・新宿・墨田川・国分寺）の令和2〜8年度・全51本で、共通問題には無かった型を照らした結果です。<strong>作図（平面図形モードのコンパス・定規作図）</strong>：角度を指定する作図は「同じ角度に見える点の集まり」ツールで対応（75°・120°・135°・25°など任意の角度。線分を見込む角が一定になる点の集まり＝円弧を描き、他の図形との交点も取れます）。∠APB＝∠ACB 型は、同じツールの「3点目に点を選ぶ」形で対応（点Cを通る円の弧がその集まり）。折り返し（対称移動）は「対称な点」ツールで、作図モード内でも連動点として作れます。接する円は「接する円」ツール（中心から直線までの距離が半径）で、中心を角の二等分線の上に置けば2直線に接する円も作れます。中心が示されていない円の中心の復元は、弦2本の垂直二等分線＋交点ツールで対応済み。ひし形・二等辺三角形・直角三角形そのものの作図は、プリセット作図（ひし形は対角線指定、三角形は3辺／2辺と間の角＋頂点ドラッグ）と自由キャンバスで対応。√2・√3 の長さと √3：1 の比は、お手本作図「√2・√3の長さ」（直角二等辺三角形の斜辺と正三角形の高さ経由、コンパスで長さを移す）で対応。線分の比例分割（5：1、1：3など）は「内分・外分点」ツールで対応（自由キャンバスの内分・外分点と同じものが作図モードでも使えます）。<strong>関数・平面図形（自由キャンバス）</strong>：放物線2本の併用（係数は数値で指定。文字 a のままの式変形は対象外）、反比例が主役の構成、格子点の数え上げ補助（多角形は格子点の数から求めた面積と、辺の上・内部の個数、関数は整数 x で y も整数になる点、線分は gcd で個数を表示）、x座標＝相手の y座標のような座標を介した連動点（「関数の上の点（x座標が他の点のy座標）」）、線分上の点、外角の二等分線を図形として追加（交点の定義に使えます）、二重半円（「半円（2点を直径・3点目の側）」を重ねる。テンプレート「二重半円の型」）、正六角形（円周の6等分点）、平面の対角線上の点（線分上の点で対応）まで作れます。<strong>立体（立体モード）</strong>：4点を通る平面での切断に対応（4点目が同じ平面の上にあるか自動で判定し、上にないときは理由を表示）。正五角柱・正六角柱を追加（展開図・3点／4点切断・対角線上の点・動点も使えます）。動点P・Qは速さを別々に変えられます。立体の内部・面上を動く点は、対角線上の点（面の対角線／空間の対角線）で対応。表面の最短経路（ひもを巻く問題）は、直方体（立方体ふくむ）と円柱で対応（立体モードの「表面の最短距離」で、展開図の上の直線と3Dでの経路の両方が見られます）。<strong>未対応（正直な一覧）</strong>：展開図の上での作図（新宿R3型。展開図は表示専用で、点や線は置けません）、立体の貼り合わせ・重ね合わせ（立方体＋正四角すい等）、平面上に置いた立体を転がして90°回転させる操作、回転体に接する球、立体での点から平面への垂線の足、切断面上での最短経路。平面での垂線の足は自由キャンバスの「垂線の足の点（直線へ下ろした点）」で対応しています。</p></details>
       <button class="btn" type="button" id="tplSolid">立体型（角すい O-ABCD）を開く ↓</button>
       <p class="note">立体型を開くと、下に角すい O-ABCD の立体と展開図が出ます。寸法と t は「立体カスタム（角すい）」で変えられます。</p>
     </details>
@@ -1581,7 +1626,7 @@ details.card>summary{margin-bottom:2px}
       <div class="card" style="margin-top:12px">
         <h2>式と面積の対応</h2>
         <dl class="kv" id="areaStats"></dl>
-        <p class="note">面積図は、式の展開が「なぜその形になるか」を目で確かめるためのものです。計算そのものの練習は扱いません。因数分解は、この図を逆向きに読むこと（面積から辺の長さに戻すこと）です。右の「見方」で、展開（辺→面積）と因数分解（面積→辺）を切り替えられます。</p>
+        <p class="note">面積図は、式の展開が「なぜその形になるか」を目で確かめるためのものです。計算そのものの練習は扱いませんが、答え合わせ（検算）は下の「答え合わせ（検算）」でできます。因数分解は、この図を逆向きに読むこと（面積から辺の長さに戻すこと）です。右の「見方」で、展開（辺→面積）と因数分解（面積→辺）を切り替えられます。</p>
         <p class="note">※ 面積で表せるのは、長さが正になるプラスの式が中心です。x²−5x＋6 のようなマイナスの項を含む式は、長さがマイナスになってしまうため、面積図では表せません。</p>
       </div>
     </div>
@@ -1622,6 +1667,79 @@ details.card>summary{margin-bottom:2px}
         <div class="row"><button class="btn small" type="button" id="quadToGraph">関数モードで放物線を見る</button></div>
       </div>
     </div>
+
+    <!-- 答え合わせ（検算）：答えだけを出す小さなコーナー -->
+    <section class="card" id="chkCard" style="margin-top:12px" aria-label="答え合わせ（検算）">
+      <h2>答え合わせ（検算）</h2>
+      <p class="note" style="margin-top:0">自分で解いた答えが合っているかだけを確かめる、小さなコーナーです。出るのは<strong>答えだけ</strong>で、解き方や途中式は出しません（解き方の理解は、上の天秤・面積図・グラフのコーナーの担当です）。計算の練習は扱いません。係数の数字は、分数のまま（1/2 のように）入れることもできます。</p>
+      <div class="seg" role="group" aria-label="検算の種類" style="flex-wrap:wrap;margin-bottom:8px">
+        <button id="chkTabLin" class="on" type="button">1次方程式</button>
+        <button id="chkTabSim" type="button">連立方程式</button>
+        <button id="chkTabQuad" type="button">2次方程式</button>
+        <button id="chkTabFact" type="button">因数分解・展開</button>
+      </div>
+
+      <div id="chkPaneLin">
+        <div class="chkcoef">
+          <input type="text" id="chkLA" value="2" inputmode="text" aria-label="1次方程式：x の係数 a"><span>x ＋</span>
+          <input type="text" id="chkLB" value="3" inputmode="text" aria-label="1次方程式：定数 b"><span>＝</span>
+          <input type="text" id="chkLC" value="7" inputmode="text" aria-label="1次方程式：右辺 c">
+        </div>
+        <p class="note">形は a x＋b＝c です。たとえば x＋3＝5 なら、a＝1、b＝3、c＝5 と入れます（x だけの項がないときは b＝0）。</p>
+        <div class="okbox chkans" id="chkLinAns" aria-live="polite"></div>
+      </div>
+
+      <div id="chkPaneSim" class="hidden">
+        <div class="chkcoef">
+          <input type="text" id="chkS1A" value="1" inputmode="text" aria-label="連立方程式1式目：x の係数"><span>x ＋</span>
+          <input type="text" id="chkS1B" value="1" inputmode="text" aria-label="連立方程式1式目：y の係数"><span>y ＝</span>
+          <input type="text" id="chkS1C" value="5" inputmode="text" aria-label="連立方程式1式目：右辺">
+        </div>
+        <div class="chkcoef">
+          <input type="text" id="chkS2A" value="2" inputmode="text" aria-label="連立方程式2式目：x の係数"><span>x ＋</span>
+          <input type="text" id="chkS2B" value="-1" inputmode="text" aria-label="連立方程式2式目：y の係数"><span>y ＝</span>
+          <input type="text" id="chkS2C" value="4" inputmode="text" aria-label="連立方程式2式目：右辺">
+        </div>
+        <p class="note">形は a x＋b y＝c が2式です。引く項は、係数をマイナスの数で入れます（2x−y＝4 なら、y の係数は −1）。</p>
+        <div class="okbox chkans" id="chkSimAns" aria-live="polite"></div>
+      </div>
+
+      <div id="chkPaneQuad" class="hidden">
+        <div class="chkcoef">
+          <input type="text" id="chkQA" value="1" inputmode="text" aria-label="2次方程式：x² の係数 a"><span>x² ＋</span>
+          <input type="text" id="chkQB" value="-5" inputmode="text" aria-label="2次方程式：x の係数 b"><span>x ＋</span>
+          <input type="text" id="chkQC" value="6" inputmode="text" aria-label="2次方程式：定数 c"><span>＝ 0</span>
+        </div>
+        <p class="note">形は a x²＋b x＋c＝0 です。項がないところは 0 を入れます（x²−4＝0 なら、b＝0、c＝−4）。</p>
+        <div class="okbox chkans" id="chkQuadAns" aria-live="polite"></div>
+      </div>
+
+      <div id="chkPaneFact" class="hidden">
+        <div class="seg" role="group" aria-label="因数分解と展開の切替" style="flex-wrap:wrap;margin-bottom:8px">
+          <button id="chkSubFact" class="on" type="button">因数分解</button>
+          <button id="chkSubExp" type="button">展開の検算</button>
+        </div>
+        <div id="chkFactDiv">
+          <div class="chkcoef">
+            <input type="text" id="chkFA" value="1" inputmode="text" aria-label="因数分解：x² の係数 a"><span>x² ＋</span>
+            <input type="text" id="chkFB" value="5" inputmode="text" aria-label="因数分解：x の係数 b"><span>x ＋</span>
+            <input type="text" id="chkFC" value="6" inputmode="text" aria-label="因数分解：定数 c">
+          </div>
+          <p class="note">形は a x²＋b x＋c です。因数分解の検算は、整数の係数で入れてください。</p>
+          <div class="okbox chkans" id="chkFactAns" aria-live="polite"></div>
+        </div>
+        <div id="chkExpDiv" class="hidden">
+          <div class="chkcoef">
+            <span>(</span><input type="text" id="chkEA" value="1" inputmode="text" aria-label="展開：1つ目のかっこの x の係数"><span>x ＋</span>
+            <input type="text" id="chkEB" value="2" inputmode="text" aria-label="展開：1つ目のかっこの定数"><span>)(</span>
+            <input type="text" id="chkEC" value="1" inputmode="text" aria-label="展開：2つ目のかっこの x の係数"><span>x ＋</span>
+            <input type="text" id="chkED" value="3" inputmode="text" aria-label="展開：2つ目のかっこの定数"><span>)</span>
+          </div>
+          <p class="note">(a x＋b)(c x＋d) を展開した式が答えです。たとえば (x＋2)² は、2つのかっこを両方とも (x＋2) にします。</p>
+          <div class="okbox chkans" id="chkExpAns" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <aside class="side">
@@ -1844,6 +1962,14 @@ details.card>summary{margin-bottom:2px}
       <div id="gList"></div>
       <button class="btn primary" id="gAdd" type="button">＋ 関数を追加</button>
       <p class="note">比例 y＝ax・反比例 y＝a/x（中1）、1次関数 y＝ax＋b（中2）、関数 y＝ax²（中3）を、最大6つまで重ねて描けます。</p>
+    </section>
+    <section class="card" id="gTableCard">
+      <h2>値の表</h2>
+      <p class="note" style="margin-top:0">選んだ関数の、x の値に対する y の値の対応表です。表で対応を確かめてから、式とグラフと見比べてみよう。</p>
+      <div class="row"><label for="gTableSel">関数</label><select id="gTableSel" aria-label="値の表に出す関数"></select></div>
+      <p style="margin:6px 0 2px"><strong id="gTableFormula"></strong></p>
+      <div id="gTableWrap"></div>
+      <p class="note" id="gTableNote" style="margin-bottom:0"></p>
     </section>
   </aside>
 </div>
@@ -2128,6 +2254,7 @@ function buildSolid(){
     if(typeof buildProj==="function"&&state.viewMode==="proj")buildProj();
     if(typeof refreshCutVisuals==="function")refreshCutVisuals();
     if(typeof refreshDiagOverlay==="function")refreshDiagOverlay();
+    if(typeof refreshSP==="function")refreshSP();
     return;
   }
   if(s==="cube"||s==="cuboid"){
@@ -2297,6 +2424,7 @@ function buildSolid(){
   if(typeof buildProj==="function"&&state.viewMode==="proj")buildProj();
   if(typeof refreshCutVisuals==="function")refreshCutVisuals();
   if(typeof refreshDiagOverlay==="function")refreshDiagOverlay();
+  if(typeof refreshSP==="function")refreshSP();
 }
 function applyUnfold(){
   var t=state.unfold;
@@ -2430,7 +2558,7 @@ function netPatCount(){var p=NET_PATTERNS[state.shape];return p?p.length:1;}
 function updateNetPatternUI(){
   var card=$("netPatternCard"); if(!card)return;
   var cnt=netPatCount();
-  var show=(typeof NET_SUPPORTED!=="undefined")&&NET_SUPPORTED.indexOf(state.shape)>=0&&cnt>1;
+  var show=(typeof NET_SUPPORTED!=="undefined")&&NET_SUPPORTED.indexOf(state.shape)>=0&&cnt>1&&!(typeof spNetOverrideActive==="function"&&spNetOverrideActive());
   card.classList.toggle("hidden",!show);
   if(!show)return;
   var idx=netPatIdx();
@@ -2619,6 +2747,7 @@ function buildNet(){
   note.innerHTML="";
   updateNetPatternUI();
   var F=netFaces();
+  if(typeof spNetOverride==="function"){var spF=spNetOverride(); if(spF)F=spF;}
   var minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
   F.forEach(function(f){
     var xs=[],ys=[];
@@ -2651,8 +2780,9 @@ function buildNet(){
     }
     var t1=svgEl("text",{x:cx,y:cy-fs*0.12,"class":"netlabel","font-size":fs*0.95},g); t1.textContent=f.id;
     var t2=svgEl("text",{x:cx,y:cy+fs*0.85,"class":"netname","font-size":fs*0.62},g); t2.textContent=f.name;
-    g.addEventListener("click",function(){selectFace(state.selectedFace===f.id?null:f.id);});
+    g.addEventListener("click",function(){if(typeof SP!=="undefined"&&SP&&SP.arm)return; selectFace(state.selectedFace===f.id?null:f.id);});
   });
+  if(typeof spDrawNetOverlay==="function")spDrawNetOverlay(svg,fs);
 }
 function selectFace(id){
   state.selectedFace=id;
@@ -2688,6 +2818,11 @@ canvas.addEventListener("pointerup",function(e){
   var r=canvas.getBoundingClientRect();
   ptr.x=((e.clientX-r.left)/r.width)*2-1; ptr.y=-((e.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(ptr,camera);
+  if(typeof SP!=="undefined"&&SP&&SP.arm&&SP.on&&typeof spSupported==="function"&&spSupported()&&typeof spPlaceFromHits==="function"){
+    var spHits=ray.intersectObjects(group.children,true);
+    if(spPlaceFromHits(spHits)){SP.arm=null; if(typeof syncSPForm==="function")syncSPForm(); if(typeof refreshSP==="function")refreshSP();}
+    return;
+  }
   var hits=ray.intersectObjects(group.children,true);
   for(var i=0;i<hits.length;i++){
     var o=hits[i].object;
@@ -3523,6 +3658,516 @@ resizeGL();
   controls.update();
   if(state.viewMode!=="net"&&state.viewMode!=="proj")renderer.render(scene,camera);
 })();
+</script>
+<script>
+"use strict";
+/* ============================================================
+   表面の最短距離（ひもを巻く問題）
+   直方体・立方体：2点の通る面を平らに広げると直線になることを使う。
+   面の並び方（展開の仕方）をすべて調べ、直線が面の並びの中に収まる
+   もののうち一番短いものを選ぶ。
+   円柱：側面を長方形に広げ、回る向きの両方を比べて短い方を選ぶ。
+   最短距離の数値は「答え合わせ表示」ONのときだけ出す（経路は常に出す）。
+   点の決め方は、既存の仕組み（面を選ぶ＋位置の割合、タップで置く）に合わせる。
+============================================================ */
+var SP={on:false,answers:false,arm:null,
+  a:{face:3,u:25,v:25}, b:{face:6,u:75,v:75},
+  ca:{th:0,y:100}, cb:{th:180,y:0},
+  result:null};
+var SP_COLA="#e0655a", SP_COLB="#0e7a6d", SP_COLPATH="#d96a1e";
+var SP_FACE_NAMES=["上面","左面","正面","右面","下面","背面"];
+var spGroup=null;
+function spSupported(){return state.shape==="cube"||state.shape==="cuboid"||state.shape==="cylinder";}
+function spIsBox(){return state.shape==="cube"||state.shape==="cuboid";}
+
+/* ---- 直方体・立方体：面の座標系（3Dの面番号と共通） ----
+   各面：中心C、面の右方向U・上方向V（外から見たとき）、外向き法線N=U×V、幅W・高さH */
+function spBoxFaces(){
+  var d=state.dims, s=state.shape;
+  var w=s==="cube"?d.a:d.w, h=s==="cube"?d.a:d.h, dep=s==="cube"?d.a:d.d;
+  function F(id,name,cx,cy,cz,ux,uy,uz,vx,vy,vz,W,H){
+    var U=T(ux,uy,uz), V=T(vx,vy,vz);
+    return {id:id,name:name,C:T(cx,cy,cz),U:U,V:V,N:new THREE.Vector3().crossVectors(U,V),W:W,H:H};
+  }
+  return [
+    F(1,"上面",0,h/2,0, 1,0,0, 0,0,-1, w,dep),
+    F(2,"左面",-w/2,0,0, 0,0,1, 0,1,0, dep,h),
+    F(3,"正面",0,0,dep/2, 1,0,0, 0,1,0, w,h),
+    F(4,"右面",w/2,0,0, 0,0,-1, 0,1,0, dep,h),
+    F(5,"下面",0,-h/2,0, 1,0,0, 0,0,1, w,dep),
+    F(6,"背面",0,0,-dep/2, -1,0,0, 0,1,0, w,h)
+  ];
+}
+function spBoxPoint3(f,pt){
+  var s=(pt.u/100-0.5)*f.W, t=(pt.v/100-0.5)*f.H;
+  return f.C.clone().add(f.U.clone().multiplyScalar(s)).add(f.V.clone().multiplyScalar(t));
+}
+/* 面fを展開図の平面（z=0）に置く変換：3D点→展開図座標 */
+function spStartMatrix(f){
+  var m=new THREE.Matrix4().makeBasis(f.U,f.V,f.N).transpose();
+  m.setPosition(new THREE.Vector3(-f.U.dot(f.C),-f.V.dot(f.C),-f.N.dot(f.C)));
+  return m;
+}
+function spApply(m,p){return p.clone().applyMatrix4(m);}
+function spFaceRectNet(f,m){
+  var cs=[[-1,-1],[1,-1],[1,1],[-1,1]].map(function(c){
+    var p=f.C.clone().add(f.U.clone().multiplyScalar(c[0]*f.W/2)).add(f.V.clone().multiplyScalar(c[1]*f.H/2));
+    var q=spApply(m,p); return [q.x,q.y];
+  });
+  var xs=cs.map(function(p){return p[0];}), ys=cs.map(function(p){return p[1];});
+  return {pts:cs,minX:Math.min.apply(null,xs),maxX:Math.max.apply(null,xs),minY:Math.min.apply(null,ys),maxY:Math.max.apply(null,ys)};
+}
+function spRectsOverlap(r1,r2){
+  var ox=Math.min(r1.maxX,r2.maxX)-Math.max(r1.minX,r2.minX);
+  var oy=Math.min(r1.maxY,r2.maxY)-Math.max(r1.minY,r2.minY);
+  return ox>1e-4&&oy>1e-4;
+}
+/* 面fの辺（axis方向・sign側）を軸に隣の面を平らに開いたときの、隣の面とその変換 */
+function spNeighbor(faces,f,mF,axis,sign){
+  var A=axis==="U"?f.U:f.V, size=axis==="U"?f.W:f.H, E=axis==="U"?f.V:f.U;
+  var Me=f.C.clone().add(A.clone().multiplyScalar(sign*size/2));
+  var target=A.clone().multiplyScalar(sign), g=null;
+  faces.forEach(function(x){if(x.id!==f.id&&x.N.distanceTo(target)<1e-6)g=x;});
+  if(!g)return null;
+  var netF=spApply(mF,f.C), netE=spApply(mF,Me);
+  var outX=netE.x-netF.x, outY=netE.y-netF.y;
+  for(var si=0;si<2;si++){
+    var q=new THREE.Quaternion().setFromAxisAngle(E,(si===0?1:-1)*Math.PI/2);
+    var mRot=new THREE.Matrix4().compose(Me.clone().sub(Me.clone().applyQuaternion(q)),q,new THREE.Vector3(1,1,1));
+    var mG=mF.clone().multiply(mRot);
+    var nc=spApply(mG,g.C);
+    if(Math.abs(nc.z)<1e-4&&(nc.x-netE.x)*outX+(nc.y-netE.y)*outY>1e-6)return {face:g,m:mG};
+  }
+  return null;
+}
+/* 線分p→qを長方形rで切り取ったときのパラメータ区間（なければnull） */
+function spClipSegRect(p,q,r){
+  var dx=q[0]-p[0], dy=q[1]-p[1], t0=0, t1=1;
+  var P=[-dx,dx,-dy,dy], Q=[p[0]-r.minX,r.maxX-p[0],p[1]-r.minY,r.maxY-p[1]];
+  for(var i=0;i<4;i++){
+    if(Math.abs(P[i])<1e-12){if(Q[i]<-1e-9)return null;}
+    else{
+      var t=Q[i]/P[i];
+      if(P[i]<0){if(t>t1+1e-9)return null; if(t>t0)t0=t;}
+      else{if(t<t0-1e-9)return null; if(t<t1)t1=t;}
+    }
+  }
+  return t1-t0<-1e-9?null:[t0,t1];
+}
+function spComputeBox(){
+  var faces=spBoxFaces();
+  var fA=faces[SP.a.face-1], fB=faces[SP.b.face-1];
+  if(!fA||!fB)return null;
+  var PA=spBoxPoint3(fA,SP.a), PB=spBoxPoint3(fB,SP.b);
+  var m0=spStartMatrix(fA);
+  var p0=spApply(m0,PA), P2=[p0.x,p0.y];
+  var best=null;
+  function evaluate(path,ms){
+    var mB=ms[fB.id]; if(!mB)return;
+    var q3=spApply(mB,PB), Q2=[q3.x,q3.y];
+    var rects=path.map(function(fid){return spFaceRectNet(faces[fid-1],ms[fid]);});
+    var ivs=[], i;
+    for(i=0;i<rects.length;i++){
+      var iv=spClipSegRect(P2,Q2,rects[i]);
+      if(!iv)return;
+      ivs.push(iv);
+    }
+    if(Math.abs(ivs[0][0])>1e-4)return;
+    if(Math.abs(ivs[ivs.length-1][1]-1)>1e-4)return;
+    for(i=1;i<ivs.length;i++)if(Math.abs(ivs[i][0]-ivs[i-1][1])>1e-3)return;
+    var dist=Math.hypot(Q2[0]-P2[0],Q2[1]-P2[1]);
+    if(best&&dist>=best.dist-1e-9)return;
+    var pts3=[PA.clone()], crossNet=[];
+    for(i=0;i<ivs.length-1;i++){
+      var tt=ivs[i][1];
+      var cp=[P2[0]+(Q2[0]-P2[0])*tt,P2[1]+(Q2[1]-P2[1])*tt];
+      crossNet.push(cp);
+      pts3.push(new THREE.Vector3(cp[0],cp[1],0).applyMatrix4(ms[path[i]].clone().invert()));
+    }
+    pts3.push(PB.clone());
+    var msCopy={}; path.forEach(function(fid){msCopy[fid]=ms[fid];});
+    best={dist:dist,path:path.slice(),ms:msCopy,P2:P2,Q2:Q2,crossNet:crossNet,pts3:pts3,
+      nrml:path.map(function(fid){return faces[fid-1].N;}),pA3:PA,pB3:PB};
+  }
+  function dfs(path,ms){
+    evaluate(path,ms);
+    if(path.length>=6)return;
+    var curF=faces[path[path.length-1]-1], curM=ms[curF.id];
+    [["U",1],["U",-1],["V",1],["V",-1]].forEach(function(e){
+      var nb=spNeighbor(faces,curF,curM,e[0],e[1]);
+      if(!nb||path.indexOf(nb.face.id)>=0)return;
+      var r=spFaceRectNet(nb.face,nb.m), ov=false, i;
+      for(i=0;i<path.length;i++)if(spRectsOverlap(r,spFaceRectNet(faces[path[i]-1],ms[path[i]]))){ov=true;break;}
+      if(ov)return;
+      ms[nb.face.id]=nb.m; path.push(nb.face.id);
+      dfs(path,ms);
+      path.pop(); delete ms[nb.face.id];
+    });
+  }
+  var ms0={}; ms0[fA.id]=m0;
+  dfs([fA.id],ms0);
+  if(!best)return null;
+  /* 展開図全体：最短経路の面の並びを保ったまま、残りの面も重ならないように付ける */
+  var fullMs={}; best.path.forEach(function(fid){fullMs[fid]=best.ms[fid];});
+  var queue=best.path.slice();
+  while(queue.length){
+    var cf=faces[queue.shift()-1], cm=fullMs[cf.id];
+    [["U",1],["U",-1],["V",1],["V",-1]].forEach(function(e){
+      var nb=spNeighbor(faces,cf,cm,e[0],e[1]);
+      if(!nb||fullMs[nb.face.id])return;
+      var r=spFaceRectNet(nb.face,nb.m), ov=false;
+      for(var fid in fullMs)if(spRectsOverlap(r,spFaceRectNet(faces[fid-1],fullMs[fid]))){ov=true;break;}
+      if(ov)return;
+      fullMs[nb.face.id]=nb.m; queue.push(nb.face.id);
+    });
+  }
+  best.fullFaces=[];
+  for(var fid2 in fullMs)best.fullFaces.push({face:faces[fid2-1],m:fullMs[fid2],rect:spFaceRectNet(faces[fid2-1],fullMs[fid2])});
+  return best;
+}
+/* ---- 円柱：側面を広げた長方形の上で比べる ---- */
+function spComputeCyl(){
+  var r=state.dims.r, h=state.dims.h, W=2*Math.PI*r;
+  function pt(c){
+    var th=c.th*Math.PI/180; if(th>=2*Math.PI)th-=2*Math.PI;
+    return {th:th,y:(c.y/100-0.5)*h};
+  }
+  var A=pt(SP.ca), B=pt(SP.cb);
+  var raw=r*(B.th-A.th), alt=raw>0?raw-W:raw+W, dx=raw, i;
+  var cands=[raw,alt], best=null;
+  for(i=0;i<cands.length;i++){
+    var dist=Math.hypot(cands[i],B.y-A.y);
+    if(!best||dist<best.dist)best={dist:dist,dx:cands[i]};
+  }
+  best.A=A; best.B=B; best.r=r; best.h=h; best.W=W;
+  best.pA3=new THREE.Vector3(r*Math.sin(A.th),A.y,r*Math.cos(A.th));
+  best.pB3=new THREE.Vector3(r*Math.sin(B.th),B.y,r*Math.cos(B.th));
+  return best;
+}
+function spCompute(){
+  if(!SP.on||!spSupported()){SP.result=null;return null;}
+  SP.result=spIsBox()?spComputeBox():spComputeCyl();
+  return SP.result;
+}
+/* ---- 3D表示 ---- */
+function spMarker(pos,color,name){
+  var sm=new THREE.Mesh(new THREE.SphereGeometry(0.11,20,14),
+    new THREE.MeshBasicMaterial({color:new THREE.Color(color),depthTest:false,transparent:true}));
+  sm.position.copy(pos); sm.renderOrder=22; spGroup.add(sm);
+  var sp=makeLabelSprite(name,color,true);
+  sp.position.copy(pos).add(T(0.24,0.24,0)); spGroup.add(sp);
+}
+function spTube(a,b){
+  var dir=b.clone().sub(a), len=dir.length(); if(len<1e-9)return;
+  var tube=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,len,10),
+    new THREE.MeshBasicMaterial({color:new THREE.Color(SP_COLPATH),depthTest:false,transparent:true,opacity:0.95}));
+  tube.position.copy(a.clone().add(b).multiplyScalar(0.5));
+  tube.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());
+  tube.renderOrder=21; spGroup.add(tube);
+}
+function refreshSPGroup(){
+  if(spGroup){group.remove(spGroup); spGroup=null;}
+  if(!SP.on||!SP.result)return;
+  spGroup=new THREE.Group(); group.add(spGroup);
+  var res=SP.result, i;
+  if(spIsBox()){
+    var faces=spBoxFaces();
+    for(i=0;i<res.pts3.length-1;i++){
+      var n=res.nrml[i];
+      spTube(res.pts3[i].clone().add(n.clone().multiplyScalar(0.045)),
+             res.pts3[i+1].clone().add(n.clone().multiplyScalar(0.045)));
+      if(i>0){
+        var dot=new THREE.Mesh(new THREE.SphereGeometry(0.055,12,10),
+          new THREE.MeshBasicMaterial({color:0xffffff,depthTest:false,transparent:true}));
+        dot.position.copy(res.pts3[i].clone().add(n.clone().multiplyScalar(0.045)));
+        dot.renderOrder=21; spGroup.add(dot);
+      }
+    }
+    spMarker(res.pA3.clone().add(faces[SP.a.face-1].N.clone().multiplyScalar(0.045)),SP_COLA,"A");
+    spMarker(res.pB3.clone().add(faces[SP.b.face-1].N.clone().multiplyScalar(0.045)),SP_COLB,"B");
+  }else{
+    var pts=[], N=48;
+    for(i=0;i<=N;i++){
+      var s=i/N, th=res.A.th+(res.dx/res.r)*s, y=res.A.y+(res.B.y-res.A.y)*s;
+      var rr=res.r+0.04;
+      pts.push(new THREE.Vector3(rr*Math.sin(th),y,rr*Math.cos(th)));
+    }
+    var tube=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),72,0.035,8),
+      new THREE.MeshBasicMaterial({color:new THREE.Color(SP_COLPATH),depthTest:false,transparent:true,opacity:0.95}));
+    tube.renderOrder=21; spGroup.add(tube);
+    function cylOff(p){var q=p.clone(); var k=(res.r+0.04)/res.r; q.x*=k; q.z*=k; return q;}
+    spMarker(cylOff(res.pA3),SP_COLA,"A");
+    spMarker(cylOff(res.pB3),SP_COLB,"B");
+  }
+}
+/* ---- 展開図（buildNetからのフック） ---- */
+function spNetOverride(){
+  if(!SP.on||!SP.result||!spIsBox()||!SP.result.fullFaces)return null;
+  return SP.result.fullFaces.map(function(rec){
+    return {id:rec.face.id,name:rec.face.name,type:"poly",pts:rec.rect.pts};
+  });
+}
+function spNetOverrideActive(){return !!spNetOverride();}
+function spDrawNetOverlay(svg,fs){
+  if(!SP.on||!SP.result)return;
+  var res=SP.result, g=svgEl("g",{},svg), note=$("netNote");
+  function netPoint(p,color,label){
+    svgEl("circle",{cx:p[0],cy:p[1],r:fs*0.30,fill:color,stroke:"#ffffff","stroke-width":fs*0.07},g);
+    var t=svgEl("text",{x:p[0],y:p[1]-fs*0.5,"text-anchor":"middle","font-size":fs*0.95,"font-weight":700,fill:color},g);
+    t.textContent=label;
+  }
+  if(spIsBox()){
+    svgEl("line",{x1:res.P2[0],y1:res.P2[1],x2:res.Q2[0],y2:res.Q2[1],stroke:SP_COLPATH,"stroke-width":fs*0.16,"stroke-linecap":"round"},g);
+    res.crossNet.forEach(function(cp){
+      svgEl("circle",{cx:cp[0],cy:cp[1],r:fs*0.13,fill:"#ffffff",stroke:SP_COLPATH,"stroke-width":fs*0.06},g);
+    });
+    netPoint(res.P2,SP_COLA,"A");
+    netPoint(res.Q2,SP_COLB,"B");
+    if(note)note.innerHTML='<div class="okbox">最短経路の展開図です。経路が通る面を並べた形になっていて、点Aと点Bが直線で結ばれています。</div>';
+  }else{
+    var W=res.W, h=res.h, uA=res.r*res.A.th;
+    var pNet=[uA-W/2,-res.A.y], qNet=[uA+res.dx-W/2,-res.B.y];
+    var base=Math.floor((uA+res.dx)/W)*W;
+    if(base!==0){
+      svgEl("rect",{x:base-W/2,y:-h/2,width:W,height:h,fill:"var(--panel2)","fill-opacity":0.55,stroke:"var(--sub)","stroke-width":fs*0.05,"stroke-dasharray":(fs*0.3)+" "+(fs*0.2)},g);
+    }
+    svgEl("line",{x1:pNet[0],y1:pNet[1],x2:qNet[0],y2:qNet[1],stroke:SP_COLPATH,"stroke-width":fs*0.16,"stroke-linecap":"round"},g);
+    var lo=Math.min(uA,uA+res.dx), hi=Math.max(uA,uA+res.dx);
+    for(var m=Math.ceil(lo/W)*W;m<hi;m+=W){
+      if(Math.abs(m-uA)<1e-9||Math.abs(res.dx)<1e-12)continue;
+      var tt=(m-uA)/res.dx;
+      svgEl("circle",{cx:pNet[0]+(qNet[0]-pNet[0])*tt,cy:pNet[1]+(qNet[1]-pNet[1])*tt,r:fs*0.13,fill:"#ffffff",stroke:SP_COLPATH,"stroke-width":fs*0.06},g);
+    }
+    netPoint(pNet,SP_COLA,"A");
+    netPoint(qNet,SP_COLB,"B");
+    var vb=svg.getAttribute("viewBox").split(/\s+/).map(parseFloat);
+    var minX=Math.min(vb[0],pNet[0],qNet[0],base!==0?base-W/2:1e9)-fs*0.6;
+    var maxX=Math.max(vb[0]+vb[2],pNet[0],qNet[0],base!==0?base+W/2:-1e9)+fs*0.6;
+    svg.setAttribute("viewBox",minX+" "+vb[1]+" "+(maxX-minX)+" "+vb[3]);
+    if(note)note.innerHTML='<div class="okbox">最短経路の展開図です。側面を長方形に広げると、点Aと点Bが直線で結ばれます。点Bがうすい長方形の中に出ているときは、側面を1周分ずらした位置に同じ点があるという意味です。</div>';
+  }
+}
+/* ---- 説明文 ---- */
+function spLenText(d){return Math.abs(d-Math.round(d))<1e-9?fmt(d):"約 "+fmt(d);}
+function updateSPInfo(){
+  var info=$("spInfo"); if(!info)return;
+  if(!SP.on||!spSupported()){info.innerHTML="";return;}
+  var res=SP.result;
+  if(!res){info.innerHTML='<div class="err">経路が見つかりませんでした。点の位置を変えてください。</div>';return;}
+  var h="";
+  if(spIsBox()){
+    var names=res.path.map(function(fid){return SP_FACE_NAMES[fid-1];});
+    h='<div class="okbox">点A（'+SP_FACE_NAMES[SP.a.face-1]+'）から点B（'+SP_FACE_NAMES[SP.b.face-1]+'）へ、通る面は <strong>'+names.join(" → ")+'</strong> の順です。展開図でこの面を並べると、AとBが直線で結ばれます。';
+    if(SP.answers){
+      var dx=Math.abs(res.Q2[0]-res.P2[0]), dy=Math.abs(res.Q2[1]-res.P2[1]);
+      h+='<br>最短距離：<strong>'+spLenText(res.dist)+'</strong>';
+      h+=(dx>1e-9&&dy>1e-9)?'（展開図の上では、横 '+fmt(dx)+'・縦 '+fmt(dy)+' の直角三角形の斜辺の長さです）':'（展開図の上でまっすぐな線の長さです）';
+    }else h+='<br>最短距離の長さは「答え合わせ表示」をONにすると出ます。';
+    h+='</div>';
+  }else{
+    h='<div class="okbox">点Aから点Bへ、'+(Math.abs(res.dx)<1e-9?'側面をまっすぐ進む道':'側面を回りながら進む道')+'が最短です。側面を長方形に広げた展開図では、AとBが直線で結ばれます。';
+    if(SP.answers){
+      var dxc=Math.abs(res.dx), dyc=Math.abs(res.B.y-res.A.y);
+      h+='<br>最短距離：<strong>'+spLenText(res.dist)+'</strong>';
+      h+=(dxc>1e-9&&dyc>1e-9)?'（展開図の上では、横 '+fmt(dxc)+'・縦 '+fmt(dyc)+' の直角三角形の斜辺の長さです）':'（展開図の上でまっすぐな線の長さです）';
+    }else h+='<br>最短距離の長さは「答え合わせ表示」をONにすると出ます。';
+    h+='</div><p class="note">円柱は側面の上の2点で見ています。上面・下面の円の上を通る道は扱っていません。</p>';
+  }
+  info.innerHTML=h;
+}
+/* ---- 全体の更新 ---- */
+function refreshSP(){
+  var sup=spSupported();
+  var uc=$("spUnsupported"), mn=$("spMain");
+  if(uc)uc.classList.toggle("hidden",sup);
+  if(mn)mn.classList.toggle("hidden",!sup);
+  if(sup){
+    $("spBoxControls").classList.toggle("hidden",!spIsBox());
+    $("spCylControls").classList.toggle("hidden",spIsBox());
+    $("spPresetBox").classList.toggle("hidden",!spIsBox());
+    $("spPresetCyl").classList.toggle("hidden",spIsBox());
+  }
+  spCompute();
+  refreshSPGroup();
+  updateSPInfo();
+  if(typeof buildNet==="function")buildNet();
+}
+/* ---- 点をタップで置く（3D・展開図） ---- */
+function spPlaceFromHits(hits){
+  if(!hits||!hits.length)return false;
+  group.updateMatrixWorld(true);
+  var pt=SP.arm==="A"?(spIsBox()?SP.a:SP.ca):(spIsBox()?SP.b:SP.cb);
+  for(var i=0;i<hits.length;i++){
+    var o=hits[i].object;
+    if(spIsBox()){
+      var oo=o;
+      while(oo&&oo.userData.faceId===undefined)oo=oo.parent;
+      if(!oo||!(oo.userData.faceId>0))continue;
+      var faces=spBoxFaces(), f=faces[oo.userData.faceId-1];
+      if(!f)continue;
+      var local=group.worldToLocal(hits[i].point.clone());
+      var rel=local.clone().sub(f.C);
+      var s=Math.max(-f.W/2,Math.min(f.W/2,rel.dot(f.U)));
+      var t=Math.max(-f.H/2,Math.min(f.H/2,rel.dot(f.V)));
+      pt.face=f.id;
+      pt.u=Math.round((s/f.W+0.5)*100);
+      pt.v=Math.round((t/f.H+0.5)*100);
+      return true;
+    }else{
+      if(!faceMeshes.length||o!==faceMeshes[0].mesh)continue;
+      var local2=group.worldToLocal(hits[i].point.clone());
+      var r=state.dims.r, hh=state.dims.h;
+      var th=Math.atan2(local2.x,local2.z); if(th<0)th+=2*Math.PI;
+      var y=Math.max(-hh/2,Math.min(hh/2,local2.y));
+      pt.th=Math.round(th*180/Math.PI)%360;
+      pt.y=Math.round((y/hh+0.5)*100);
+      return true;
+    }
+  }
+  return false;
+}
+function spPlaceFromNet(nx,ny){
+  var pt=SP.arm==="A"?(spIsBox()?SP.a:SP.ca):(spIsBox()?SP.b:SP.cb);
+  if(spIsBox()){
+    if(!SP.result||!SP.result.fullFaces)return false;
+    for(var i=0;i<SP.result.fullFaces.length;i++){
+      var rec=SP.result.fullFaces[i], r=rec.rect;
+      if(nx<r.minX-1e-9||nx>r.maxX+1e-9||ny<r.minY-1e-9||ny>r.maxY+1e-9)continue;
+      var p3=new THREE.Vector3(nx,ny,0).applyMatrix4(rec.m.clone().invert());
+      var f=rec.face, rel=p3.clone().sub(f.C);
+      var s=Math.max(-f.W/2,Math.min(f.W/2,rel.dot(f.U)));
+      var t=Math.max(-f.H/2,Math.min(f.H/2,rel.dot(f.V)));
+      pt.face=f.id;
+      pt.u=Math.round((s/f.W+0.5)*100);
+      pt.v=Math.round((t/f.H+0.5)*100);
+      return true;
+    }
+    return false;
+  }
+  var r2=state.dims.r, h2=state.dims.h, W=2*Math.PI*r2;
+  if(ny<-h2/2-1e-6||ny>h2/2+1e-6||nx<-W*1.5-1e-6||nx>W*1.5+1e-6)return false;
+  var th=(nx+W/2)/r2;
+  th=((th%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  pt.th=Math.round(th*180/Math.PI)%360;
+  pt.y=Math.max(0,Math.min(100,Math.round((-ny/h2+0.5)*100)));
+  return true;
+}
+$("netSvg").addEventListener("click",function(e){
+  if(!SP.arm||!SP.on||!spSupported())return;
+  var svg=$("netSvg"), ctm=svg.getScreenCTM();
+  if(!ctm)return;
+  var p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
+  var loc=p.matrixTransform(ctm.inverse());
+  if(spPlaceFromNet(loc.x,loc.y)){SP.arm=null; syncSPForm(); refreshSP();}
+});
+/* ---- コントロール構築 ---- */
+function spVertexOptions(){
+  var faces=spBoxFaces(), out=[];
+  [-1,1].forEach(function(sz){[-1,1].forEach(function(sx){[-1,1].forEach(function(sy){
+    var d=state.dims, s=state.shape;
+    var w=s==="cube"?d.a:d.w, h=s==="cube"?d.a:d.h, dep=s==="cube"?d.a:d.d;
+    var v=new THREE.Vector3(sx*w/2,sy*h/2,sz*dep/2), found=null;
+    faces.forEach(function(f){
+      if(found)return;
+      var rel=v.clone().sub(f.C), ss=rel.dot(f.U), tt=rel.dot(f.V);
+      if(Math.abs(Math.abs(ss)-f.W/2)<1e-6&&Math.abs(Math.abs(tt)-f.H/2)<1e-6)
+        found={face:f.id,u:Math.round((ss/f.W+0.5)*100),v:Math.round((tt/f.H+0.5)*100)};
+    });
+    if(found)out.push({label:(sz>0?"前":"後")+"・"+(sx<0?"左":"右")+"・"+(sy<0?"下":"上")+"の頂点",face:found.face,u:found.u,v:found.v});
+  });});});
+  return out;
+}
+function buildSPControls(){
+  var verts=spVertexOptions();
+  function boxBlock(key,label,color){
+    var div=document.createElement("div"); div.className="spptrow";
+    var faceOpts=SP_FACE_NAMES.map(function(nm,i){return '<option value="'+(i+1)+'">'+nm+'</option>';}).join("");
+    var vOpts='<option value="">頂点を選ぶ…</option>'+verts.map(function(v,i){return '<option value="'+i+'">'+v.label+'</option>';}).join("");
+    div.innerHTML=
+      '<div class="row" style="margin:2px 0"><span class="ptdot" style="background:'+color+'"></span><strong>点'+label+'</strong>'+
+      '<button class="btn small" type="button" id="sp'+label+'Arm">タップで置く</button>'+
+      '<select id="sp'+label+'Vertex" aria-label="点'+label+'を頂点に置く">'+vOpts+'</select></div>'+
+      '<div class="row" style="margin:2px 0"><label for="sp'+label+'Face" style="flex-basis:52px">面</label><select id="sp'+label+'Face">'+faceOpts+'</select></div>'+
+      '<div class="row" style="margin:2px 0"><label for="sp'+label+'U" style="flex-basis:52px">横の位置</label><input type="range" id="sp'+label+'U" min="0" max="100" step="1"><span class="val" id="sp'+label+'UVal"></span></div>'+
+      '<div class="row" style="margin:2px 0"><label for="sp'+label+'V" style="flex-basis:52px">縦の位置</label><input type="range" id="sp'+label+'V" min="0" max="100" step="1"><span class="val" id="sp'+label+'VVal"></span></div>'+
+      '<p class="note" style="margin:2px 0 0">横は左端が0%・右端が100%、縦は下端が0%・上端が100%（面を外から見たとき）。</p>';
+    $("spBoxControls").appendChild(div);
+    $("sp"+label+"Face").addEventListener("change",function(){SP[key].face=parseInt(this.value,10); refreshSP();});
+    $("sp"+label+"U").addEventListener("input",function(){SP[key].u=parseInt(this.value,10); $("sp"+label+"UVal").textContent=this.value+"%"; refreshSP();});
+    $("sp"+label+"V").addEventListener("input",function(){SP[key].v=parseInt(this.value,10); $("sp"+label+"VVal").textContent=this.value+"%"; refreshSP();});
+    $("sp"+label+"Vertex").addEventListener("change",function(){
+      if(this.value==="")return;
+      var v=verts[parseInt(this.value,10)];
+      SP[key].face=v.face; SP[key].u=v.u; SP[key].v=v.v;
+      this.value=""; syncSPForm(); refreshSP();
+    });
+    $("sp"+label+"Arm").addEventListener("click",function(){
+      SP.arm=(SP.arm===label)?null:label; syncSPForm();
+    });
+  }
+  function cylBlock(key,label,color){
+    var div=document.createElement("div"); div.className="spptrow";
+    div.innerHTML=
+      '<div class="row" style="margin:2px 0"><span class="ptdot" style="background:'+color+'"></span><strong>点'+label+'</strong>'+
+      '<button class="btn small" type="button" id="spC'+label+'Arm">タップで置く</button></div>'+
+      '<div class="row" style="margin:2px 0"><label for="spC'+label+'Th" style="flex-basis:52px">回る位置</label><input type="range" id="spC'+label+'Th" min="0" max="360" step="1"><span class="val" id="spC'+label+'ThVal"></span></div>'+
+      '<div class="row" style="margin:2px 0"><label for="spC'+label+'Y" style="flex-basis:52px">高さ</label><input type="range" id="spC'+label+'Y" min="0" max="100" step="1"><span class="val" id="spC'+label+'YVal"></span></div>'+
+      '<p class="note" style="margin:2px 0 0">回る位置は、正面の向きを0°として一周が360°。高さは下端が0%・上端が100%です。</p>';
+    $("spCylControls").appendChild(div);
+    $("spC"+label+"Th").addEventListener("input",function(){SP[key].th=parseInt(this.value,10); $("spC"+label+"ThVal").textContent=this.value+"°"; refreshSP();});
+    $("spC"+label+"Y").addEventListener("input",function(){SP[key].y=parseInt(this.value,10); $("spC"+label+"YVal").textContent=this.value+"%"; refreshSP();});
+    $("spC"+label+"Arm").addEventListener("click",function(){
+      SP.arm=(SP.arm===label)?null:label; syncSPForm();
+    });
+  }
+  boxBlock("a","A",SP_COLA);
+  boxBlock("b","B",SP_COLB);
+  cylBlock("ca","A",SP_COLA);
+  cylBlock("cb","B",SP_COLB);
+}
+function syncSPForm(){
+  function setBox(label,pt){
+    var f=$("sp"+label+"Face"), u=$("sp"+label+"U"), v=$("sp"+label+"V");
+    if(f)f.value=String(pt.face);
+    if(u){u.value=pt.u; $("sp"+label+"UVal").textContent=pt.u+"%";}
+    if(v){v.value=pt.v; $("sp"+label+"VVal").textContent=pt.v+"%";}
+    var arm=$("sp"+label+"Arm"); if(arm)arm.classList.toggle("on",SP.arm===label);
+  }
+  function setCyl(label,pt){
+    var th=$("spC"+label+"Th"), y=$("spC"+label+"Y");
+    if(th){th.value=pt.th; $("spC"+label+"ThVal").textContent=pt.th+"°";}
+    if(y){y.value=pt.y; $("spC"+label+"YVal").textContent=pt.y+"%";}
+    var arm=$("spC"+label+"Arm"); if(arm)arm.classList.toggle("on",SP.arm===label);
+  }
+  setBox("A",SP.a); setBox("B",SP.b);
+  setCyl("A",SP.ca); setCyl("B",SP.cb);
+  var note=$("spArmNote");
+  if(note)note.textContent=SP.arm
+    ? "点"+SP.arm+"を置く場所を、3Dビューか展開図の上でタップしてください（「タップで置く」をもう一度押すとやめます）。"
+    : "点の場所は、面と位置の指定のほか、「タップで置く」を押してから3Dビューや展開図をタップしても決められます。";
+  var ab=$("spAnswersBtn");
+  if(ab){ab.textContent="答え合わせ表示："+(SP.answers?"ON":"OFF"); ab.classList.toggle("on",SP.answers);}
+}
+$("spOn").addEventListener("change",function(){
+  SP.on=this.checked;
+  $("spControls").classList.toggle("hidden",!SP.on);
+  refreshSP();
+});
+$("spAnswersBtn").addEventListener("click",function(){
+  SP.answers=!SP.answers; syncSPForm(); updateSPInfo();
+});
+$("spPresetBox").addEventListener("click",function(){
+  SP.a={face:3,u:0,v:0}; SP.b={face:6,u:0,v:100};
+  syncSPForm(); refreshSP();
+});
+$("spPresetCyl").addEventListener("click",function(){
+  SP.ca={th:0,y:100}; SP.cb={th:180,y:0};
+  syncSPForm(); refreshSP();
+});
+$("spViewBoth").addEventListener("click",function(){setViewMode("both");});
+buildSPControls();
+syncSPForm();
+refreshSP();
 </script>
 <script>
 "use strict";
@@ -5695,10 +6340,10 @@ var GTYPES={
   lin:{name:"1次関数 y＝ax＋b（中2）",coefs:[["a","a",-5,5,0.25],["b","b",-10,10,0.5]]},
   quad2:{name:"関数 y＝ax²（中3）",coefs:[["a","a",-3,3,0.25]]}
 };
-var gState={funcs:[],next:1,cx:0,cy:0,zoom:1,showInter:true,showVertex:true,hover:null};
+var gState={funcs:[],next:1,cx:0,cy:0,zoom:1,showInter:true,showVertex:true,hover:null,selId:null};
 function gAddFunc(type,a,b){
   var f={id:gState.next++,type:type,a:a,b:(b||0),color:GCOLORS[(gState.next-2)%GCOLORS.length],visible:true};
-  gState.funcs.push(f); return f;
+  gState.funcs.push(f); if(gState.selId==null)gState.selId=f.id; return f;
 }
 gAddFunc("lin",2,1);
 gAddFunc("quad2",1,0);
@@ -5873,15 +6518,60 @@ function updateGInfo(){
     else html+="<p style='margin:4px 0'>"+pair+(r.pts.length===1?"交点は1つだけ ":"交点 ")+r.pts.map(function(p){return "("+fmt(p.x)+", "+fmt(p.y)+")";}).join(" と ")+"</p>";
   }
   $("gInfo").innerHTML=html;
+  if(typeof updateGTable==="function")updateGTable();
+}
+/* ---- 値の表（B4）：選択中の関数について x＝−3〜3（整数）の対応表 ---- */
+function gSelectedFunc(){
+  if(!gState.funcs.length)return null;
+  for(var i=0;i<gState.funcs.length;i++)if(gState.funcs[i].id===gState.selId)return gState.funcs[i];
+  return gState.funcs[0];
+}
+function updateGTable(){
+  var sel=$("gTableSel"), wrap=$("gTableWrap"), note=$("gTableNote"), ttl=$("gTableFormula");
+  if(!sel||!wrap)return;
+  var cur=gSelectedFunc();
+  if(cur)gState.selId=cur.id;
+  var needRebuild=sel.options.length!==gState.funcs.length;
+  if(!needRebuild){for(var oi=0;oi<gState.funcs.length;oi++){if(sel.options[oi].value!==String(gState.funcs[oi].id)||sel.options[oi].textContent!==gFormula(gState.funcs[oi])){needRebuild=true;break;}}}
+  if(needRebuild){
+    var opts="";
+    gState.funcs.forEach(function(f){opts+='<option value="'+f.id+'"'+(cur&&f.id===cur.id?" selected":"")+'>'+gFormula(f)+'</option>';});
+    sel.innerHTML=opts;
+  }
+  if(cur)sel.value=String(cur.id);
+  if(ttl){ttl.textContent=cur?gFormula(cur):""; ttl.style.color=cur?cur.color:"";}
+  if(!cur){
+    wrap.innerHTML="<p class='note'>関数がありません。「＋ 関数を追加」で関数を作ると、ここに値の表が出ます。</p>";
+    if(note)note.textContent="";
+    return;
+  }
+  var xs=[-3,-2,-1,0,1,2,3];
+  var html="<table class='gtable' aria-label='値の表'><tbody>";
+  html+="<tr><th scope='row' class='rh'>x</th>"+xs.map(function(x){return "<td>"+x+"</td>";}).join("")+"</tr>";
+  html+="<tr><th scope='row' class='rh'>y</th>"+xs.map(function(x){
+    var y=(cur.type==="hyp"&&cur.a===0)?0:gEval(cur,x);
+    if(!isFinite(y))return "<td class='undef'>なし</td>";
+    return "<td>"+fracHTML(fmt(y))+"</td>";
+  }).join("")+"</tr>";
+  html+="</tbody></table>";
+  wrap.innerHTML=html;
+  if(note){
+    if(cur.type==="hyp"&&cur.a!==0)note.textContent="x ＝ 0 のときは、0でわる計算になるので値はなし（定義されません）。";
+    else if(cur.type==="hyp"&&cur.a===0)note.textContent="a ＝ 0 のときは y ＝ 0 になるので、x ＝ 0 のときも y ＝ 0 です。";
+    else note.textContent="";
+  }
 }
 /* ---- 関数リストUI ---- */
 function buildGList(){
   var box=$("gList"); box.innerHTML="";
+  var selF=gSelectedFunc();
   gState.funcs.forEach(function(f){
-    var div=document.createElement("div"); div.className="gfunc"+(f.visible?"":" off");
+    var isSel=!!selF&&f.id===selF.id;
+    var div=document.createElement("div"); div.className="gfunc"+(f.visible?"":" off")+(isSel?" sel":"");
     var head=document.createElement("div"); head.className="ghead";
     head.innerHTML='<input type="color" value="'+f.color+'" aria-label="色">'+
       '<span class="formula" style="color:'+f.color+'">'+gFormula(f)+'</span>'+
+      '<button class="btn small selbtn'+(isSel?" on":"")+'" type="button" data-act="sel">'+(isSel?"値の表を表示中":"値の表を見る")+'</button>'+
       '<button class="btn small" type="button" data-act="vis">'+(f.visible?"隠す":"表示")+'</button>'+
       '<button class="btn small" type="button" data-act="del">削除</button>';
     div.appendChild(head);
@@ -5907,21 +6597,28 @@ function buildGList(){
       num.addEventListener("change",function(){apply(num.value);});
       div.appendChild(row);
     });
+    head.querySelector('[data-act="sel"]').onclick=function(){gState.selId=f.id;buildGList();drawGraph();};
     head.querySelector('[data-act="vis"]').onclick=function(){f.visible=!f.visible;buildGList();drawGraph();};
     head.querySelector('[data-act="del"]').onclick=function(){
-      gState.funcs=gState.funcs.filter(function(x){return x.id!==f.id;}); buildGList(); drawGraph();};
+      var wasSel=(gState.selId===f.id);
+      gState.funcs=gState.funcs.filter(function(x){return x.id!==f.id;});
+      if(wasSel)gState.selId=gState.funcs.length?gState.funcs[0].id:null;
+      buildGList(); drawGraph();};
     head.querySelector('input[type="color"]').addEventListener("input",function(){f.color=this.value;buildGList();drawGraph();});
     box.appendChild(div);
   });
   $("gAdd").disabled=gState.funcs.length>=6;
+  updateGTable();
 }
 $("gAdd").onclick=function(){
   if(gState.funcs.length>=6)return;
   var order=["prop","hyp","lin","quad2"];
   var t=order[gState.funcs.length%4];
-  gAddFunc(t, t==="hyp"?6:1, 0);
+  var nf=gAddFunc(t, t==="hyp"?6:1, 0);
+  gState.selId=nf.id;
   buildGList(); drawGraph();
 };
+$("gTableSel").addEventListener("change",function(){gState.selId=parseInt(this.value,10);buildGList();drawGraph();});
 $("gResetView").onclick=function(){gState.cx=0;gState.cy=0;gState.zoom=1;gState.hover=null;$("gCursor").textContent="座標：―";drawGraph();};
 $("gToggleInter").onclick=function(){gState.showInter=!gState.showInter;this.textContent="交点："+(gState.showInter?"表示":"非表示");this.classList.toggle("on",gState.showInter);drawGraph();};
 $("gToggleVertex").onclick=function(){gState.showVertex=!gState.showVertex;this.textContent="頂点・軸："+(gState.showVertex?"表示":"非表示");this.classList.toggle("on",gState.showVertex);drawGraph();};
@@ -7232,7 +7929,7 @@ ovlSetMode("godo");
    点は「定義（def）」で決まる：自由点・中点・直線上の点・円上の点・
    関数の上の点・交点。定義した点は元の図形を動かすと連動する。
 ============================================================ */
-var CUST={points:[],shapes:[],sel:null,_pos:{},answers:false,showLabels:true,selShape:null,time:0,graphShape:null,_graphCache:null};
+var CUST={points:[],shapes:[],sel:null,_pos:{},answers:false,showLabels:true,selShape:null,time:0,graphShape:null,_graphCache:null,traceOn:{},tracePts:{}};
 /* 写真の下絵（トレース）：端末内だけで使う。座標はキャンバス中心を原点とした数学座標 */
 var TRACE={dataUrl:null,name:"",show:true,opacity:0.45,w:14,x:0,y:0,aspect:1};
 var CUST_COLORS=["#2f7fd0","#d6455a","#3d9e50","#c07a12","#7a6fd0","#0e7a6d"];
@@ -7299,6 +7996,29 @@ function custNextName(){
   return "P"+(CUST.points.length+1);
 }
 function custPoint(name){for(var i=0;i<CUST.points.length;i++)if(CUST.points[i].name===name)return CUST.points[i];return null;}
+/* ---- 点の通り道（軌跡）：図の定義とは別の、表示だけの記録。
+   traceOn[name] が ON の点について、drawCust が解決済みの位置 pos を受けて
+   動いた位置を tracePts[name] へ点列として積む。中点・内分点・交点などの
+   連動点も、custResolve の結果を使うので定義の再計算にそのまま追従する。
+   レシピや元に戻す履歴（点・図形のスナップショット）には含めない。 ---- */
+function custTraceOn(name){return !!(CUST.traceOn&&CUST.traceOn[name]);}
+function custTraceList(name){return (CUST.tracePts&&CUST.tracePts[name])||[];}
+function custRecordTraces(pos){
+  if(!CUST.traceOn||!CUST.tracePts)return;
+  CUST.points.forEach(function(p){
+    if(!CUST.traceOn[p.name])return;
+    var q=pos[p.name]; if(!q)return;
+    var pts=CUST.tracePts[p.name];
+    if(!pts){pts=[]; CUST.tracePts[p.name]=pts;}
+    var last=pts[pts.length-1];
+    if(!last||Math.hypot(q.x-last.x,q.y-last.y)>0.02){
+      pts.push({x:q.x,y:q.y});
+      if(pts.length>3000)pts.splice(0,pts.length-3000);
+    }
+  });
+}
+function custClearTrace(name){if(CUST.tracePts)CUST.tracePts[name]=[];}
+function custClearAllTraces(){CUST.tracePts={};}
 function custEsc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function custFuncY(sh,x){
   if(sh.fkind==="quad")return sh.a*x*x;
@@ -7310,6 +8030,31 @@ function custFuncText(sh){
   if(sh.fkind==="quad")return "y＝"+coefStr(sh.a)+"x²";
   if(sh.fkind==="hyp")return "y＝"+coefStr(sh.a)+"/x";
   return "y＝"+coefStr(sh.a)+"x"+(sh.b?((sh.b>0?"＋":"－")+fmtFrac(Math.abs(sh.b))):"");
+}
+/* 直線の式（教科書表記）：線の geometry（通る点 px,py と方向 dx,dy）から
+   y＝ax＋b の形で作る。縦の直線は x＝定数、横の直線は y＝定数。 */
+function custLineEqText(gm){
+  if(!gm||gm.kind!=="line")return "";
+  if(Math.abs(gm.dx)<1e-12)return "x＝"+fmtFrac(gm.px);
+  var a=gm.dy/gm.dx;
+  if(Math.abs(a)<1e-12)return "y＝"+fmtFrac(gm.py);
+  var b=gm.py-a*gm.px;
+  var at;
+  if(Math.abs(a-1)<1e-12)at="x";
+  else if(Math.abs(a+1)<1e-12)at="－x";
+  else at=coefStr(a)+"x";
+  var s="y＝"+at;
+  if(Math.abs(b)>1e-9)s+=(b>0?"＋":"－")+fmtFrac(Math.abs(b));
+  return s;
+}
+/* 円の式（教科書表記）：中心 (h，k)・半径 r から (x－h)²＋(y－k)²＝r² の形で作る */
+function custCircleEqText(gm){
+  if(!gm||gm.kind!=="circle")return "";
+  function part(v,axis){
+    if(Math.abs(v)<1e-9)return axis+"²";
+    return "("+axis+(v>0?"－":"＋")+fmtFrac(Math.abs(v))+")²";
+  }
+  return part(gm.cx,"x")+"＋"+part(gm.cy,"y")+"＝"+fmtFrac(gm.r*gm.r);
 }
 function custShapeGeom(sh,pos){
   var a,b,t;
@@ -7870,6 +8615,14 @@ function drawCust(){
   }
   var R=custResolve(), pos=R.pos, geoms=R.geoms;
   CUST._pos=pos;
+  /* 通り道の記録：ドラッグ・時刻 t のスライダー・再生のどれで位置が変わっても、
+     drawCust は必ずここを通るので、解決済みの位置をそのまま記録に使う */
+  custRecordTraces(pos);
+  var tcEl=document.getElementById("custTraceCount");
+  if(tcEl&&CUST.sel){
+    var tcN=custTraceList(CUST.sel).length;
+    tcEl.textContent=tcN?("いま "+tcN+" 個の点で通り道を記録しています"):"まだ通り道はありません";
+  }
   var g=svgEl("g",{},svg);
   function SX(x){return x;} function SY(y){return -y;}
   /* 関数 */
@@ -7969,6 +8722,17 @@ function drawCust(){
     if(!q||!bs)return;
     svgEl("line",{x1:SX(bs.x),y1:SY(bs.y),x2:SX(q.x),y2:SY(q.y),stroke:"var(--sub)","stroke-width":0.05,"stroke-dasharray":"0.28 0.2"},g);
   });
+  /* 通り道（軌跡）：ONにした点が通った位置を、点の下に薄い線で残す */
+  CUST.points.forEach(function(p,pi){
+    var tpts=custTraceList(p.name); if(!tpts.length)return;
+    var tcol=CUST_COLORS[pi%CUST_COLORS.length];
+    if(tpts.length===1){
+      svgEl("circle",{cx:SX(tpts[0].x),cy:SY(tpts[0].y),r:0.09,fill:tcol,opacity:0.65},g);
+    }else{
+      var tstr=tpts.map(function(q){return SX(q.x)+","+SY(q.y);}).join(" ");
+      svgEl("polyline",{points:tstr,fill:"none",stroke:tcol,"stroke-width":0.05,"stroke-linecap":"round","stroke-linejoin":"round",opacity:0.6},g);
+    }
+  });
   /* 点 */
   CUST.points.forEach(function(p){
     var q=pos[p.name]; if(!q)return;
@@ -8029,9 +8793,9 @@ function drawCust(){
       if(sp1&&sp2&&Math.abs(sp1.x-Math.round(sp1.x))<1e-9&&Math.abs(sp1.y-Math.round(sp1.y))<1e-9&&Math.abs(sp2.x-Math.round(sp2.x))<1e-9&&Math.abs(sp2.y-Math.round(sp2.y))<1e-9){
         segLat="／線の上の格子点 "+(gcd2(Math.round(Math.abs(sp2.x-sp1.x)),Math.round(Math.abs(sp2.y-sp1.y)))+1)+" 個（両端ふくむ）";
       }
-      html+="<dt>"+lab+"</dt><dd>長さ "+fmtFrac(Math.hypot(gm.dx,gm.dy))+segLat+"</dd>";
+      html+="<dt>"+lab+"</dt><dd>長さ "+fmtFrac(Math.hypot(gm.dx,gm.dy))+"／式 "+fracHTML(custEsc(custLineEqText(gm)))+segLat+"</dd>";
     }else if(sh.type==="circle"&&gm){
-      html+="<dt>"+lab+"</dt><dd>中心 ("+fmtFrac(gm.cx)+", "+fmtFrac(gm.cy)+")／半径 "+fmtFrac(gm.r)+"／円周 "+fmtFrac(2*Math.PI*gm.r)+"／面積 "+fmtFrac(Math.PI*gm.r*gm.r)+"</dd>";
+      html+="<dt>"+lab+"</dt><dd>中心 ("+fmtFrac(gm.cx)+", "+fmtFrac(gm.cy)+")／半径 "+fmtFrac(gm.r)+"／円周 "+fmtFrac(2*Math.PI*gm.r)+"／面積 "+fmtFrac(Math.PI*gm.r*gm.r)+"<br>式："+fracHTML(custEsc(custCircleEqText(gm)))+"</dd>";
     }else if(sh.type==="semi"&&gm){
       html+="<dt>"+lab+"</dt><dd>中心 ("+fmtFrac(gm.cx)+", "+fmtFrac(gm.cy)+")／半径 "+fmtFrac(gm.r)+"／弧の長さ "+fmtFrac(Math.PI*gm.r)+"／半円の面積 "+fmtFrac(Math.PI*gm.r*gm.r/2)+"</dd>";
     }else if(sh.type==="poly"&&gm){
@@ -8060,7 +8824,7 @@ function drawCust(){
       var latFTxt="格子点（xが整数で、yも整数になる点）："+latF.length+" 個"+(latF.length?("（x＝"+latF.join("，")+"）"):"");
       html+="<dt>"+lab+"</dt><dd>"+(masked?"式と係数は非表示中（右の図形リストで表示に戻せます）":("a＝"+fmtFrac(sh.a)+(sh.fkind==="lin"?("、b＝"+fmtFrac(sh.b||0)):"")+"（右の図形リストで変更）"))+"<br><span style='font-weight:400'>"+latFTxt+"</span></dd>";
     }else if(gm&&(sh.type==="line"||sh.type==="pline"||sh.type==="perp"||sh.type==="vline"||sh.type==="hline"||sh.type==="slope"||sh.type==="bis"||sh.type==="exbis")){
-      html+="<dt>"+lab+"</dt><dd>直線</dd>";
+      html+="<dt>"+lab+"</dt><dd>式："+fracHTML(custEsc(custLineEqText(gm)))+"</dd>";
     }else if(!gm){
       html+="<dt>"+lab+"</dt><dd>（作れません：頂点や交点が存在しないため）</dd>";
     }
@@ -8211,6 +8975,7 @@ $("custTimePlay").onclick=function(){
   drawCust();
 };
 $("custTimeReset").onclick=function(){custSetPlaying(false); CUST.time=0; drawCust();};
+$("custTimeClearTraces").onclick=function(){custClearAllTraces(); drawCust(); syncCustForms();};
 $("custGraphShape").addEventListener("change",function(){CUST.graphShape=parseInt(this.value,10); CUST._graphCache=null; drawCust();});
 function thmLabelSafe(parent,x,y,text,color){
   var t=svgEl("text",{x:x,y:y,"text-anchor":"middle","font-size":0.62,"font-weight":700,fill:color,"paint-order":"stroke",stroke:"var(--panel)","stroke-width":0.12},parent);
@@ -8294,7 +9059,8 @@ function syncCustForms(){
   while(wrap.firstChild)wrap.removeChild(wrap.firstChild);
   CUST.points.forEach(function(p){
     var b=document.createElement("button");
-    b.type="button"; b.textContent="点"+p.name;
+    b.type="button"; b.textContent="点"+p.name+(custTraceOn(p.name)?"（通り道）":"");
+    if(custTraceOn(p.name))b.title="通り道を残しています";
     b.classList.toggle("on",CUST.sel===p.name);
     b.onclick=function(){CUST.sel=p.name; drawCust(); syncCustForms();};
     wrap.appendChild(b);
@@ -8380,11 +9146,26 @@ function syncCustForms(){
     }else{
       h+="<p class='note'>この点は条件で決まる連動点です。元の点や図形を動かすとついてきます。</p>";
     }
+    (function(){
+      var trOn=custTraceOn(p.name), trN=custTraceList(p.name).length;
+      h+="<div class='row'><label>通り道（軌跡）</label><button type='button' class='btn small"+(trOn?" on":"")+"' id='custEdTraceToggle' aria-pressed='"+(trOn?"true":"false")+"'>通り道を残す："+(trOn?"ON":"OFF")+"</button></div>"+
+         "<div class='row'><button type='button' class='btn small' id='custEdTraceClear'>この点の通り道を消す</button><span class='note' id='custTraceCount'>"+(trN?("いま "+trN+" 個の点で通り道を記録しています"):"まだ通り道はありません")+"</span></div>"+
+         "<p class='note'>ONにした点は、元の点をドラッグしたり、時刻 t で再生したりして位置が変わるたびに、通った道が薄い線でキャンバスに残ります。中点・内分点など、他の点に連動して決まる点にも使えます。OFFにすると記録は止まりますが、残した道は「消す」を押すまで残ります。</p>";
+    })();
     h+="<div class='row'><label for='custEdLabel'>ラベル文字</label><input type='text' id='custEdLabel' value='"+custEsc(p.label||p.name).replace(/'/g,"&#39;")+"' style='flex:1;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel)'></div>"+
        "<div class='row'><label for='custEdMode'>ラベルの表示</label><select id='custEdMode'><option value='name'>名前だけ</option><option value='namecoord'>名前＋座標 A(3, 0)</option><option value='coord'>座標だけ</option><option value='none'>非表示</option></select></div>"+
        "<div class='row'><label class='chk'><input type='checkbox' id='custEdShow'"+(p.showLabel===false?"":" checked")+"> この点のラベルを表示</label></div>"+
        "<p class='note'>ラベルの位置は、図の上でラベルを直接ドラッグして動かせます（点とは別に動きます）。ラベル文字を変えても、他の点や図形からの参照は壊れません。初期設定は「名前だけ」で、座標は出しません。</p>";
     ed.innerHTML=h;
+    var trToggle=$("custEdTraceToggle");
+    if(trToggle)trToggle.onclick=function(){
+      if(!CUST.traceOn)CUST.traceOn={};
+      if(!CUST.tracePts)CUST.tracePts={};
+      CUST.traceOn[p.name]=!CUST.traceOn[p.name];
+      drawCust(); syncCustForms();
+    };
+    var trClear=$("custEdTraceClear");
+    if(trClear)trClear.onclick=function(){custClearTrace(p.name); drawCust(); syncCustForms();};
     $("custEdMode").value=p.labelMode||"name";
     $("custEdLabel").onchange=function(){p.label=this.value.trim()||p.name; drawCust();};
     $("custEdMode").onchange=function(){p.labelMode=this.value; drawCust();};
@@ -8445,6 +9226,7 @@ function syncCustForms(){
   /* 図形リスト */
   var sl=$("custShapeList");
   while(sl.firstChild)sl.removeChild(sl.firstChild);
+  var eqGeoms=CUST.answers?custResolve().geoms:null;
   CUST.shapes.forEach(function(sh,i){
     var div=document.createElement("div");
     div.className="custitem"+(CUST.selShape===i?" on":"");
@@ -8484,6 +9266,19 @@ function syncCustForms(){
       drawCust(); syncCustForms();
     };
     head.appendChild(del); div.appendChild(head);
+    /* 答え合わせ表示ONのときだけ、直線・線分・円の式を併記する（OFFでは出さない） */
+    if(CUST.answers&&eqGeoms&&sh.type!=="func"){
+      var gmEq=eqGeoms[i], eqTxt="";
+      if(gmEq&&gmEq.kind==="line")eqTxt=custLineEqText(gmEq);
+      else if(sh.type==="circle"&&gmEq&&gmEq.kind==="circle")eqTxt=custCircleEqText(gmEq);
+      if(eqTxt){
+        var eqDiv=document.createElement("div");
+        eqDiv.className="note";
+        eqDiv.style.cssText="margin:2px 0 4px;font-weight:600;color:var(--ink)";
+        eqDiv.innerHTML="式："+fracHTML(custEsc(eqTxt));
+        div.appendChild(eqDiv);
+      }
+    }
     (function(){
       var lrow=document.createElement("div"); lrow.className="row";
       var ll=document.createElement("label"); ll.textContent="名前ラベル"; lrow.appendChild(ll);
@@ -8808,10 +9603,13 @@ $("custAddShape").onclick=function(){
   msg.textContent="追加しました";
   drawCust(); syncCustForms();
 };
+$("custClearAllTraces").onclick=function(){custClearAllTraces(); drawCust(); syncCustForms();};
 $("custDelPoint").onclick=function(){
   var p=custPoint(CUST.sel); if(!p)return;
   custPushHistory();
   var nm=p.name;
+  if(CUST.traceOn)delete CUST.traceOn[nm];
+  if(CUST.tracePts)delete CUST.tracePts[nm];
   CUST.points=CUST.points.filter(function(x){return x.name!==nm;});
   CUST.shapes=CUST.shapes.filter(function(sh){
     if(sh.a===nm||sh.b===nm||sh.through===nm||sh.from===nm||sh.c===nm||sh.rA===nm||sh.rB===nm||sh.diamA===nm||sh.diamB===nm||sh.v===nm||sh.side===nm)return false;
@@ -8836,6 +9634,7 @@ function custSet(points,shapes,sel){
   custHideResetConfirm();
   if(CUST.points.length||CUST.shapes.length)custPushHistory();
   CUST.time=0; CUST.graphShape=null; CUST._graphCache=null;
+  CUST.traceOn={}; CUST.tracePts={};
   CUST.points=points; CUST.shapes=shapes; CUST.sel=sel;
   drawCust(); syncCustForms();
 }
@@ -9703,6 +10502,7 @@ function applyRecipe(obj,res){
   });
   CUST.points=cleanPoints; CUST.shapes=cleanShapes;
   CUST.sel=(typeof obj.sel==="string"&&res.names[obj.sel])?obj.sel:(cleanPoints.length?cleanPoints[0].name:null);
+  CUST.traceOn={}; CUST.tracePts={};
   if(custPlayTimer)custSetPlaying(false);
   CUST.time=isNum(obj.time)?Math.max(0,obj.time):0; CUST.graphShape=null; CUST._graphCache=null;
   if(typeof obj.title==="string"&&obj.title)$("recipeTitle").value=obj.title;
@@ -10206,7 +11006,8 @@ drawDataAll(); drawProb(); drawSamp();
 "use strict";
 /* ============================================================
    数と式モード（中1 数直線／中3 平方根／数の増え方／面積図）
-   計算そのものではなく、数と式を「図で見せる」部分だけを扱う。
+   基本は数と式を「図で見せる」部分を扱う。計算練習は扱わないが、
+   答えだけを返す「答え合わせ（検算）」コーナーを小さく併設する。
    近似値は Math.sqrt の値を使い、はさみうちの数値（1.4²=1.96 等）は
    その場で計算して表示する（検算済み）。
 ============================================================ */
@@ -10888,6 +11689,189 @@ $("quadToGraph").onclick=function(){if(typeof unitGraph==="function")unitGraph([
 $("simulPrev").onclick=function(){if(SMQ.step>0){SMQ.step--;drawSimul();}};
 $("simulNext").onclick=function(){if(SMQ.step<3){SMQ.step++;drawSimul();}};
 $("simulToGraph").onclick=function(){var P=SMP[SMQ.preset];if(typeof unitGraph==="function")unitGraph([["lin",P.g1[0],P.g1[1]],["lin",P.g2[0],P.g2[1]]]);};
+
+/* ---------- 答え合わせ（検算）：答えだけを返す ----------
+   有理数は {n,d}（既約、d>0）で厳密に計算し、分数のまま出す。
+   2次方程式で解の公式が必要なときは、√の中を平方因数でくくり出して
+   教科書の形（(P ± S√m)／Q、共通因数は約分）に整える。
+   手順・途中式は一切出さない。 */
+function ckGcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function ckFrac(n,d){if(d<0){n=-n;d=-d;}var g=ckGcd(n,d);return {n:n/g,d:d/g};}
+function ckParse(str){
+  var t=String(str===undefined||str===null?"":str).trim().replace(/／/g,"/").replace(/－/g,"-").replace(/＋/g,"+").replace(/\s+/g,"");
+  if(!t)return null;
+  var m=t.match(/^([+-]?\d+)\/([+-]?\d+)$/);
+  if(m){var dn=parseInt(m[2],10);return dn===0?null:ckFrac(parseInt(m[1],10),dn);}
+  if(/^[+-]?\d+$/.test(t))return ckFrac(parseInt(t,10),1);
+  if(/^[+-]?(\d+\.\d+|\.\d+)$/.test(t)){
+    var neg=t.charAt(0)==="-",body=t.replace(/^[+-]/,""),parts=body.split("."),den=1;
+    for(var i=0;i<parts[1].length;i++)den*=10;
+    var num=(parseInt(parts[0]||"0",10))*den+parseInt(parts[1],10);
+    return ckFrac(neg?-num:num,den);
+  }
+  return null;
+}
+function ckInt(str){
+  var t=String(str===undefined||str===null?"":str).trim().replace(/－/g,"-").replace(/＋/g,"+");
+  return /^[+-]?\d+$/.test(t)?parseInt(t,10):null;
+}
+function ckAdd(x,y){return ckFrac(x.n*y.d+y.n*x.d,x.d*y.d);}
+function ckSub(x,y){return ckFrac(x.n*y.d-y.n*x.d,x.d*y.d);}
+function ckMul(x,y){return ckFrac(x.n*y.n,x.d*y.d);}
+function ckDiv(x,y){return y.n===0?null:ckFrac(x.n*y.d,x.d*y.n);}
+function ckEq(x,y){return x.n===y.n&&x.d===y.d;}
+function ckFmt(f){return f.d===1?String(f.n):(f.n+"/"+f.d);}
+function ckHTML(s){return fracHTML(String(s)).replace(/-/g,"−");}
+function ckSetAns(id,txt){var el=$(id);if(el)el.innerHTML="答え： "+ckHTML(txt);}
+function ckBad(id){var el=$(id);if(el)el.textContent="数字を入れてください（分数は 1/2 の形でも書けます）。";}
+/* 2次式 A x²＋B x＋C（有理数係数）の表示文字列 */
+function ckPoly2(A,B,C){
+  var terms=[];
+  function push(coef,sym,first){
+    if(coef.n===0)return;
+    var mag=(Math.abs(coef.n)===1&&coef.d===1&&sym)?"":ckFmt({n:Math.abs(coef.n),d:coef.d});
+    var body=mag+sym;
+    if(first)terms.push((coef.n<0?"-":"")+body);
+    else terms.push((coef.n<0?"−":"＋")+body);
+  }
+  push(A,"x²",true); push(B,"x",terms.length===0);
+  if(C.n!==0){var cm=ckFmt({n:Math.abs(C.n),d:C.d});terms.push(terms.length===0?((C.n<0?"-":"")+cm):((C.n<0?"−":"＋")+cm));}
+  return terms.length?terms.join(""):"0";
+}
+function ckSqrtDecomp(n){ /* n = s²・m（m は平方因子を持たない） */
+  var s=1,m=n;
+  for(var p=2;p*p<=m;p++){var pp=p*p;while(m%pp===0){m/=pp;s*=p;}}
+  return {s:s,m:m};
+}
+function ckLin(){
+  var a=ckParse($("chkLA").value),b=ckParse($("chkLB").value),c=ckParse($("chkLC").value);
+  if(!a||!b||!c){ckBad("chkLinAns");return;}
+  if(a.n===0){
+    ckSetAns("chkLinAns",ckEq(b,c)?"x がどんな数でも成り立ちます":"成り立つ x はありません");
+    return;
+  }
+  ckSetAns("chkLinAns","x ＝ "+ckFmt(ckDiv(ckSub(c,b),a)));
+}
+function ckSim(){
+  var a1=ckParse($("chkS1A").value),b1=ckParse($("chkS1B").value),c1=ckParse($("chkS1C").value);
+  var a2=ckParse($("chkS2A").value),b2=ckParse($("chkS2B").value),c2=ckParse($("chkS2C").value);
+  if(!a1||!b1||!c1||!a2||!b2||!c2){ckBad("chkSimAns");return;}
+  var zero={n:0,d:1};
+  var rowBad1=(a1.n===0&&b1.n===0&&c1.n!==0),rowBad2=(a2.n===0&&b2.n===0&&c2.n!==0);
+  var det=ckSub(ckMul(a1,b2),ckMul(a2,b1));
+  if(det.n!==0){
+    var x=ckDiv(ckSub(ckMul(c1,b2),ckMul(c2,b1)),det);
+    var y=ckDiv(ckSub(ckMul(a1,c2),ckMul(a2,c1)),det);
+    ckSetAns("chkSimAns","x ＝ "+ckFmt(x)+"、y ＝ "+ckFmt(y));
+    return;
+  }
+  if(rowBad1||rowBad2){ckSetAns("chkSimAns","解はありません");return;}
+  var cons=ckEq(ckMul(a1,c2),ckMul(a2,c1))&&ckEq(ckMul(b1,c2),ckMul(b2,c1));
+  ckSetAns("chkSimAns",cons?"解は無数にあります（2つの式は同じ直線を表しています）":"解はありません");
+}
+function ckQuad(){
+  var a=ckParse($("chkQA").value),b=ckParse($("chkQB").value),c=ckParse($("chkQC").value);
+  if(!a||!b||!c){ckBad("chkQuadAns");return;}
+  if(a.n===0){var el=$("chkQuadAns");if(el)el.textContent="a が 0 のときは2次方程式ではありません。「1次方程式」のタブで確かめてください。";return;}
+  var twoA=ckFrac(2*a.n,a.d);
+  var D=ckSub(ckMul(b,b),ckMul(ckFrac(4,1),ckMul(a,c)));
+  if(D.n<0){ckSetAns("chkQuadAns","解はありません");return;}
+  if(D.n===0){ckSetAns("chkQuadAns","x ＝ "+ckFmt(ckDiv(ckFrac(-b.n,b.d),twoA)));return;}
+  var prod=D.n*D.d,dec=ckSqrtDecomp(prod),s=dec.s,m=dec.m;
+  /* 根 ＝ (P ± S√m)／Q の形にそろえる */
+  var nb=ckFrac(-b.n,b.d);
+  var P0=nb.n*D.d*twoA.d, S0=s*nb.d*twoA.d, Q0=nb.d*D.d*twoA.n;
+  if(Q0<0){Q0=-Q0;P0=-P0;}
+  S0=Math.abs(S0);
+  var g=ckGcd(ckGcd(P0,S0),Q0); P0/=g;S0/=g;Q0/=g;
+  var av=a.n/a.d,bv=b.n/b.d,cv=c.n/c.d,dv=bv*bv-4*av*cv,rt=Math.sqrt(Math.max(0,dv));
+  var r1=(-bv+rt)/(2*av),r2=(-bv-rt)/(2*av);
+  if(r2>r1){var rsw=r1;r1=r2;r2=rsw;}
+  var approx="（≒ "+fmtDec(r1,2)+"、"+fmtDec(r2,2)+"）";
+  if(m===1){
+    var f1=ckFrac(P0+S0,Q0),f2=ckFrac(P0-S0,Q0);
+    ckSetAns("chkQuadAns","x ＝ "+ckFmt(f1)+"、x ＝ "+ckFmt(f2));
+    return;
+  }
+  function radNum(sign){
+    var sq=(S0===1?"√"+m:S0+"√"+m);
+    if(P0===0)return (sign<0?"−":"")+sq;
+    return String(P0).replace(/-/g,"−")+(sign<0?" − ":" ＋ ")+sq;
+  }
+  var el2=$("chkQuadAns");
+  if(Q0===1){
+    el2.innerHTML="答え： x ＝ "+radNum(1)+"、x ＝ "+radNum(-1)+" "+approx;
+  }else{
+    function radFrac(sign){return "<span class='vfrac'><span class='top'>"+radNum(sign)+"</span><span class='bot'>"+Q0+"</span></span>";}
+    el2.innerHTML="答え： x ＝ "+radFrac(1)+"、x ＝ "+radFrac(-1)+" "+approx;
+  }
+}
+function ckFactorStr(p,q){ /* (p x＋q) の中身 */
+  var xs=(p===1?"x":p+"x");
+  if(q===0)return xs;
+  return xs+(q>0?"＋"+q:"−"+(-q));
+}
+function ckFact(){
+  var a=ckInt($("chkFA").value),b=ckInt($("chkFB").value),c=ckInt($("chkFC").value);
+  var el=$("chkFactAns");
+  if(a===null||b===null||c===null){if(el)el.textContent="因数分解の検算は、整数の係数で入れてください。";return;}
+  var expr=ckPoly2(ckFrac(a,1),ckFrac(b,1),ckFrac(c,1));
+  if(a===0&&b===0){ckSetAns("chkFactAns",c===0?"0":"定数 "+c+"（因数分解する式ではありません）");return;}
+  if(a===0){ /* 1次式：共通因数をくくり出す */
+    var g1=ckGcd(b,c)*(b<0?-1:1);
+    ckSetAns("chkFactAns",(g1===1?"":g1=== -1?"−":g1)+"("+ckFactorStr(b/g1,c/g1)+")");
+    return;
+  }
+  if(c===0){ /* x でくくれる */
+    var g2=ckGcd(a,b)*((a<0||(a===0&&b<0))?-1:1);
+    if(a<0)g2=-Math.abs(g2); else g2=Math.abs(g2);
+    ckSetAns("chkFactAns",(g2===1?"":g2=== -1?"−":g2)+"x("+ckFactorStr(a/g2,b/g2)+")");
+    return;
+  }
+  var g0=ckGcd(ckGcd(a,b),c),G=g0*(a<0?-1:1);
+  var a1=a/G,b1=b/G,c1=c/G,found=null;
+  for(var p=1;p<=a1&&!found;p++){
+    if(a1%p!==0)continue;
+    var r=a1/p;
+    for(var q=-Math.abs(c1);q<=Math.abs(c1)&&!found;q++){
+      if(q===0||c1%q!==0)continue;
+      var s=c1/q;
+      if(p*s+q*r===b1)found=[p,q,r,s];
+    }
+  }
+  if(!found){if(el)el.innerHTML="答え： "+ckHTML(expr)+" は<strong>整数の範囲では因数分解できない</strong>";return;}
+  var f1=ckFactorStr(found[0],found[1]),f2=ckFactorStr(found[2],found[3]);
+  var pre=(G===1?"":G=== -1?"−":String(G));
+  if(f1===f2)ckSetAns("chkFactAns",pre+"("+f1+")²");
+  else ckSetAns("chkFactAns",pre+"("+f1+")("+f2+")");
+}
+function ckExp(){
+  var a=ckParse($("chkEA").value),b=ckParse($("chkEB").value),c=ckParse($("chkEC").value),d=ckParse($("chkED").value);
+  if(!a||!b||!c||!d){ckBad("chkExpAns");return;}
+  var A=ckMul(a,c),B=ckAdd(ckMul(a,d),ckMul(b,c)),C=ckMul(b,d);
+  ckSetAns("chkExpAns",ckPoly2(A,B,C));
+}
+var CHKTABS=[["chkTabLin","chkPaneLin"],["chkTabSim","chkPaneSim"],["chkTabQuad","chkPaneQuad"],["chkTabFact","chkPaneFact"]];
+function ckShowTab(paneId){
+  CHKTABS.forEach(function(p){
+    $(p[0]).classList.toggle("on",p[1]===paneId);
+    $(p[1]).classList.toggle("hidden",p[1]!==paneId);
+  });
+}
+$("chkTabLin").onclick=function(){ckShowTab("chkPaneLin");};
+$("chkTabSim").onclick=function(){ckShowTab("chkPaneSim");};
+$("chkTabQuad").onclick=function(){ckShowTab("chkPaneQuad");};
+$("chkTabFact").onclick=function(){ckShowTab("chkPaneFact");};
+$("chkSubFact").onclick=function(){$("chkSubFact").classList.add("on");$("chkSubExp").classList.remove("on");$("chkFactDiv").classList.remove("hidden");$("chkExpDiv").classList.add("hidden");};
+$("chkSubExp").onclick=function(){$("chkSubExp").classList.add("on");$("chkSubFact").classList.remove("on");$("chkExpDiv").classList.remove("hidden");$("chkFactDiv").classList.add("hidden");};
+[["chkLA",ckLin],["chkLB",ckLin],["chkLC",ckLin],
+ ["chkS1A",ckSim],["chkS1B",ckSim],["chkS1C",ckSim],["chkS2A",ckSim],["chkS2B",ckSim],["chkS2C",ckSim],
+ ["chkQA",ckQuad],["chkQB",ckQuad],["chkQC",ckQuad],
+ ["chkFA",ckFact],["chkFB",ckFact],["chkFC",ckFact],
+ ["chkEA",ckExp],["chkEB",ckExp],["chkEC",ckExp],["chkED",ckExp]].forEach(function(p){
+  $(p[0]).addEventListener("input",p[1]);
+});
+ckLin(); ckSim(); ckQuad(); ckFact(); ckExp();
 sqResetGuess();
 drawNumAll();
 </script>
