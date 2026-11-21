@@ -515,6 +515,12 @@ body>#homeView{flex:1 1 auto;min-height:0;overflow-y:auto;width:100%}
 @media (max-width:900px){
   #solidMode .viewbar,#planeMode .viewbar,#theoremMode .viewbar,#customMode .viewbar,#dataMode .viewbar,#numMode .viewbar,#graphMode .viewbar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
   #solidMode .viewbar::-webkit-scrollbar,#planeMode .viewbar::-webkit-scrollbar,#theoremMode .viewbar::-webkit-scrollbar,#customMode .viewbar::-webkit-scrollbar,#dataMode .viewbar::-webkit-scrollbar,#numMode .viewbar::-webkit-scrollbar,#graphMode .viewbar::-webkit-scrollbar{display:none}
+  /* 無効理由の注記（.why-note）は本来、折り返すビューバーの中で全幅の行として出す前提（flex:0 0 100%）。
+     横スクロール1行になるスマホ幅では、行の中に横幅いっぱいの空き地を作ってしまい、後ろに並ぶ
+     「広く見る」「印刷」を何百pxも先へ押しやって実質押せなくなる（立体モードで実測：印刷がx=921px）。
+     スマホ幅ではビューバー内に出さない。理由はボタンのtitle属性に残り、PC幅では従来どおり行として出る。
+     作図モードのビューバーで既に採っている扱いに合わせたもの。 */
+  .viewbar .why-note{display:none}
   /* 広く見る（スマホ幅）：上部の説明文を畳み、ビューバーを細い1行にしてキャンバスを主役に戻す */
   .is-wide .firsthint,.is-wide .d-note{display:none!important}
   #planeMode.is-wide #planeHint,#customMode.is-wide #custIntro,#customMode.is-wide #custDimNote{display:none!important}
