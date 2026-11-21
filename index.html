@@ -490,6 +490,10 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
     <li><button type="button" class="uname" data-unit="custom">自由キャンバス（入試の図を自分で作る）</button><span class="dom">全学年</span></li>
     <li><button type="button" class="uname" data-unit="h-sheet">表計算・スプレッドシート（セル参照と SUM などの集計／高校・数学I「データの分析」）</button><span class="dom">データ</span></li>
     <li><button type="button" class="uname" data-unit="h-seq">数列（等差・等比・漸化式の項を点で見る／高校・数学B）</button><span class="dom">数と式</span></li>
+    <li><button type="button" class="uname" data-unit="h-conic">円錐曲線（楕円・双曲線・放物線を標準形で描く／高校・数学C）</button><span class="dom">関数</span></li>
+    <li><button type="button" class="uname" data-unit="h-cplx">複素数平面（和・積を回転と拡大で見る／高校・数学III）</button><span class="dom">作図</span></li>
+    <li><button type="button" class="uname" data-unit="h-mat">行列と線形変換（2×2行列の積・行列式と、格子が移る図／旧課程・参考）</button><span class="dom">数と式</span></li>
+    <li><button type="button" class="uname" data-unit="h-eq3">3Dの方程式（平面・球・直線を方程式で出す／高校・空間ベクトルの発展）</button><span class="dom">作図</span></li>
   </ul>
   <p class="note cov-note"><strong>部分対応</strong>の単元は計算が中心の単元です。計算練習そのものは扱いませんが、自分で解いた答えの答え合わせ（検算）はできます（「数と式」モードの下の「答え合わせ（検算）」）。それ以外は、このサイトは「図・グラフを動かして目で確かめる」サイトなので、図で理由が見える部分だけを扱っています。</p>
   </div>
@@ -1144,6 +1148,11 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
       <svg id="c3NetSvg" preserveAspectRatio="xMidYMid meet" aria-label="展開図"></svg>
       <p class="note" id="c3NetNote" style="margin:8px 10px 10px"></p>
     </div>
+    <div class="viewbox c3d-only hidden" id="eq3Box">
+      <div class="vhead">方程式の立体 <span id="eq3Head">平面・球・直線を方程式で表した図です</span></div>
+      <div id="eq3Wrap"><canvas id="eq3Gl" aria-label="方程式の立体の専用ビュー" style="width:100%;height:340px;display:block"></canvas></div>
+      <p class="note" style="margin:8px 2px 0">ドラッグで回転、ホイール／ピンチで拡大・縮小できます。方程式の立体は、点・辺で作る立体キャンバスとは別の専用ビューに出ます（キャンバスの点とは連動しません）。軸は x（赤）・y（緑）・z（青・上向き）です。</p>
+    </div>
     </div>
 
     <div class="card" id="custMeasureCard2d" style="margin-top:12px">
@@ -1576,6 +1585,24 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
       <p class="note" id="vecMsg" style="margin-bottom:0"></p>
       <p class="note">和・差・実数倍で追加したベクトルの終点は、新しい自由な点です（元のベクトルとは別々に動かせます）。内積 a・b ＝ a₁b₁＋a₂b₂、なす角 θ は cosθ ＝ a・b÷(|a||b|) で求めます。ベクトルは「元に戻す」と下書き保存にも含まれます。</p>
     </section>
+    <section class="card" id="custCxCard">
+      <h2>複素数平面<span class="advbadge">高校・数学III</span></h2>
+      <p class="note" style="margin-top:0">複素数 z＝a＋bi を、平面上の点（a, b）として表したものが複素数平面です。点をドラッグしても、下の数値で決めても動きます。積 z₁z₂ は「|z₂| 倍に拡大して、偏角 arg z₂ だけ回転」として図に出ます（破線の弧が回転、破線の円が拡大の目安です）。</p>
+      <svg id="cxSvg" viewBox="-8.6 -8.6 17.2 17.2" preserveAspectRatio="xMidYMid meet" aria-label="複素数平面" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:6px;background:var(--panel)"></svg>
+      <div class="row"><label>z₁</label>
+        <input type="number" id="cxZ1Re" step="0.5" value="2" style="width:70px" aria-label="z1 の実部"><span>＋</span>
+        <input type="number" id="cxZ1Im" step="0.5" value="1" style="width:70px" aria-label="z1 の虚部"><span>i</span></div>
+      <div class="row"><label>z₂</label>
+        <input type="number" id="cxZ2Re" step="0.5" value="1" style="width:70px" aria-label="z2 の実部"><span>＋</span>
+        <input type="number" id="cxZ2Im" step="0.5" value="2" style="width:70px" aria-label="z2 の虚部"><span>i</span></div>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="cxShowSum" checked> 和 z₁＋z₂ を出す</label>
+        <label class="chk"><input type="checkbox" id="cxShowProd" checked> 積 z₁z₂ を出す</label>
+      </div>
+      <dl class="kv" id="cxInfo"></dl>
+      <p class="note" id="cxMsg" style="margin-bottom:0"></p>
+      <p class="note" style="margin-bottom:0">絶対値 |z| は原点からの距離、偏角 arg z は実軸から測った角度です。和はベクトルの和（平行四辺形）と同じ動きをします。商 z₁÷z₂ は「|z₁|÷|z₂| 倍、偏角は差だけ回転」です。累乗・ド・モアブルの定理の図示は対象外です。</p>
+    </section>
     <section class="card" id="custToolsCard">
       <h2>測る道具（分度器・定規）</h2>
       <p class="note" style="margin-top:0">画面の上に、本物の道具のように当てて測る分度器と定規（ものさし）を出します。計測値の数値表示とは別に、道具そのものを図に当てて、目盛りを読んで測る体験ができます。どちらもドラッグで動かせます。</p>
@@ -1831,6 +1858,46 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
       </div>
       <div class="row"><span class="val" id="c3ShapeMsg"></span></div>
       <div id="c3CurvedList"></div>
+    </section>
+    <section class="card c3d-sec" id="c3SecEq">
+      <h2>方程式で立体を出す<span class="advbadge">高校・空間ベクトル</span></h2>
+      <p class="note" style="margin-top:0">平面・球・直線を、座標の方程式で指定して専用ビューに出します。係数を変えると、その場で形が変わります。</p>
+      <div class="seg" role="group" aria-label="方程式の種類" style="flex-wrap:wrap;margin-bottom:8px">
+        <button id="eq3TPlane" class="on" type="button">平面 ax＋by＋cz＝d</button>
+        <button id="eq3TSphere" type="button">球</button>
+        <button id="eq3TLine" type="button">直線（方向ベクトル）</button>
+      </div>
+      <div id="eq3PlaneCtl">
+        <div class="row"><label>係数</label>
+          <span>a</span><input type="number" id="eq3A" step="0.5" value="1" style="width:64px" aria-label="平面の係数 a">
+          <span>b</span><input type="number" id="eq3B" step="0.5" value="1" style="width:64px" aria-label="平面の係数 b">
+          <span>c</span><input type="number" id="eq3C" step="0.5" value="1" style="width:64px" aria-label="平面の係数 c">
+          <span>d</span><input type="number" id="eq3D" step="0.5" value="3" style="width:64px" aria-label="平面の右辺 d"></div>
+        <p class="note">（a, b, c）は平面に垂直な法線ベクトルです。a＝b＝c＝0 では平面になりません。</p>
+      </div>
+      <div id="eq3SphereCtl" class="hidden">
+        <div class="row"><label>中心</label>
+          <input type="number" id="eq3SCx" step="0.5" value="0" style="width:64px" aria-label="球の中心 x">
+          <input type="number" id="eq3SCy" step="0.5" value="0" style="width:64px" aria-label="球の中心 y">
+          <input type="number" id="eq3SCz" step="0.5" value="1" style="width:64px" aria-label="球の中心 z"></div>
+        <div class="row"><label for="eq3SR">半径 r</label><input type="number" id="eq3SR" step="0.25" min="0.25" max="6" value="2" style="width:64px"></div>
+        <p class="note">方程式は (x−a)²＋(y−b)²＋(z−c)²＝r² です。</p>
+      </div>
+      <div id="eq3LineCtl" class="hidden">
+        <div class="row"><label>通る点</label>
+          <input type="number" id="eq3LPx" step="0.5" value="0" style="width:64px" aria-label="直線の通る点 x">
+          <input type="number" id="eq3LPy" step="0.5" value="0" style="width:64px" aria-label="直線の通る点 y">
+          <input type="number" id="eq3LPz" step="0.5" value="0" style="width:64px" aria-label="直線の通る点 z"></div>
+        <div class="row"><label>方向ベクトル</label>
+          <input type="number" id="eq3LDx" step="0.5" value="1" style="width:64px" aria-label="方向ベクトル x">
+          <input type="number" id="eq3LDy" step="0.5" value="1" style="width:64px" aria-label="方向ベクトル y">
+          <input type="number" id="eq3LDz" step="0.5" value="1" style="width:64px" aria-label="方向ベクトル z"></div>
+        <p class="note">直線は「通る点 ＋ t×（方向ベクトル）」の点の集まりです。矢印が方向ベクトルです。</p>
+      </div>
+      <div class="row"><button class="btn primary" type="button" id="eq3ShowBtn">方程式ビューを出す</button></div>
+      <dl class="kv" id="eq3Info"></dl>
+      <p class="note" id="eq3Msg" role="status" style="margin-bottom:0"></p>
+      <p class="note" style="margin-bottom:0">2つの平面の交わり（交線）や、平面と球の切り口の図示は対象外です。</p>
     </section>
     <section class="card c3d-sec" id="c3SecOnEdge">
       <h2>辺の上の点（立体）</h2>
@@ -2144,6 +2211,7 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <button id="nSubSimul" type="button">連立方程式（中2）</button>
         <button id="nSubQuad" type="button">2次方程式（中3）</button>
         <button id="nSubSeq" type="button">数列（高校）</button>
+        <button id="nSubMat" type="button">行列（旧課程・参考）</button>
       </div>
       <span class="firsthint" id="numHint">点Aと点Bを左右にドラッグすると、位置・絶対値・A＋Bの矢印がその場で変わります。</span>
       <button class="btn btn-wide" type="button" data-wide="numMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
@@ -2265,6 +2333,17 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <h2>項の一覧</h2>
         <div class="dtablewrap"><table class="dtable" id="seqTable" aria-label="数列の項の一覧" style="min-width:0"></table></div>
         <p class="note" id="seqTableNote" style="margin-bottom:0"></p>
+      </div>
+    </div>
+<div id="nPaneMat" class="hidden">
+      <div class="viewbox">
+        <div class="vhead">行列による線形変換 <span id="matHead">行列 A が、格子点と単位正方形をどこへ移すかが見えます</span></div>
+        <svg id="matSvg" viewBox="-6.4 -6.4 12.8 12.8" preserveAspectRatio="xMidYMid meet" aria-label="行列による線形変換の図" style="width:100%;height:auto;display:block"></svg>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h2>計算の結果</h2>
+        <dl class="kv" id="matStats"></dl>
+        <p class="note">積・行列式・逆行列は「式としての答え」に当たるため、右の「答え合わせ表示」が ON のときにだけ出ます。変換の図そのものは常に出ています。行列は現行課程では扱わないため、旧課程・参考として置いています。</p>
       </div>
     </div>
 <section class="card" id="chkCard" style="margin-top:12px" aria-label="答え合わせ（検算）">
@@ -2619,6 +2698,34 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <p class="note" style="margin-bottom:0">ONにすると、左に一般項・第n項・第n項までの和が出て、項の一覧表も出ます。点の図は、ON・OFFどちらでも出ています。</p>
       </section>
     </div>
+<div id="nSideMat" class="hidden">
+      <section class="card">
+        <h2>行列 A・B（2×2）</h2>
+        <p class="note" style="margin-top:0">A は左の図の変換にも使います。数は分数（1/2 のように）でも入れられます。</p>
+        <div class="row"><label>A</label>
+          <input type="text" class="matin" id="matA11" value="2" aria-label="行列A 1行1列" style="width:64px">
+          <input type="text" class="matin" id="matA12" value="1" aria-label="行列A 1行2列" style="width:64px">
+          <input type="text" class="matin" id="matA21" value="0" aria-label="行列A 2行1列" style="width:64px">
+          <input type="text" class="matin" id="matA22" value="1" aria-label="行列A 2行2列" style="width:64px"></div>
+        <div class="row"><label>B</label>
+          <input type="text" class="matin" id="matB11" value="1" aria-label="行列B 1行1列" style="width:64px">
+          <input type="text" class="matin" id="matB12" value="0" aria-label="行列B 1行2列" style="width:64px">
+          <input type="text" class="matin" id="matB21" value="1" aria-label="行列B 2行1列" style="width:64px">
+          <input type="text" class="matin" id="matB22" value="2" aria-label="行列B 2行2列" style="width:64px"></div>
+        <div class="row" style="flex-wrap:wrap;gap:6px">
+          <button class="btn small" type="button" data-matpreset="rot">A＝90°回転</button>
+          <button class="btn small" type="button" data-matpreset="scale">A＝2倍に拡大</button>
+          <button class="btn small" type="button" data-matpreset="mirror">A＝x軸で鏡映</button>
+          <button class="btn small" type="button" data-matpreset="shear">A＝せん断</button>
+        </div>
+        <p class="note" id="matMsg" style="margin-bottom:0" role="status"></p>
+      </section>
+      <section class="card">
+        <h2>答え合わせ</h2>
+        <div class="row"><button class="btn" type="button" id="matAnswersBtn">答え合わせ表示：OFF</button></div>
+        <p class="note" style="margin-bottom:0">ONにすると、左に A×B・B×A・行列式・逆行列が出ます。変換の図は、ON・OFFどちらでも出ています。</p>
+      </section>
+    </div>
   </aside>
 </div>
 </div>
@@ -2662,7 +2769,32 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
       <div class="exb-row"><input type="text" id="exInputG" placeholder="例：y＝x^2－3x＋2" aria-label="追加する関数の式（関数グラフ）"><button class="btn primary" type="button" id="exAddG">追加する</button></div>
       <div id="exMsgG" role="status"></div>
       <div class="exb-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-exg="x^3-3x">x³－3x</button><button class="btn small" type="button" data-exg="sqrt(x)">√x</button><button class="btn small" type="button" data-exg="|x-2|">|x－2|</button><button class="btn small" type="button" data-exg="sin(x)">sin(x)</button><button class="btn small" type="button" data-exg="2^x">2^x</button><button class="btn small" type="button" data-exg="x^2 (-1<=x<=2)">x²（−1≦x≦2）</button></div>
-      <p class="note">書ける式：多項式（x^2、x^3、1/2x のような分数の係数）、√（sqrt(x) とも書けます）、絶対値 |x|、sin(x)・cos(x)・tan(x)（角度は弧度法＝ラジアン）、2^x のような指数、log(x)（底は10。ln(x) は自然対数、log2(x) は底2）。下の「変数（スライダー）」で作った名前も係数に使えます。定義域は y＝x^2（−1≦x≦2）のように最後に書けます。読めない式は、どこが読めないかを表示して、グラフには出しません。陰関数（x と y の両方を使う式）・媒介変数・極座標は対象外で、その旨が表示されます。</p>
+      <p class="note">書ける式：多項式（x^2、x^3、1/2x のような分数の係数）、√（sqrt(x) とも書けます）、絶対値 |x|、sin(x)・cos(x)・tan(x)（角度は弧度法＝ラジアン）、2^x のような指数、log(x)（底は10。ln(x) は自然対数、log2(x) は底2）。下の「変数（スライダー）」で作った名前も係数に使えます。定義域は y＝x^2（−1≦x≦2）のように最後に書けます。読めない式は、どこが読めないかを表示して、グラフには出しません。x と y の両方を使う式（陰関数）のうち、円錐曲線の標準形（x^2/9＋y^2/4＝1 など）は下の「円錐曲線」カードで描けます。それ以外の陰関数・媒介変数・極座標は対象外で、その旨が表示されます。</p>
+    </section>
+    <section class="card" id="conicCard">
+      <h2>円錐曲線（高校・数学C）</h2>
+      <p class="note" style="margin-top:0">楕円・双曲線・放物線を、標準形のパラメータで上のグラフに描きます。関数のグラフと重ねて見ることもできます。</p>
+      <div class="seg" role="group" aria-label="円錐曲線の種類" style="flex-wrap:wrap;margin-bottom:8px">
+        <button id="conicTEll" class="on" type="button">楕円</button>
+        <button id="conicTHyp" type="button">双曲線</button>
+        <button id="conicTParY" type="button">放物線 y²＝4px</button>
+        <button id="conicTParX" type="button">放物線 x²＝4py</button>
+      </div>
+      <div class="row" id="conicRowA"><label for="conicA">a（x方向）</label><input type="number" id="conicA" min="0.25" max="9" step="0.25" value="3" style="width:74px"></div>
+      <div class="row" id="conicRowB"><label for="conicB">b（y方向）</label><input type="number" id="conicB" min="0.25" max="9" step="0.25" value="2" style="width:74px"></div>
+      <div class="row hidden" id="conicRowP"><label for="conicP">p（焦点の位置）</label><input type="number" id="conicP" min="-6" max="6" step="0.25" value="1" style="width:74px"></div>
+      <div class="row"><label for="conicH">中心・頂点の x</label><input type="number" id="conicH" min="-6" max="6" step="0.5" value="0" style="width:74px"></div>
+      <div class="row"><label for="conicK">中心・頂点の y</label><input type="number" id="conicK" min="-6" max="6" step="0.5" value="0" style="width:74px"></div>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="conicOn" checked> グラフに表示</label>
+        <label class="chk"><input type="checkbox" id="conicFoci" checked> 焦点を出す</label>
+        <label class="chk"><input type="checkbox" id="conicDir" checked> 準線・漸近線を出す</label>
+      </div>
+      <dl class="kv" id="conicStats"></dl>
+      <h3>式から描く</h3>
+      <div class="exb-row"><input type="text" id="conicExpr" placeholder="例：x^2/9＋y^2/4＝1" aria-label="円錐曲線の式"><button class="btn primary" type="button" id="conicExprBtn">この式で描く</button></div>
+      <p class="note" id="conicMsg" role="status" style="margin-bottom:0"></p>
+      <p class="note" style="margin-bottom:0">書ける形：x²/a＋y²/b＝1（楕円）、x²/a−y²/b＝1（双曲線）、y²＝4px・x²＝4py（放物線）、(x−h)²/a＋(y−k)²/b＝1 のような平行移動した形、x²＋y²＝r²（円は楕円として描きます）。これ以外の2次曲線（回転した楕円 xy の項がある形など）は対象外で、その旨が表示されます。</p>
     </section>
     <section class="card" id="slVarCardG"><h2>変数（スライダー）</h2><div id="slVarPanelG"></div></section>
     <section class="card" id="gTableCard">
@@ -4277,7 +4409,8 @@ if(bC)bC.addEventListener("click",function(){
 /* ===== 下書きの名前付き複数保存（作図キャンバス 平面・立体） ===== */
 (function(){
   function $(id){return document.getElementById(id)}
-  function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+  function sh(v){return v===0?"":(v>0?"−"+F(v):"＋"+F(-v))}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
   function loadList(key){try{var a=JSON.parse(localStorage.getItem(key)||"[]");if(!Array.isArray(a))return[];return a.filter(function(d){return d&&typeof d.name==="string"&&!!d.name&&typeof d.data==="string"})}catch(e){return[]}}
   function saveList(key,list){try{localStorage.setItem(key,JSON.stringify(list));return true}catch(e){return false}}
   function fmtDate(ts){var d=new Date(ts||0);if(isNaN(d.getTime()))return"";return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
@@ -7310,7 +7443,7 @@ function exTokens(s){
       if(fname)throw new Error(fname+" のあとは（ ）で式を囲んでください。例："+fname+"(x)");
       if(low==="pi"){toks.push({t:"num",v:Math.PI,raw:"π"});continue}
       if(id==="e"){toks.push({t:"num",v:Math.E,raw:"e"});continue}
-      if(id==="y")throw new Error("これは対象外です：x と y の両方を使う式（陰関数）は描けません。y＝（xだけの式）の形で入れてください。");
+      if(id==="y")throw new Error("x と y の両方を使う式（陰関数）は、ここでは描けません。y＝（xだけの式）の形で入れてください。ただし円錐曲線の標準形（x^2/9＋y^2/4＝1 など）は、下の「円錐曲線」カードの「式から描く」で描けます。");
       if(id==="t")throw new Error("t を使う媒介変数表示は対象外です。y＝（xの式）の形で入れてください。");
       if(id.length>1){
         var ok=true,k,c1;
@@ -8768,6 +8901,377 @@ document.querySelectorAll('[data-unit="h-seq"]').forEach(function(b){ b.onclick 
 
 try { shtBuild(); } catch (e) {}
 try { drawSeq(); } catch (e) {}
+})();
+</script>
+<script>
+"use strict";
+/* ===== 第4段後半：円錐曲線・複素数平面・行列・3Dの方程式表現 ===== */
+(function(){
+function $(id){return document.getElementById(id)}
+function F(v){if(v==null||!isFinite(v))return "―";var r=Math.round(v*100)/100;if(r===0)r=0;return String(r)}
+function PF(s){s=String(s==null?"":s).trim();if(!s)return NaN;var m=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);if(m){var d=parseFloat(m[2]);if(!d)return NaN;return parseFloat(m[1])/d}var v=parseFloat(s);return isNaN(v)?NaN:v}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function el(tag,attrs,parent){var e=document.createElementNS("http://www.w3.org/2000/svg",tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function txt(parent,x,y,str,attrs){var t=el("text",attrs||{},parent);t.setAttribute("x",x);t.setAttribute("y",y);t.textContent=str;return t}
+
+/* ---------- 1. 円錐曲線（関数グラフへの重ね描き） ---------- */
+var CONIC={on:true,type:"ell",a:3,b:2,p:1,h:0,k:0,foci:true,dir:true};
+function conicPathPts(){
+  var a=CONIC.a,b=CONIC.b,p=CONIC.p,h=CONIC.h,k=CONIC.k,pts=[],i,t;
+  if(CONIC.type==="ell"){for(i=0;i<=144;i++){t=2*Math.PI*i/144;pts.push([h+a*Math.cos(t),k+b*Math.sin(t)])}}
+  else if(CONIC.type==="parY"){for(i=0;i<=120;i++){var Y=-9+18*i/120;pts.push([h+Y*Y/(4*p),k+Y])}}
+  else if(CONIC.type==="parX"){for(i=0;i<=120;i++){var X=-9+18*i/120;pts.push([h+X,k+X*X/(4*p)])}}
+  return pts;
+}
+function conicDraw(){
+  var gSvg=$("graphSvg");if(!gSvg||typeof gGeom!=="function")return;
+  var gm=gGeom(),grp=el("g",{"clip-path":"url(#gclip)"},gSvg);
+  var stats=$("conicStats");
+  if(!CONIC.on){if(stats)stats.innerHTML="<dt>表示</dt><dd>OFF（「グラフに表示」をONにすると描きます）</dd>";return}
+  var a=CONIC.a,b=CONIC.b,p=CONIC.p,h=CONIC.h,k=CONIC.k,COL="#c2410c";
+  var xL=gm.mx(0),xR=gm.mx(gm.w);
+  function pathFrom(pts){var d="",pen=false;pts.forEach(function(q){var px=gm.X(q[0]),py=gm.Y(q[1]);if(!isFinite(px)||!isFinite(py)||px<-200||px>gm.w+200||py<-200||py>gm.h+200){pen=false;return}d+=(pen?"L":"M")+px.toFixed(1)+" "+py.toFixed(1);pen=true});if(d)el("path",{d:d,fill:"none",stroke:COL,"stroke-width":2.8,"stroke-linejoin":"round"},grp)}
+  function line(x1,y1,x2,y2,dash,col){el("line",{x1:gm.X(x1),y1:gm.Y(y1),x2:gm.X(x2),y2:gm.Y(y2),stroke:col||"#64748b","stroke-width":1.6,"stroke-dasharray":dash||"6 5"},grp)}
+  function focusPt(x,y,label){el("circle",{cx:gm.X(x),cy:gm.Y(y),r:4.5,fill:"#b91c1c",stroke:"var(--panel)","stroke-width":1.6},grp);txt(grp,gm.X(x)+8,gm.Y(y)-8,label,{"font-size":12,"font-weight":700,fill:"#b91c1c","paint-order":"stroke",stroke:"var(--panel)","stroke-width":3})}
+  var rows="";
+  if(CONIC.type==="ell"){
+    pathFrom(conicPathPts());
+    var c=Math.sqrt(Math.abs(a*a-b*b)),fx,fy,horiz=a>=b;
+    if(horiz){fx=[h-c,h+c];fy=[k,k]}else{fx=[h,h];fy=[k-c,k+c]}
+    if(CONIC.foci){focusPt(fx[0],fy[0],"F₁");focusPt(fx[1],fy[1],"F₂");
+      var t0=0.9,Px=h+a*Math.cos(t0),Py=k+b*Math.sin(t0);
+      line(Px,Py,fx[0],fy[0],"3 4",COL);line(Px,Py,fx[1],fy[1],"3 4",COL);
+      el("circle",{cx:gm.X(Px),cy:gm.Y(Py),r:4,fill:COL,stroke:"var(--panel)","stroke-width":1.5},grp);
+      txt(grp,gm.X(Px)+8,gm.Y(Py)+14,"P",{"font-size":12,"font-weight":700,fill:COL,"paint-order":"stroke",stroke:"var(--panel)","stroke-width":3});}
+    rows="<dt>式</dt><dd>(x"+(sh(h))+")²/"+F(a*a)+" ＋ (y"+(sh(k))+")²/"+F(b*b)+" ＝ 1</dd>"
+      +"<dt>焦点</dt><dd>("+F(fx[0])+", "+F(fy[0])+") と ("+F(fx[1])+", "+F(fy[1])+")</dd>"
+      +"<dt>焦点からの距離の和</dt><dd>楕円上のどの点 P でも PF₁＋PF₂ ＝ "+F(2*Math.max(a,b))+"（一定）です。図の破線がその2つの距離です。</dd>";
+  } else if(CONIC.type==="hyp"){
+    var sgn,sg2,tt,pts;
+    for(sgn=-1;sgn<=1;sgn+=2)for(sg2=-1;sg2<=1;sg2+=2){pts=[];for(var i2=0;i2<=80;i2++){tt=-2.4+4.8*i2/80;pts.push([h+sgn*a*Math.cosh(tt),k+sg2*b*Math.sinh(tt)])}pathFrom(pts)}
+    var c2=Math.sqrt(a*a+b*b);
+    if(CONIC.dir){line(xL,k+(b/a)*(xL-h),xR,k+(b/a)*(xR-h));line(xL,k-(b/a)*(xL-h),xR,k-(b/a)*(xR-h))}
+    if(CONIC.foci){focusPt(h-c2,k,"F₁");focusPt(h+c2,k,"F₂")}
+    rows="<dt>式</dt><dd>(x"+(sh(h))+")²/"+F(a*a)+" − (y"+(sh(k))+")²/"+F(b*b)+" ＝ 1</dd>"
+      +"<dt>焦点</dt><dd>("+F(h-c2)+", "+F(k)+") と ("+F(h+c2)+", "+F(k)+")</dd>"
+      +"<dt>焦点からの距離の差</dt><dd>双曲線上のどの点でも |PF₁−PF₂| ＝ "+F(2*a)+"（一定）です。</dd>"
+      +(CONIC.dir?"<dt>漸近線</dt><dd>y−"+F(k)+" ＝ ±"+F(b/a)+"(x−"+F(h)+")（破線）</dd>":"");
+  } else if(CONIC.type==="parY"){
+    if(p===0){if(stats)stats.innerHTML="<dt>理由</dt><dd>p＝0 では放物線になりません（直線に退化します）。p を 0 でない数にしてください。</dd>";return}
+    pathFrom(conicPathPts());
+    if(CONIC.dir)line(h-p,gm.my(gm.h),h-p,gm.my(0));
+    if(CONIC.foci)focusPt(h+p,k,"F");
+    rows="<dt>式</dt><dd>(y"+(sh(k))+")² ＝ "+F(4*p)+"(x"+(sh(h))+")</dd>"
+      +"<dt>頂点・焦点</dt><dd>頂点 ("+F(h)+", "+F(k)+")、焦点 ("+F(h+p)+", "+F(k)+")</dd>"
+      +(CONIC.dir?"<dt>準線</dt><dd>x ＝ "+F(h-p)+"（破線）。放物線上の点は、焦点までの距離と準線までの距離が等しくなります。</dd>":"<dt>準線</dt><dd>x ＝ "+F(h-p)+"（「準線・漸近線を出す」で表示）</dd>");
+  } else {
+    if(p===0){if(stats)stats.innerHTML="<dt>理由</dt><dd>p＝0 では放物線になりません（直線に退化します）。p を 0 でない数にしてください。</dd>";return}
+    pathFrom(conicPathPts());
+    if(CONIC.dir)line(xL,k-p,xR,k-p);
+    if(CONIC.foci)focusPt(h,k+p,"F");
+    rows="<dt>式</dt><dd>(x"+(sh(h))+")² ＝ "+F(4*p)+"(y"+(sh(k))+")</dd>"
+      +"<dt>頂点・焦点</dt><dd>頂点 ("+F(h)+", "+F(k)+")、焦点 ("+F(h)+", "+F(k+p)+")</dd>"
+      +(CONIC.dir?"<dt>準線</dt><dd>y ＝ "+F(k-p)+"（破線）。放物線上の点は、焦点までの距離と準線までの距離が等しくなります。</dd>":"<dt>準線</dt><dd>y ＝ "+F(k-p)+"（「準線・漸近線を出す」で表示）</dd>");
+  }
+  if(stats)stats.innerHTML=rows;
+}
+if(typeof window.drawGraph==="function"){
+  var _dg=window.drawGraph;
+  window.drawGraph=function(){_dg.apply(null,arguments);try{conicDraw()}catch(e){}};
+}
+function conicSyncFromInputs(){
+  CONIC.a=Math.max(0.25,parseFloat($("conicA").value)||3);
+  CONIC.b=Math.max(0.25,parseFloat($("conicB").value)||2);
+  CONIC.p=parseFloat($("conicP").value);if(isNaN(CONIC.p))CONIC.p=1;
+  CONIC.h=parseFloat($("conicH").value)||0;CONIC.k=parseFloat($("conicK").value)||0;
+  CONIC.on=$("conicOn").checked;CONIC.foci=$("conicFoci").checked;CONIC.dir=$("conicDir").checked;
+}
+function conicSetType(t){
+  CONIC.type=t;
+  [["conicTEll","ell"],["conicTHyp","hyp"],["conicTParY","parY"],["conicTParX","parX"]].forEach(function(pr){var b=$(pr[0]);if(b)b.classList.toggle("on",pr[1]===t)});
+  var par=(t==="parY"||t==="parX");
+  $("conicRowA").classList.toggle("hidden",par);$("conicRowB").classList.toggle("hidden",par);$("conicRowP").classList.toggle("hidden",!par);
+  conicSyncFromInputs();if(typeof drawGraph==="function")drawGraph();
+}
+["conicTEll","conicTHyp","conicTParY","conicTParX"].forEach(function(id){var b=$(id);if(b)b.addEventListener("click",function(){conicSetType(id==="conicTEll"?"ell":id==="conicTHyp"?"hyp":id==="conicTParY"?"parY":"parX")})});
+["conicA","conicB","conicP","conicH","conicK","conicOn","conicFoci","conicDir"].forEach(function(id){var e=$(id);if(e)e.addEventListener("input",function(){conicSyncFromInputs();if(typeof drawGraph==="function")drawGraph()})});
+function conicNorm(s){
+  s=String(s||"");var out="",i,c;for(i=0;i<s.length;i++){c=s.charCodeAt(i);if(c>=0xFF01&&c<=0xFF5E)out+=String.fromCharCode(c-0xFEE0);else out+=s[i]}
+  return out.replace(/\s+/g,"").replace(/−/g,"-").replace(/²/g,"^2").replace(/＝/g,"=").replace(/（/g,"(").replace(/）/g,")").toLowerCase();
+}
+$("conicExprBtn")&&$("conicExprBtn").addEventListener("click",function(){
+  var msg=$("conicMsg"),raw=conicNorm($("conicExpr").value);
+  function fail(t){msg.innerHTML="<span style='color:var(--warn);font-weight:600'>"+esc(t)+"</span>"}
+  function ok(t){msg.innerHTML="<span style='color:var(--ok,#2e7d32);font-weight:600'>"+esc(t)+"</span>"}
+  if(!raw)return fail("式が入力されていません。");
+  if(/xy/.test(raw))return fail("対象外です：xy の項がある形は、軸が回転した円錐曲線で、このカードでは描けません。");
+  if(raw.indexOf("y")===-1)return fail("対象外です：y を含まない式は円錐曲線ではありません。関数は上の「式を入力して追加」で追加してください。");
+  var m;
+  m=raw.match(/^x\^2\+y\^2=([\d.]+)$/);
+  if(m){var r2=parseFloat(m[1]);if(!(r2>0))return fail("右辺が正の数でないため、円になりません。");CONIC.a=CONIC.b=Math.sqrt(r2);CONIC.h=0;CONIC.k=0;$("conicA").value=CONIC.a;$("conicB").value=CONIC.b;$("conicH").value=0;$("conicK").value=0;conicSetType("ell");return ok("円（楕円の特別な場合）として描きました。半径は "+F(Math.sqrt(r2))+" です。")}
+  var TX="(?:\\(x([+-][\\d.]+)\\)\\^2|x\\^2)(?:\\/([\\d.]+))?";
+  var TY="(?:\\(y([+-][\\d.]+)\\)\\^2|y\\^2)(?:\\/([\\d.]+))?";
+  m=raw.match(new RegExp("^"+TX+"([+-])"+TY+"=1$"));
+  if(m){
+    var A=m[2]?parseFloat(m[2]):1,B=m[5]?parseFloat(m[5]):1;
+    if(!(A>0)||!(B>0))return fail("分母は正の数にしてください。");
+    CONIC.h=m[1]?-parseFloat(m[1]):0;CONIC.k=m[4]?-parseFloat(m[4]):0;
+    CONIC.a=Math.sqrt(A);CONIC.b=Math.sqrt(B);
+    $("conicA").value=CONIC.a;$("conicB").value=CONIC.b;$("conicH").value=CONIC.h;$("conicK").value=CONIC.k;
+    conicSetType(m[3]==="+"?"ell":"hyp");
+    return ok((m[3]==="+"?"楕円":"双曲線")+"として描きました。");
+  }
+  m=raw.match(/^\(y([+-][\d.]+)\)\^2=(-?[\d.]*)\(x([+-][\d.]+)\)$/)||raw.match(/^y\^2=(-?[\d.]*)x$/);
+  if(m&&raw.indexOf("y^2=")===0||m&&raw.indexOf("(y")===0){
+    if(m.length===4&&m[3]!==undefined&&raw.charAt(0)==="("){CONIC.k=-parseFloat(m[1]);CONIC.h=-parseFloat(m[3]);var C1=m[2]===""||m[2]==="-"?parseFloat(m[2]+"1"):parseFloat(m[2]);CONIC.p=C1/4}
+    else{CONIC.h=0;CONIC.k=0;var C2=m[1]===""||m[1]==="-"?parseFloat(m[1]+"1"):parseFloat(m[1]);CONIC.p=C2/4}
+    if(!CONIC.p)return fail("係数が 0 のため放物線になりません。");
+    $("conicP").value=CONIC.p;$("conicH").value=CONIC.h;$("conicK").value=CONIC.k;conicSetType("parY");return ok("放物線 y²＝4px として描きました（p＝"+F(CONIC.p)+"）。");
+  }
+  m=raw.match(/^\(x([+-][\d.]+)\)\^2=(-?[\d.]*)\(y([+-][\d.]+)\)$/)||raw.match(/^x\^2=(-?[\d.]*)y$/);
+  if(m){
+    if(raw.charAt(0)==="("){CONIC.h=-parseFloat(m[1]);CONIC.k=-parseFloat(m[3]);var C3=m[2]===""||m[2]==="-"?parseFloat(m[2]+"1"):parseFloat(m[2]);CONIC.p=C3/4}
+    else{CONIC.h=0;CONIC.k=0;var C4=m[1]===""||m[1]==="-"?parseFloat(m[1]+"1"):parseFloat(m[1]);CONIC.p=C4/4}
+    if(!CONIC.p)return fail("係数が 0 のため放物線になりません。");
+    $("conicP").value=CONIC.p;$("conicH").value=CONIC.h;$("conicK").value=CONIC.k;conicSetType("parX");return ok("放物線 x²＝4py として描きました（p＝"+F(CONIC.p)+"）。");
+  }
+  fail("対象外です：この形は円錐曲線の標準形として読めませんでした。x^2/9＋y^2/4＝1、y^2＝4x、(x−1)^2/4−(y＋2)^2/9＝1 のような形で入れてください。");
+});
+
+/* ---------- 2. 複素数平面 ---------- */
+var CX={z1:{re:2,im:1},z2:{re:1,im:2}};
+function fmtC(z){var re=Math.round(z.re*100)/100,im=Math.round(z.im*100)/100;if(re===0&&im===0)return "0";var s="";if(re!==0)s=F(re);if(im!==0){var a=Math.abs(im);s+=(s?(im>0?"＋":"−"):(im>0?"":"−"))+(a===1?"":F(a))+"i"}return s||"0"}
+function cxDraw(){
+  var svg=$("cxSvg");if(!svg)return;while(svg.firstChild)svg.removeChild(svg.firstChild);
+  var i;for(i=-8;i<=8;i++){el("line",{x1:i,y1:-8.6,x2:i,y2:8.6,stroke:"var(--line)","stroke-width":i===0?0.05:0.02},svg);el("line",{x1:-8.6,y1:-i,x2:8.6,y2:-i,stroke:"var(--line)","stroke-width":i===0?0.05:0.02},svg)}
+  el("circle",{cx:0,cy:0,r:1,fill:"none",stroke:"var(--sub)","stroke-width":0.03,"stroke-dasharray":"0.18 0.14",opacity:0.7},svg);
+  txt(svg,8.35,0.75,"実軸",{"font-size":0.72,fill:"var(--sub)"});txt(svg,0.25,8.35,"虚軸",{"font-size":0.72,fill:"var(--sub)"});
+  var z1=CX.z1,z2=CX.z2;
+  var sum={re:z1.re+z2.re,im:z1.im+z2.im},prod={re:z1.re*z2.re-z1.im*z2.im,im:z1.re*z2.im+z1.im*z2.re};
+  function arrow(x,y,col,dash){var L=Math.hypot(x,y);if(L<1e-9)return;var ux=x/L,uy=y/L,hx=x-ux*0.55,hy=y-uy*0.55,px=-uy*0.22,py=ux*0.22;el("line",{x1:0,y1:0,x2:x,y2:-y,stroke:col,"stroke-width":0.09,"stroke-dasharray":dash||""},svg);el("polygon",{points:(x)+","+(-y)+" "+(hx+px)+","+(-(hy+py))+" "+(hx-px)+","+(-(hy-py)),fill:col},svg)}
+  function pt(z,col,label,dy){var c=el("circle",{cx:z.re,cy:-z.im,r:0.30,fill:col,stroke:"var(--panel)","stroke-width":0.06,style:"cursor:grab;touch-action:none"},svg);c.dataset.cxpt=label;txt(svg,z.re+0.45,-z.im+(dy||0),label,{"font-size":0.85,"font-weight":700,fill:col,"paint-order":"stroke",stroke:"var(--panel)","stroke-width":0.12});return c}
+  if($("cxShowSum").checked){
+    el("line",{x1:z1.re,y1:-z1.im,x2:sum.re,y2:-sum.im,stroke:"#e08a1e","stroke-width":0.05,"stroke-dasharray":"0.22 0.16"},svg);
+    el("line",{x1:z2.re,y1:-z2.im,x2:sum.re,y2:-sum.im,stroke:"#e08a1e","stroke-width":0.05,"stroke-dasharray":"0.22 0.16"},svg);
+    arrow(sum.re,sum.im,"#e08a1e");pt(sum,"#e08a1e","z₁＋z₂",-0.5);
+  }
+  if($("cxShowProd").checked&&Math.hypot(z1.re,z1.im)>1e-9&&Math.hypot(z2.re,z2.im)>1e-9){
+    var a1=Math.atan2(z1.im,z1.re),a2=Math.atan2(z2.im,z2.re),r1=Math.hypot(z1.re,z1.im);
+    var arcPts=[],steps=40;for(i=0;i<=steps;i++){var aa=a1+(a2)*i/steps;arcPts.push((r1*Math.cos(aa)).toFixed(2)+","+(-(r1*Math.sin(aa))).toFixed(2))}
+    el("polyline",{points:arcPts.join(" "),fill:"none",stroke:"#d6455a","stroke-width":0.06,"stroke-dasharray":"0.22 0.16"},svg);
+    arrow(prod.re,prod.im,"#d6455a");pt(prod,"#d6455a","z₁z₂",-0.5);
+  }
+  arrow(z1.re,z1.im,"#2f7fd0");arrow(z2.re,z2.im,"#3d9e50");
+  pt(z1,"#2f7fd0","z₁",0.95);pt(z2,"#3d9e50","z₂",0.95);
+  function argDeg(z){var d=Math.atan2(z.im,z.re)*180/Math.PI;return Math.round(d*10)/10}
+  function info(z){var r=Math.hypot(z.re,z.im);return "|z| ＝ "+F(r)+"、arg z ＝ "+F(argDeg(z))+"°"}
+  var html="<dt>z₁ ＝ "+esc(fmtC(z1))+"</dt><dd>"+info(z1)+"</dd>"
+    +"<dt>z₂ ＝ "+esc(fmtC(z2))+"</dt><dd>"+info(z2)+"</dd>"
+    +"<dt>和・差</dt><dd>z₁＋z₂ ＝ "+esc(fmtC(sum))+"、z₁−z₂ ＝ "+esc(fmtC({re:z1.re-z2.re,im:z1.im-z2.im}))+"</dd>"
+    +"<dt>積</dt><dd>z₁z₂ ＝ "+esc(fmtC(prod))+"（z₁ を "+F(Math.hypot(z2.re,z2.im))+" 倍して "+F(argDeg(z2))+"° 回転したもの）</dd>";
+  if(Math.hypot(z2.re,z2.im)<1e-9)html+="<dt>商</dt><dd>z₂＝0 のため、商 z₁÷z₂ は定義できません。</dd>";
+  else{var dn=z2.re*z2.re+z2.im*z2.im;html+="<dt>商</dt><dd>z₁÷z₂ ＝ "+esc(fmtC({re:(z1.re*z2.re+z1.im*z2.im)/dn,im:(z1.im*z2.re-z1.re*z2.im)/dn}))+"</dd>"}
+  $("cxInfo").innerHTML=html;
+}
+function cxSyncInputs(){$("cxZ1Re").value=CX.z1.re;$("cxZ1Im").value=CX.z1.im;$("cxZ2Re").value=CX.z2.re;$("cxZ2Im").value=CX.z2.im}
+[["cxZ1Re","z1","re"],["cxZ1Im","z1","im"],["cxZ2Re","z2","re"],["cxZ2Im","z2","im"]].forEach(function(t){var e=$(t[0]);if(e)e.addEventListener("input",function(){var v=parseFloat(e.value);if(isNaN(v))return;CX[t[1]][t[2]]=Math.max(-8,Math.min(8,v));cxDraw()})});
+["cxShowSum","cxShowProd"].forEach(function(id){var e=$(id);if(e)e.addEventListener("change",cxDraw)});
+(function(){
+  var svg=$("cxSvg");if(!svg)return;var drag=null;
+  function toMath(ev){var r=svg.getBoundingClientRect();var x=-8.6+(ev.clientX-r.left)/r.width*17.2;var y=-(-8.6+(ev.clientY-r.top)/r.height*17.2);return{x:Math.round(x*2)/2,y:Math.round(y*2)/2}}
+  svg.addEventListener("pointerdown",function(ev){var t=ev.target;if(t&&t.dataset&&t.dataset.cxpt){if(t.dataset.cxpt==="z₁")drag="z1";else if(t.dataset.cxpt==="z₂")drag="z2";if(drag){svg.setPointerCapture(ev.pointerId);ev.preventDefault()}}});
+  svg.addEventListener("pointermove",function(ev){if(!drag)return;var p=toMath(ev);CX[drag].re=Math.max(-8,Math.min(8,p.x));CX[drag].im=Math.max(-8,Math.min(8,p.y));cxSyncInputs();cxDraw()});
+  svg.addEventListener("pointerup",function(){drag=null});svg.addEventListener("pointercancel",function(){drag=null});
+})();
+cxDraw();
+
+/* ---------- 3. 行列と線形変換 ---------- */
+var MAT={answers:false};
+var MAT_PANES=[["nPaneLine","nSideLine"],["nPaneMoji","nSideMoji"],["nPaneEq1","nSideEq1"],["nPaneSqrt","nSideSqrt"],["nPanePow","nSidePow"],["nPaneArea","nSideArea"],["nPaneSimul","nSideSimul"],["nPaneQuad","nSideQuad"],["nPaneSeq","nSideSeq"]];
+var MAT_BTNS=["nSubLine","nSubMoji","nSubEq1","nSubSqrt","nSubPow","nSubArea","nSubSimul","nSubQuad","nSubSeq"];
+function matRead(){var ids=["matA11","matA12","matA21","matA22","matB11","matB12","matB21","matB22"],v=[],i;for(i=0;i<ids.length;i++){var x=PF($(ids[i]).value);if(isNaN(x))return null;v.push(x)}return{A:[[v[0],v[1]],[v[2],v[3]]],B:[[v[4],v[5]],[v[6],v[7]]]}}
+function matMul(X,Y){return[[X[0][0]*Y[0][0]+X[0][1]*Y[1][0],X[0][0]*Y[0][1]+X[0][1]*Y[1][1]],[X[1][0]*Y[0][0]+X[1][1]*Y[1][0],X[1][0]*Y[0][1]+X[1][1]*Y[1][1]]]}
+function matStr(M){return "（ "+F(M[0][0])+" , "+F(M[0][1])+" ／ "+F(M[1][0])+" , "+F(M[1][1])+" ）"}
+function drawMat(){
+  var svg=$("matSvg"),msg=$("matMsg"),stats=$("matStats");if(!svg)return;
+  var R=matRead();
+  if(!R){if(msg)msg.innerHTML="<span style='color:var(--warn);font-weight:600'>読めない数があります。数か分数（1/2 など）で入れてください。</span>";return}
+  if(msg)msg.textContent="";
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  var A=R.A,i,j;
+  function apply(x,y){return[A[0][0]*x+A[0][1]*y,A[1][0]*x+A[1][1]*y]}
+  for(i=-6;i<=6;i++){el("line",{x1:i,y1:6.4,x2:i,y2:-6.4,stroke:"var(--line)","stroke-width":i===0?0.05:0.02},svg);el("line",{x1:-6.4,y1:-i,x2:6.4,y2:-i,stroke:"var(--line)","stroke-width":i===0?0.05:0.02},svg)}
+  for(i=-3;i<=3;i++)for(j=-3;j<=3;j++){el("circle",{cx:i,cy:-j,r:0.09,fill:"var(--sub)",opacity:0.55},svg);var q=apply(i,j);if(Math.abs(q[0])<=6.4&&Math.abs(q[1])<=6.4)el("circle",{cx:q[0],cy:-q[1],r:0.13,fill:"#2f7fd0"},svg)}
+  function poly(pts,attrs){var s=pts.map(function(q){return q[0]+","+(-q[1])}).join(" ");el("polygon",{points:s,fill:attrs.fill||"none",stroke:attrs.stroke,"stroke-width":0.06,"stroke-dasharray":attrs.dash||""},svg)}
+  poly([[0,0],[1,0],[1,1],[0,1]],{stroke:"var(--sub)",dash:"0.22 0.16"});
+  poly([[0,0],apply(1,0),apply(1,1),apply(0,1)],{fill:"rgba(47,127,208,0.20)",stroke:"#2f7fd0"});
+  txt(svg,5.2,0.8,"x",{"font-size":0.6,fill:"var(--sub)"});txt(svg,0.3,6.2,"y",{"font-size":0.6,fill:"var(--sub)"});
+  var det=A[0][0]*A[1][1]-A[0][1]*A[1][0],detB=R.B[0][0]*R.B[1][1]-R.B[0][1]*R.B[1][0];
+  if(!MAT.answers){stats.innerHTML="<dt>計算の結果</dt><dd>答え合わせ表示が OFF のため、積・行列式・逆行列は出ていません。図では、灰色の点線が元の単位正方形、青が A で移したあとの形です。格子の青い点が、元の格子点の移り先です。</dd>";return}
+  var AB=matMul(R.A,R.B),BA=matMul(R.B,R.A);
+  var inv=det!==0?"（ "+F(A[1][1]/det)+" , "+F(-A[0][1]/det)+" ／ "+F(-A[1][0]/det)+" , "+F(A[0][0]/det)+" ）":"ありません（行列式が 0 のため、変換で図形がつぶれて元に戻せません）";
+  stats.innerHTML="<dt>A × B</dt><dd>"+esc(matStr(AB))+"</dd>"
+    +"<dt>B × A</dt><dd>"+esc(matStr(BA))+"（一般に A×B と B×A は一致しません）</dd>"
+    +"<dt>行列式</dt><dd>det A ＝ "+F(det)+"、det B ＝ "+F(detB)+"、det(A×B) ＝ "+F(det*detB)+"</dd>"
+    +"<dt>A の逆行列</dt><dd>"+esc(inv)+"</dd>"
+    +"<dt>面積の倍率</dt><dd>変換 A で面積は "+F(Math.abs(det))+" 倍になります（det の符号が負だと、向きが裏返ります）。</dd>";
+}
+document.querySelectorAll(".matin").forEach(function(e){e.addEventListener("input",drawMat)});
+document.querySelectorAll("[data-matpreset]").forEach(function(b){b.addEventListener("click",function(){
+  var P={rot:[0,-1,1,0],scale:[2,0,0,2],mirror:[1,0,0,-1],shear:[1,1,0,1]}[b.getAttribute("data-matpreset")];if(!P)return;
+  $("matA11").value=P[0];$("matA12").value=P[1];$("matA21").value=P[2];$("matA22").value=P[3];drawMat();
+})});
+var matAnsBtn=$("matAnswersBtn");if(matAnsBtn)matAnsBtn.onclick=function(){MAT.answers=!MAT.answers;matAnsBtn.textContent="答え合わせ表示："+(MAT.answers?"ON":"OFF");matAnsBtn.classList.toggle("on",MAT.answers);drawMat()};
+function matHide(){var p=$("nPaneMat"),s=$("nSideMat"),b=$("nSubMat");if(p)p.classList.add("hidden");if(s)s.classList.add("hidden");if(b)b.classList.remove("on")}
+function matShow(){
+  MAT_PANES.forEach(function(pr){var pn=$(pr[0]),sd=$(pr[1]);if(pn)pn.classList.add("hidden");if(sd)sd.classList.add("hidden")});
+  MAT_BTNS.forEach(function(id){var b=$(id);if(b)b.classList.remove("on")});
+  var sp=$("nPaneSeq"),ss=$("nSideSeq");if(sp)sp.classList.add("hidden");if(ss)ss.classList.add("hidden");
+  var p=$("nPaneMat"),s=$("nSideMat"),b=$("nSubMat");if(p)p.classList.remove("hidden");if(s)s.classList.remove("hidden");if(b)b.classList.add("on");
+  var h=$("numHint");if(h)h.textContent="行列 A・B の数を変えると、積と行列式（答え合わせ表示ON）と、A による線形変換の図がその場で変わります。行列は旧課程・参考の内容です。";
+  drawMat();
+}
+MAT_BTNS.forEach(function(id){var b=$(id);if(b)b.addEventListener("click",matHide)});
+var matBtn=$("nSubMat");if(matBtn)matBtn.addEventListener("click",matShow);
+drawMat();
+
+/* ---------- 4. 3Dの方程式表現 ---------- */
+var EQ3={kind:"plane",ready:false,theta:0.75,phi:1.02,dist:14};
+var eq3R=null,eq3S=null,eq3C=null,eq3G=null;
+function eq3Num(id,def){var v=parseFloat($(id).value);return isNaN(v)?def:v}
+function T3(x,y,z){return new THREE.Vector3(x,z,-y)}
+function eq3Info(){
+  var info=$("eq3Info");if(!info)return;var msg=$("eq3Msg");msg.textContent="";
+  if(EQ3.kind==="plane"){
+    var a=eq3Num("eq3A",1),b=eq3Num("eq3B",1),c=eq3Num("eq3C",1),d=eq3Num("eq3D",3);
+    if(a===0&&b===0&&c===0){info.innerHTML="<dt>理由</dt><dd>a＝b＝c＝0 では平面になりません。少なくとも1つの係数を 0 でない数にしてください。</dd>";return null}
+    var pt;if(Math.abs(c)>=Math.abs(a)&&Math.abs(c)>=Math.abs(b))pt=[0,0,d/c];else if(Math.abs(a)>=Math.abs(b))pt=[d/a,0,0];else pt=[0,d/b,0];
+    info.innerHTML="<dt>方程式</dt><dd>"+F(a)+"x ＋ "+F(b)+"y ＋ "+F(c)+"z ＝ "+F(d)+"</dd>"
+      +"<dt>法線ベクトル</dt><dd>("+F(a)+", "+F(b)+", "+F(c)+")（平面に垂直なベクトル）</dd>"
+      +"<dt>通る点の例</dt><dd>("+F(pt[0])+", "+F(pt[1])+", "+F(pt[2])+")</dd>";
+    return{a:a,b:b,c:c,d:d};
+  }
+  if(EQ3.kind==="sphere"){
+    var cx=eq3Num("eq3SCx",0),cy=eq3Num("eq3SCy",0),cz=eq3Num("eq3SCz",1),r=eq3Num("eq3SR",2);
+    if(!(r>0)){info.innerHTML="<dt>理由</dt><dd>半径 r は正の数にしてください。</dd>";return null}
+    info.innerHTML="<dt>方程式</dt><dd>(x−"+F(cx)+")²＋(y−"+F(cy)+")²＋(z−"+F(cz)+")² ＝ "+F(r*r)+"</dd>"
+      +"<dt>中心・半径</dt><dd>中心 ("+F(cx)+", "+F(cy)+", "+F(cz)+")、半径 "+F(r)+"</dd>";
+    return{cx:cx,cy:cy,cz:cz,r:r};
+  }
+  var px=eq3Num("eq3LPx",0),py=eq3Num("eq3LPy",0),pz=eq3Num("eq3LPz",0),dx=eq3Num("eq3LDx",1),dy=eq3Num("eq3LDy",1),dz=eq3Num("eq3LDz",1);
+  if(dx===0&&dy===0&&dz===0){info.innerHTML="<dt>理由</dt><dd>方向ベクトルが (0, 0, 0) では直線になりません。</dd>";return null}
+  info.innerHTML="<dt>媒介変数表示</dt><dd>x ＝ "+F(px)+" ＋ "+F(dx)+"t、y ＝ "+F(py)+" ＋ "+F(dy)+"t、z ＝ "+F(pz)+" ＋ "+F(dz)+"t</dd>"
+    +"<dt>方向ベクトル</dt><dd>("+F(dx)+", "+F(dy)+", "+F(dz)+")、大きさ "+F(Math.hypot(dx,dy,dz))+"</dd>";
+  return{px:px,py:py,pz:pz,dx:dx,dy:dy,dz:dz};
+}
+function eq3Build(){
+  if(!EQ3.ready)return;var P=eq3Info();
+  while(eq3G.children.length){var ch=eq3G.children.pop();eq3G.remove(ch)}
+  var i;
+  var gridPts=[];for(i=-5;i<=5;i++){gridPts.push(T3(i,-5,0),T3(i,5,0),T3(-5,i,0),T3(5,i,0))}
+  var gg=new THREE.BufferGeometry().setFromPoints(gridPts);
+  eq3G.add(new THREE.LineSegments(gg,new THREE.LineBasicMaterial({color:0x9aa3ab,transparent:true,opacity:0.45})));
+  function axis(p1,p2,col){var g=new THREE.BufferGeometry().setFromPoints([T3(p1[0],p1[1],p1[2]),T3(p2[0],p2[1],p2[2])]);eq3G.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:col})))}
+  axis([-5,0,0],[5,0,0],0xd6455a);axis([0,-5,0],[0,5,0],0x3d9e50);axis([0,0,0],[0,0,5],0x2f7fd0);
+  if(!P){eq3Render();return}
+  if(EQ3.kind==="plane"){
+    var n=[P.a,P.b,P.c],B=5,edges=[],corners=[];
+    var cs=[-B,B];cs.forEach(function(x){cs.forEach(function(y){cs.forEach(function(z){corners.push([x,y,z])})})});
+    var E=[[0,1],[0,2],[0,4],[1,3],[1,5],[2,3],[2,6],[3,7],[4,5],[4,6],[5,7],[6,7]];
+    var pts=[];
+    E.forEach(function(e){var p1=corners[e[0]],p2=corners[e[1]];var v1=n[0]*p1[0]+n[1]*p1[1]+n[2]*p1[2]-P.d,v2=n[0]*p2[0]+n[1]*p2[1]+n[2]*p2[2]-P.d;if(v1===0)pts.push(p1);if(v1*v2<0){var t=v1/(v1-v2);pts.push([p1[0]+(p2[0]-p1[0])*t,p1[1]+(p2[1]-p1[1])*t,p1[2]+(p2[2]-p1[2])*t])}});
+    var uniq=[];pts.forEach(function(q){if(!uniq.some(function(u){return Math.hypot(u[0]-q[0],u[1]-q[1],u[2]-q[2])<1e-6}))uniq.push(q)});
+    if(uniq.length<3){$("eq3Msg").innerHTML="<span style='color:var(--warn);font-weight:600'>表示範囲（各軸 ±5）の中に、この平面は入っていません。d を小さくしてください。</span>";eq3Render();return}
+    var cen=[0,0,0];uniq.forEach(function(q){cen[0]+=q[0]/uniq.length;cen[1]+=q[1]/uniq.length;cen[2]+=q[2]/uniq.length});
+    var nl=Math.hypot(n[0],n[1],n[2]),nn=[n[0]/nl,n[1]/nl,n[2]/nl];
+    var ref=Math.abs(nn[2])<0.9?[0,0,1]:[1,0,0];
+    var u=[nn[1]*ref[2]-nn[2]*ref[1],nn[2]*ref[0]-nn[0]*ref[2],nn[0]*ref[1]-nn[1]*ref[0]];var ul=Math.hypot(u[0],u[1],u[2]);u=u.map(function(v){return v/ul});
+    var vv=[nn[1]*u[2]-nn[2]*u[1],nn[2]*u[0]-nn[0]*u[2],nn[0]*u[1]-nn[1]*u[0]];
+    uniq.sort(function(p1,p2){function ang(q){var d=[q[0]-cen[0],q[1]-cen[1],q[2]-cen[2]];return Math.atan2(d[0]*vv[0]+d[1]*vv[1]+d[2]*vv[2],d[0]*u[0]+d[1]*u[1]+d[2]*u[2])}return ang(p1)-ang(p2)});
+    var pos=[];for(i=1;i<uniq.length-1;i++){[uniq[0],uniq[i],uniq[i+1]].forEach(function(q){var t=T3(q[0],q[1],q[2]);pos.push(t.x,t.y,t.z)})}
+    var geo=new THREE.BufferGeometry();geo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+    eq3G.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xe08a1e,transparent:true,opacity:0.45,side:THREE.DoubleSide,depthWrite:false})));
+    var loop=uniq.map(function(q){return T3(q[0],q[1],q[2])});loop.push(loop[0].clone());
+    eq3G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(loop),new THREE.LineBasicMaterial({color:0xb45309})));
+  } else if(EQ3.kind==="sphere"){
+    var geo2=new THREE.SphereGeometry(P.r,36,24);
+    var mesh=new THREE.Mesh(geo2,new THREE.MeshBasicMaterial({color:0x2f7fd0,transparent:true,opacity:0.30,depthWrite:false}));
+    var c=T3(P.cx,P.cy,P.cz);mesh.position.copy(c);eq3G.add(mesh);
+    var wf=new THREE.LineSegments(new THREE.WireframeGeometry(geo2),new THREE.LineBasicMaterial({color:0x2f7fd0,transparent:true,opacity:0.16}));wf.position.copy(c);eq3G.add(wf);
+    var cen2=new THREE.Mesh(new THREE.SphereGeometry(0.09,12,8),new THREE.MeshBasicMaterial({color:0xb91c1c}));cen2.position.copy(c);eq3G.add(cen2);
+  } else {
+    var dir=new THREE.Vector3(P.dx,P.dz,-P.dy);var dl=dir.length();dir.normalize();
+    var p0=T3(P.px,P.py,P.pz);
+    var g2=new THREE.BufferGeometry().setFromPoints([p0.clone().addScaledVector(dir,-6),p0.clone().addScaledVector(dir,6)]);
+    eq3G.add(new THREE.Line(g2,new THREE.LineBasicMaterial({color:0xd6455a})));
+    var ah=new THREE.ArrowHelper(dir,p0,2.5,0xd6455a,0.5,0.3);eq3G.add(ah);
+    var pm=new THREE.Mesh(new THREE.SphereGeometry(0.11,12,8),new THREE.MeshBasicMaterial({color:0xd6455a}));pm.position.copy(p0);eq3G.add(pm);
+  }
+  eq3Render();
+}
+function eq3Render(){
+  if(!EQ3.ready)return;
+  var cv=$("eq3Gl");var w=cv.clientWidth||640,h=cv.clientHeight||340;
+  eq3R.setSize(w,h,false);eq3C.aspect=w/h;eq3C.updateProjectionMatrix();
+  var sp=Math.sin(EQ3.phi),x=EQ3.dist*sp*Math.cos(EQ3.theta),zUp=EQ3.dist*Math.cos(EQ3.phi),y=EQ3.dist*sp*Math.sin(EQ3.theta);
+  eq3C.position.set(x,zUp+1,-y);eq3C.lookAt(0,1,0);eq3C.up.set(0,1,0);
+  eq3R.render(eq3S,eq3C);
+}
+function eq3Init(){
+  if(EQ3.ready){eq3Build();return}
+  ensureThree(function(){
+    if(typeof THREE==="undefined"){$("eq3Msg").textContent="3D表示の読み込みに失敗しました。通信環境を確認して、ページを開き直してください。";return}
+    var cv=$("eq3Gl");
+    eq3R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+    eq3R.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+    eq3S=new THREE.Scene();eq3C=new THREE.PerspectiveCamera(42,1,0.1,200);eq3G=new THREE.Group();eq3S.add(eq3G);
+    EQ3.ready=true;
+    var drag=null;
+    cv.addEventListener("pointerdown",function(ev){drag={x:ev.clientX,y:ev.clientY};cv.setPointerCapture(ev.pointerId)});
+    cv.addEventListener("pointermove",function(ev){if(!drag)return;EQ3.theta-=(ev.clientX-drag.x)*0.008;EQ3.phi=Math.max(0.15,Math.min(2.9,EQ3.phi-(ev.clientY-drag.y)*0.008));drag={x:ev.clientX,y:ev.clientY};eq3Render()});
+    cv.addEventListener("pointerup",function(){drag=null});cv.addEventListener("pointercancel",function(){drag=null});
+    cv.addEventListener("wheel",function(ev){ev.preventDefault();EQ3.dist=Math.max(7,Math.min(30,EQ3.dist*(ev.deltaY>0?1.1:0.9)));eq3Render()},{passive:false});
+    window.addEventListener("resize",function(){if(EQ3.ready&&!$("eq3Box").classList.contains("hidden"))eq3Render()});
+    eq3Build();
+  });
+}
+function eq3SetKind(k2){
+  EQ3.kind=k2;
+  [["eq3TPlane","plane"],["eq3TSphere","sphere"],["eq3TLine","line"]].forEach(function(pr){var b=$(pr[0]);if(b)b.classList.toggle("on",pr[1]===k2)});
+  $("eq3PlaneCtl").classList.toggle("hidden",k2!=="plane");$("eq3SphereCtl").classList.toggle("hidden",k2!=="sphere");$("eq3LineCtl").classList.toggle("hidden",k2!=="line");
+  eq3Info();if(EQ3.ready)eq3Build();
+}
+["eq3TPlane","eq3TSphere","eq3TLine"].forEach(function(id){var b=$(id);if(b)b.addEventListener("click",function(){eq3SetKind(id==="eq3TPlane"?"plane":id==="eq3TSphere"?"sphere":"line")})});
+["eq3A","eq3B","eq3C","eq3D","eq3SCx","eq3SCy","eq3SCz","eq3SR","eq3LPx","eq3LPy","eq3LPz","eq3LDx","eq3LDy","eq3LDz"].forEach(function(id){var e=$(id);if(e)e.addEventListener("input",function(){eq3Info();if(EQ3.ready)eq3Build()})});
+var eq3Btn=$("eq3ShowBtn");
+if(eq3Btn)eq3Btn.addEventListener("click",function(){
+  var box=$("eq3Box");var show=box.classList.contains("hidden");
+  box.classList.toggle("hidden",!show);eq3Btn.textContent=show?"方程式ビューを隠す":"方程式ビューを出す";
+  if(show){eq3Init();box.scrollIntoView({block:"nearest",behavior:"smooth"})}
+});
+eq3Info();
+
+/* ---------- 対応表（高校）への配線 ---------- */
+try{
+  if(typeof UNIT_DESC!=="undefined"){
+    UNIT_DESC["h-conic"]="関数グラフの「円錐曲線」カードで、楕円・双曲線・放物線を標準形のパラメータで描けます。焦点と準線・漸近線も出ます。";
+    UNIT_DESC["h-cplx"]="作図キャンバスの「複素数平面」カードで、複素数を点として置き、和・積（回転と拡大）・絶対値・偏角が見られます。";
+    UNIT_DESC["h-mat"]="数と式モードの「行列」タブで、2×2行列の積・行列式・逆行列と、線形変換で格子が移る図が見られます（旧課程・参考）。";
+    UNIT_DESC["h-eq3"]="作図キャンバスの立体作図にある「方程式で立体を出す」で、平面の方程式・球の方程式・方向ベクトルつき直線を専用ビューに表示できます。";
+  }
+}catch(e){}
+function covGo2(unit,mode,after){
+  if(typeof setTopMode==="function")setTopMode(mode);
+  try{if(typeof showUnitBanner==="function"){var b=document.querySelector('[data-unit="'+unit+'"]');if(b)showUnitBanner(unit,b.textContent.replace(/\s+/g," ").trim())}}catch(e){}
+  if(after)after();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function bindCov(unit,mode,after){document.querySelectorAll('[data-unit="'+unit+'"]').forEach(function(b){b.onclick=function(){covGo2(unit,mode,after)}})}
+bindCov("h-conic","graph",null);
+bindCov("h-cplx","custom",function(){var c=$("custCxCard");if(c)c.scrollIntoView({block:"nearest",behavior:"smooth"})});
+bindCov("h-mat","num",function(){matShow()});
+bindCov("h-eq3","custom",function(){var d=$("dim3dBtn");if(d)d.click();var c=$("c3SecEq");if(c)setTimeout(function(){c.scrollIntoView({block:"nearest",behavior:"smooth"})},60)});
+try{conicSyncFromInputs();if(typeof drawGraph==="function"&&!$("graphMode").classList.contains("hidden"))drawGraph()}catch(e){}
 })();
 </script>
 </body>
