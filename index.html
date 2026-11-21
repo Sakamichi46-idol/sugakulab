@@ -278,6 +278,109 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
 }
 @media print{.side-edge-tab{display:none!important}}
 </style>
+<style>
+/* ===== スマホ版レイアウト（キャンバス主役・GeoGebra風）：上部は細い帯だけ、道具・設定は下シートにしまう ===== */
+@media (max-width:900px){
+  /* 上部の帯：サイト名は隠し、今のモード名＋「モード一覧」だけを残す */
+  .topbar{flex-wrap:nowrap;padding:6px 10px;gap:8px}
+  .topbar .ttl h1{display:none}
+  .topbar .ttl .cur-mode{font-size:14.5px;font-weight:700;color:var(--ink);white-space:nowrap}
+  #btnModeMenu{margin-left:auto;flex:none}
+  /* 説明文はキャンバスの上に常駐させない。ビューバーは操作だけの細い1行にする */
+  #solidMode:not(.is-wide) .firsthint,#planeMode:not(.is-wide) .firsthint,#theoremMode:not(.is-wide) .firsthint,#customMode:not(.is-wide) .firsthint,#dataMode:not(.is-wide) .firsthint,#numMode:not(.is-wide) .firsthint,#graphMode:not(.is-wide) .firsthint,
+  #solidMode:not(.is-wide) .d-note,#graphMode:not(.is-wide) .d-note,
+  #planeMode:not(.is-wide) #planeHint,#customMode:not(.is-wide) #custIntro,#customMode:not(.is-wide) #custDimNote{display:none}
+  #solidMode:not(.is-wide) .viewbar,#planeMode:not(.is-wide) .viewbar,#theoremMode:not(.is-wide) .viewbar,#customMode:not(.is-wide) .viewbar,#dataMode:not(.is-wide) .viewbar,#numMode:not(.is-wide) .viewbar,#graphMode:not(.is-wide) .viewbar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;margin-bottom:8px;padding-bottom:2px;scrollbar-width:none}
+  #solidMode:not(.is-wide) .viewbar::-webkit-scrollbar,#planeMode:not(.is-wide) .viewbar::-webkit-scrollbar,#theoremMode:not(.is-wide) .viewbar::-webkit-scrollbar,#customMode:not(.is-wide) .viewbar::-webkit-scrollbar,#dataMode:not(.is-wide) .viewbar::-webkit-scrollbar,#numMode:not(.is-wide) .viewbar::-webkit-scrollbar,#graphMode:not(.is-wide) .viewbar::-webkit-scrollbar{display:none}
+  .layout{padding:8px;gap:8px}
+  /* 立体・グラフ・作図キャンバスで使っていた display:contents を解除し、通常の流れ（キャンバス→情報カード）に戻す */
+  #customMode:not(.is-wide) .stage,#graphMode:not(.is-wide) .stage,#solidMode:not(.is-wide) .stage{display:block}
+  #customMode:not(.is-wide) .side,#graphMode:not(.is-wide) .side,#solidMode:not(.is-wide) .side{display:flex}
+  /* 道具・設定のパネルは常時表示せず、下から開くシートにする（閉じた状態＝side-closed が初期状態） */
+  #solidMode:not(.is-wide) .side,#planeMode:not(.is-wide) .side,#theoremMode:not(.is-wide) .side,#customMode:not(.is-wide) .side,#dataMode:not(.is-wide) .side,#numMode:not(.is-wide) .side,#graphMode:not(.is-wide) .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;flex:none;max-height:78dvh;z-index:170;background:var(--bg);border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.25);padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));overflow-y:auto;transform:translateY(0);transition:transform .26s ease}
+  #solidMode.side-closed:not(.is-wide) .side,#planeMode.side-closed:not(.is-wide) .side,#theoremMode.side-closed:not(.is-wide) .side,#customMode.side-closed:not(.is-wide) .side,#dataMode.side-closed:not(.is-wide) .side,#numMode.side-closed:not(.is-wide) .side,#graphMode.side-closed:not(.is-wide) .side{transform:translateY(calc(100% + 56px));transition:transform .26s ease}
+  /* 「いまの状態」バーも常駐させない（状態はキャンバス見出しと計測に出る） */
+  #stateBar{display:none!important}
+  /* シート上部の見出し（道具・設定／閉じるボタン） */
+  #solidMode:not(.is-wide) .wide-drawer-head,#planeMode:not(.is-wide) .wide-drawer-head,#theoremMode:not(.is-wide) .wide-drawer-head,#customMode:not(.is-wide) .wide-drawer-head,#dataMode:not(.is-wide) .wide-drawer-head,#numMode:not(.is-wide) .wide-drawer-head,#graphMode:not(.is-wide) .wide-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:-12px;z-index:2;background:var(--bg);padding:10px 2px 8px;margin:-12px -2px 8px;font-weight:700}
+  /* シートを閉じている間は、右端の縦タブ「道具・設定」だけを浮かせる */
+  .side-closed:not(.is-wide) .side-edge-tab{display:flex;position:fixed;top:50%;right:0;transform:translateY(-50%);z-index:165;writing-mode:vertical-rl;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px 0 0 8px;padding:14px 7px;font-weight:700;font-size:13px;letter-spacing:.12em;box-shadow:-2px 2px 10px rgba(0,0,0,.2);cursor:pointer;min-height:44px}
+  /* キャンバスを画面の高さいっぱいに広げる（上部の帯とビューバーの分だけ差し引く） */
+  #solidMode:not(.is-wide) #gl,#solidMode:not(.is-wide) #netSvg,#solidMode:not(.is-wide) #projSvg{height:max(320px,calc(100vh - 200px));height:max(320px,calc(100dvh - 200px))}
+  #planeMode:not(.is-wide) #presetSvg,#planeMode:not(.is-wide) #consSvg,#planeMode:not(.is-wide) #ovlSvg{height:max(320px,calc(100vh - 200px));height:max(320px,calc(100dvh - 200px))}
+  #theoremMode:not(.is-wide) #thmSvg{height:max(320px,calc(100vh - 200px));height:max(320px,calc(100dvh - 200px))}
+  #graphMode:not(.is-wide) #graphSvg{height:max(320px,calc(100vh - 200px));height:max(320px,calc(100dvh - 200px))}
+  #customMode:not(.is-wide) #custSvg{height:max(300px,calc(100vh - 255px));height:max(300px,calc(100dvh - 255px))}
+  #customMode:not(.is-wide) #c3Wrap{height:max(300px,calc(100vh - 255px));height:max(300px,calc(100dvh - 255px))}
+  #dataMode:not(.is-wide) #distSvg,#dataMode:not(.is-wide) #boxSvg,#dataMode:not(.is-wide) #probSvg,#dataMode:not(.is-wide) #sampSvg{height:max(240px,calc(100vh - 260px));height:max(240px,calc(100dvh - 260px))}
+  #numMode:not(.is-wide) #numLineSvg,#numMode:not(.is-wide) #sqrtSvg,#numMode:not(.is-wide) #powSvg,#numMode:not(.is-wide) #areaSvg,#numMode:not(.is-wide) #sqCompSvg,#numMode:not(.is-wide) #eq1Svg,#numMode:not(.is-wide) #mojiSvg,#numMode:not(.is-wide) #simulSvg,#numMode:not(.is-wide) #quadGraphSvg{height:max(240px,calc(100vh - 260px));height:max(240px,calc(100dvh - 260px))}
+  /* 右端の縦タブがキャンバス見出しの右端ボタンに被らないよう、見出しの右に余白を空ける */
+  #solidMode:not(.is-wide) .viewbox .vhead,#planeMode:not(.is-wide) .viewbox .vhead,#theoremMode:not(.is-wide) .viewbox .vhead,#customMode:not(.is-wide) .viewbox .vhead,#dataMode:not(.is-wide) .viewbox .vhead,#numMode:not(.is-wide) .viewbox .vhead,#graphMode:not(.is-wide) .viewbox .vhead{padding-right:38px}
+  /* 作図キャンバス：ビューバーは1行に畳む。元に戻す／やり直しは下部の浮動バー（同じボタンを肩代わり）と重複するので出さない */
+  #customMode:not(.is-wide) #custViewbar .c2d-actions{flex-wrap:nowrap!important}
+  #customMode:not(.is-wide) #custUndo,#customMode:not(.is-wide) #custRedo,#customMode:not(.is-wide) #c3Undo,#customMode:not(.is-wide) #c3Redo{display:none}
+  #customMode:not(.is-wide) #custViewbar .why-note,#customMode:not(.is-wide) #custDimBar .why-note{display:none}
+  #customMode:not(.is-wide) #custViewbar .btn{font-size:13px;padding:4px 10px;white-space:nowrap}
+  /* 作図キャンバスの見出しは1行に畳む（タイトル文と選択状態の文は隠し、グリッド／座標軸と表示リセットだけ残す） */
+  #customMode:not(.is-wide) #custViewbox2d .vhead{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;font-size:0;padding:4px 38px 4px 8px;gap:8px;scrollbar-width:none}
+  #customMode:not(.is-wide) #custViewbox2d .vhead::-webkit-scrollbar{display:none}
+  #customMode:not(.is-wide) #custSelHead{display:none}
+  #customMode:not(.is-wide) #custViewbox2d .vhead .cust-disp{flex:none;flex-wrap:nowrap}
+  #customMode:not(.is-wide) #custViewbox2d .vhead .panreset{flex:none}
+  #customMode:not(.is-wide) #c3Viewbox .vhead{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:4px 38px 4px 8px;scrollbar-width:none}
+  #customMode:not(.is-wide) #c3Viewbox .vhead::-webkit-scrollbar{display:none}
+  #customMode:not(.is-wide) #c3SelHead{display:none}
+  #customMode:not(.is-wide) #c3Viewbox .c3-viewtoggles{flex:none;display:flex;gap:4px;margin-left:0}
+  #customMode:not(.is-wide) #c3Viewbox .c3-viewtoggles .btn{font-size:11.5px;padding:2px 7px;white-space:nowrap}
+}
+@media (prefers-reduced-motion:reduce){
+  #solidMode:not(.is-wide) .side,#planeMode:not(.is-wide) .side,#theoremMode:not(.is-wide) .side,#customMode:not(.is-wide) .side,#dataMode:not(.is-wide) .side,#numMode:not(.is-wide) .side,#graphMode:not(.is-wide) .side{transition:none}
+}
+@media print{
+  #solidMode .side,#planeMode .side,#theoremMode .side,#customMode .side,#dataMode .side,#numMode .side,#graphMode .side{position:static;transform:none;visibility:visible;max-height:none;box-shadow:none;border-radius:0}
+}
+</style>
+<style>
+/* ===== スマホ通常表示の残件対応：作図キャンバスを画面ほぼ全体にし、頻用でない操作は下シートへ／履歴は小さいアイコンボタンに ===== */
+/* シート側の操作カードと浮動ボタンは、スマホ通常表示のときだけ出す（PC・広く見るでは従来どおり） */
+.cust-sheet-ops{display:none}
+.wide-fab{display:none}
+#custPenFab{display:none}
+@media (max-width:900px){
+  /* 作図キャンバス：上に常駐していた操作行（ビューバー／平面・立体切替／見出し行／ペン切替）を畳む。
+     実体は残し、操作は下シートの「キャンバス操作」カード（代理ボタン）から行う */
+  #customMode:not(.is-wide) #custViewbar{display:none}
+  #customMode:not(.is-wide) #custDimBar{display:none}
+  #customMode:not(.is-wide) #custViewbox2d .vhead{display:none}
+  #customMode:not(.is-wide) #custPenbar{display:none}
+  #customMode:not(.is-wide) #c3Viewbox .vhead{display:none}
+  #customMode:not(.is-wide) #c3Viewbox>p.note{display:none}
+  /* キャンバスを画面の高さほぼいっぱいに広げる（細い上部帯＋余白の分だけ差し引く） */
+  #customMode:not(.is-wide) #custSvg{height:max(300px,calc(100vh - 82px));height:max(300px,calc(100dvh - 82px))}
+  #customMode:not(.is-wide) #c3Wrap{height:max(300px,calc(100vh - 82px));height:max(300px,calc(100dvh - 82px))}
+  /* 下シートの先頭に出す操作カード */
+  #customMode:not(.is-wide) .cust-sheet-ops{display:block}
+  #customMode.c3d-on:not(.is-wide) aside.side>.card.cust-sheet-ops{display:block!important}
+  .cust-sheet-ops .ops-label{flex:0 0 auto;min-width:52px;font-size:13px;font-weight:600}
+  .cust-sheet-ops .ops-3d{display:none}
+  #customMode.c3d-on .cust-sheet-ops .ops-3d{display:block}
+  #customMode.c3d-on .cust-sheet-ops .ops-2d{display:none}
+  /* 「広く見る」はキャンバス右上の小さい浮動アイコンボタンだけ残す */
+  #custViewbox2d,#c3Viewbox{position:relative}
+  #customMode:not(.is-wide) .wide-fab{display:flex;position:absolute;top:8px;right:8px;z-index:6;width:44px;height:44px;min-height:44px;padding:0;align-items:center;justify-content:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,.18);cursor:pointer}
+  /* 手書きの候補（線分にする／円にする）が出たときだけ、キャンバス左下に小さく浮かせる */
+  #customMode:not(.is-wide) #custPenFab.on{display:flex;position:absolute;left:8px;bottom:8px;z-index:6;align-items:center;gap:6px;max-width:calc(100% - 16px);padding:5px 7px;background:var(--panel);border:1px solid var(--line);border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+  #custPenFabMsg{font-size:12px;line-height:1.35}
+  #custPenFabMsg:empty{display:none}
+  /* 元に戻す／やり直し：下中央の大きな文字入りピルをやめ、左下の端に小さいアイコンボタン2つにする */
+  .hist-bar{left:8px;right:auto;transform:none;bottom:calc(8px + env(safe-area-inset-bottom,0px));gap:4px;padding:4px}
+  .hist-bar button{width:44px;height:44px;min-height:44px;padding:0;justify-content:center;border-radius:50%}
+  .hist-bar .hist-label{display:none}
+  .hist-bar button svg{width:20px;height:20px}
+  body.wide-on .hist-bar{display:none!important}
+}
+@media print{.wide-fab,#custPenFab,.cust-sheet-ops{display:none!important}}
+</style>
 <link rel="canonical" href="https://sugakulab.pages.dev/" />
 <meta property="og:url" content="https://sugakulab.pages.dev/" />
 <meta property="og:image" content="https://sugakulab.pages.dev/og-image.png" />
@@ -963,6 +1066,12 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <span class="note" id="custPenMsg" role="status"></span>
       </div>
       <svg id="custSvg" viewBox="-10 -10 20 20" preserveAspectRatio="xMidYMid meet" aria-label="カスタムキャンバス"></svg>
+      <button type="button" class="wide-fab" id="custWideFab" aria-label="広く見る（キャンバスを画面いっぱいに広げる）" title="広く見る"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg></button>
+      <div id="custPenFab">
+        <span id="custPenFabMsg" role="status"></span>
+        <button class="btn small hidden" type="button" id="opsPenToSeg">線分にする</button>
+        <button class="btn small hidden" type="button" id="opsPenToCircle">円にする</button>
+      </div>
     </div>
     <div class="card hidden" id="custExamplePanel" style="margin-top:12px">
       <h2>お手本（型の例）</h2>
@@ -1006,6 +1115,7 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
       </div>
       <div id="c3Wrap"><canvas id="c3Gl" aria-label="立体作図キャンバス"></canvas><div id="c3Fallback" class="hidden">3D表示の読み込みに失敗しました。通信環境を確認して、ページを開き直してください。</div></div>
       <p class="note" style="margin:8px 2px 0">ドラッグで360°回転、ホイール／ピンチで拡大・縮小できます（立体モードと同じ操作です）。点をクリックすると、その点が選ばれます。</p>
+      <button type="button" class="wide-fab" id="c3WideFab" aria-label="広く見る（キャンバスを画面いっぱいに広げる）" title="広く見る"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg></button>
     </div>
     <div class="viewbox c3d-only hidden" id="c3NetBox">
       <div class="vhead">展開図 <span id="c3NetHead">3D表示と並べて表示しています</span></div>
@@ -1113,6 +1223,50 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
   </div>
   <aside class="side">
     <div class="wide-drawer-head"><span>道具・設定</span><button class="btn small" type="button" data-wide-tools="customMode">閉じる</button></div>
+    <section class="card cust-sheet-ops" aria-label="キャンバス操作">
+      <h2>キャンバス操作</h2>
+      <div class="row"><span class="ops-label">作り方</span>
+        <div class="seg" role="group" aria-label="平面と立体の切替">
+          <button type="button" id="opsDim2d" class="on">平面で作る</button>
+          <button type="button" id="opsDim3d">立体で作る</button>
+        </div>
+      </div>
+      <div class="ops-2d">
+        <div class="row"><span class="ops-label">道具</span>
+          <div class="seg" role="group" aria-label="キャンバスの道具">
+            <button type="button" id="opsToolMove" class="on">動かす</button>
+            <button type="button" id="opsToolPen">手書きペン</button>
+            <button type="button" id="opsToolEraser">消しゴム</button>
+          </div>
+        </div>
+        <div class="row">
+          <label class="chk"><input type="checkbox" id="opsGrid" checked> グリッド</label>
+          <label class="chk"><input type="checkbox" id="opsAxes" checked> 座標軸</label>
+          <button class="btn small" type="button" id="opsPanReset">最初の表示にもどす</button>
+        </div>
+        <div class="row">
+          <button class="btn small" type="button" id="opsExample">お手本を出す</button>
+          <button class="btn small" type="button" id="opsResetAll">全部消して最初から</button>
+        </div>
+      </div>
+      <div class="ops-3d">
+        <div class="row">
+          <button class="btn small" type="button" id="opsC3Axes" aria-pressed="true">座標軸：ON</button>
+          <button class="btn small" type="button" id="opsC3Grid" aria-pressed="true">床グリッド：ON</button>
+          <button class="btn small" type="button" id="opsC3Faces" aria-pressed="true">面：ON</button>
+          <button class="btn small" type="button" id="opsC3View">視点リセット</button>
+        </div>
+        <div class="row">
+          <button class="btn small" type="button" id="opsC3Example">お手本を出す</button>
+          <button class="btn small" type="button" id="opsC3ResetAll">全部消して最初から</button>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn small" type="button" id="opsWide">広く見る</button>
+        <button class="btn small" type="button" id="opsPrint">印刷</button>
+      </div>
+      <p class="note" style="margin-bottom:0">平面と立体で、下書きは別々に残ります。</p>
+    </section>
     <section class="card">
       <h2>動かす点（ボタンで選択）</h2>
       <div class="ptbtns" id="custPointBtns" role="group" aria-label="動かす点の選択"></div>
@@ -3613,8 +3767,8 @@ if(bC)bC.addEventListener("click",function(){
 })();
 </script>
 <div id="histBar" class="hist-bar hidden" role="group" aria-label="元に戻す・やり直し">
-  <button type="button" id="histUndo" disabled title="元に戻す（Ctrl+Z）"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>元に戻す</button>
-  <button type="button" id="histRedo" disabled title="やり直し（Ctrl+Y）">やり直し<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg></button>
+  <button type="button" id="histUndo" disabled title="元に戻す（Ctrl+Z）" aria-label="元に戻す"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg><span class="hist-label">元に戻す</span></button>
+  <button type="button" id="histRedo" disabled title="やり直し（Ctrl+Y）" aria-label="やり直し"><span class="hist-label">やり直し</span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg></button>
 </div>
 <script>
 "use strict";
@@ -5698,6 +5852,121 @@ if(window.MutationObserver)labelSvgIds.forEach(function(id){var s=$(id);if(s)new
       });
     });
   });
+})();
+</script>
+<script>
+/* スマホ幅では「道具・設定」を最初から下シートにしまい、キャンバスを主役にする。
+   開閉そのものは既存の setSide（右端タブ／シート見出しの「閉じる」／ビューバーの「道具を開く」）に任せる。 */
+(function(){
+  var MODES=["solidMode","planeMode","theoremMode","customMode","dataMode","numMode","graphMode"];
+  var mq=window.matchMedia("(max-width: 900px)");
+  function syncInert(r){
+    var side=r.querySelector("aside.side");if(!side)return;
+    /* スマホ幅でシートが閉じている間は、中の操作をタブ移動・読み上げからも外す */
+    if(mq.matches&&!r.classList.contains("is-wide")&&r.classList.contains("side-closed"))side.setAttribute("inert","");
+    else side.removeAttribute("inert");
+  }
+  function applyMobileDefault(){
+    MODES.forEach(function(id){
+      var r=document.getElementById(id);if(!r)return;
+      if(mq.matches&&!r.classList.contains("is-wide")){
+        r.classList.add("side-closed");
+        var tab=r.querySelector(".side-edge-tab");
+        if(tab)tab.setAttribute("aria-expanded","false");
+      }
+      syncInert(r);
+    });
+  }
+  MODES.forEach(function(id){
+    var r=document.getElementById(id);if(!r)return;
+    if(window.MutationObserver)new MutationObserver(function(){syncInert(r)}).observe(r,{attributes:true,attributeFilter:["class"]});
+  });
+  applyMobileDefault();
+  if(mq.addEventListener)mq.addEventListener("change",applyMobileDefault);
+  else if(mq.addListener)mq.addListener(applyMobileDefault);
+})();
+</script>
+<script>
+"use strict";
+/* ===== スマホ通常表示：下シートの「キャンバス操作」カード（代理ボタン）と浮動ボタン =====
+   作図キャンバスの上に常駐していた操作（平面／立体切替・ペン切替・グリッド／座標軸・表示リセット・
+   お手本・全消し・印刷・広く見る）は、元のボタンをそのまま押す代理ボタンにし、下シートへ移した。
+   元のボタン・下書き保存・広く見る（左帯への移動）の仕組みは壊さない。状態は定期同期でそろえる。 */
+(function(){
+  function $(id){return document.getElementById(id)}
+  var root=$("customMode");if(!root)return;
+  function clickEl(e){if(e)e.click()}
+  function clickId(id){clickEl($(id))}
+  function closeSheet(){
+    var head=root.querySelector("aside.side .wide-drawer-head [data-wide-tools]");
+    if(head&&!root.classList.contains("side-closed"))head.click();
+  }
+  function wideBtn(){return root.querySelector('#custViewbar [data-wide="customMode"]')}
+  function bind(proxyId,targetId,after){
+    var p=$(proxyId);if(!p)return;
+    p.addEventListener("click",function(){clickId(targetId);if(after)after();sync()});
+  }
+  bind("opsDim2d","dim2dBtn");bind("opsDim3d","dim3dBtn");
+  bind("opsToolMove","custToolMove");bind("opsToolPen","custToolPen");bind("opsToolEraser","custToolEraser");
+  bind("opsPanReset","panResetCust");
+  bind("opsExample","custExample",closeSheet);
+  bind("opsResetAll","custResetAll",closeSheet);
+  bind("opsC3Axes","c3TglAxes");bind("opsC3Grid","c3TglGrid");bind("opsC3Faces","c3TglFaces");
+  bind("opsC3View","c3ResetView");
+  bind("opsC3Example","c3Example",closeSheet);
+  bind("opsC3ResetAll","c3ResetAll",closeSheet);
+  bind("opsPenToSeg","custPenToSeg");bind("opsPenToCircle","custPenToCircle");
+  ["opsWide","custWideFab","c3WideFab"].forEach(function(id){
+    var p=$(id);if(!p)return;
+    p.addEventListener("click",function(){closeSheet();clickEl(wideBtn())});
+  });
+  var op=$("opsPrint");
+  if(op)op.addEventListener("click",function(){clickEl(root.querySelector('#custViewbar [data-print="1"]'))});
+  function bindChk(proxyId,targetId){
+    var p=$(proxyId),t=$(targetId);if(!p||!t)return;
+    p.addEventListener("change",function(){
+      t.checked=p.checked;
+      t.dispatchEvent(new Event("change"));
+      sync();
+    });
+  }
+  bindChk("opsGrid","custGrid");bindChk("opsAxes","custAxes");
+  function tog(proxyId,targetId){
+    var p=$(proxyId),t=$(targetId);if(!p||!t)return;
+    p.classList.toggle("on",t.classList.contains("on"));
+  }
+  function togBtn(proxyId,targetId){
+    var p=$(proxyId),t=$(targetId);if(!p||!t)return;
+    p.textContent=t.textContent;
+    p.setAttribute("aria-pressed",t.getAttribute("aria-pressed")||"false");
+  }
+  function sync(){
+    tog("opsDim2d","dim2dBtn");tog("opsDim3d","dim3dBtn");
+    tog("opsToolMove","custToolMove");tog("opsToolPen","custToolPen");tog("opsToolEraser","custToolEraser");
+    var g=$("custGrid"),a=$("custAxes"),og=$("opsGrid"),oa=$("opsAxes");
+    if(g&&og)og.checked=g.checked;
+    if(a&&oa)oa.checked=a.checked;
+    var pr=$("panResetCust"),opr=$("opsPanReset");
+    if(pr&&opr)opr.disabled=!!pr.disabled;
+    togBtn("opsC3Axes","c3TglAxes");togBtn("opsC3Grid","c3TglGrid");togBtn("opsC3Faces","c3TglFaces");
+    /* 手書き候補の浮動バー：ペン／消しゴム使用中か、候補ボタンが出ているときだけ出す */
+    var fab=$("custPenFab");
+    if(fab){
+      var seg=$("custPenToSeg"),circ=$("custPenToCircle");
+      var segOn=!!(seg&&!seg.classList.contains("hidden"));
+      var circOn=!!(circ&&!circ.classList.contains("hidden"));
+      var penOn=false;
+      ["custToolPen","custToolEraser"].forEach(function(id){var b=$(id);if(b&&b.classList.contains("on"))penOn=true});
+      fab.classList.toggle("on",penOn||segOn||circOn);
+      var ps=$("opsPenToSeg"),pc=$("opsPenToCircle");
+      if(ps)ps.classList.toggle("hidden",!segOn);
+      if(pc)pc.classList.toggle("hidden",!circOn);
+      var msg=$("custPenMsg"),fm=$("custPenFabMsg");
+      if(msg&&fm)fm.textContent=msg.textContent||"";
+    }
+  }
+  setInterval(sync,300);
+  sync();
 })();
 </script>
 </body>
