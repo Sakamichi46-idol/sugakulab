@@ -488,6 +488,8 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
   </div>
   <ul class="cov-list" style="margin-top:4px">
     <li><button type="button" class="uname" data-unit="custom">自由キャンバス（入試の図を自分で作る）</button><span class="dom">全学年</span></li>
+    <li><button type="button" class="uname" data-unit="h-sheet">表計算・スプレッドシート（セル参照と SUM などの集計／高校・数学I「データの分析」）</button><span class="dom">データ</span></li>
+    <li><button type="button" class="uname" data-unit="h-seq">数列（等差・等比・漸化式の項を点で見る／高校・数学B）</button><span class="dom">数と式</span></li>
   </ul>
   <p class="note cov-note"><strong>部分対応</strong>の単元は計算が中心の単元です。計算練習そのものは扱いませんが、自分で解いた答えの答え合わせ（検算）はできます（「数と式」モードの下の「答え合わせ（検算）」）。それ以外は、このサイトは「図・グラフを動かして目で確かめる」サイトなので、図で理由が見える部分だけを扱っています。</p>
   </div>
@@ -1905,6 +1907,7 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <button id="dSubProb" type="button">確率（中2）</button>
         <button id="dSubSamp" type="button">標本調査（中3）</button>
         <button id="dSubScat" type="button">散布図と相関</button>
+        <button id="dSubSheet" type="button">表計算</button>
       </div>
       <span class="firsthint" id="dataHint">下の丸（データ）を左右にドラッグすると、ヒストグラムと代表値がその場で変わります。</span>
       <button class="btn btn-wide" type="button" data-wide="dataMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
@@ -1974,6 +1977,21 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <h2>相関の読み取り</h2>
         <dl class="kv" id="scatStats"></dl>
         <p class="note">点の集まりが右上がりに寄っていれば「正の相関」、右下がりなら「負の相関」がありそうだと言えます。ただし、相関があることと、一方が他方の原因であること（因果関係）は別です。回帰直線は、点の集まりの真ん中を通る代表の直線です（高校・数学I「データの分析」）。</p>
+      </div>
+    </div>
+    <style>.shtbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.shtbar .addr{font-weight:700;min-width:2.8em;text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 4px}.shtbar input[type=text]{flex:1 1 200px;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}.shtwrap{overflow-x:auto}.shttable{border-collapse:collapse;font-size:13px;min-width:660px;width:100%}.shttable th,.shttable td{border:1px solid var(--line);padding:0;text-align:center}.shttable thead th,.shttable tbody th{background:var(--panel2);font-size:12px;padding:4px 2px;color:var(--sub)}.shttable td input{width:100%;min-width:54px;border:0;background:transparent;padding:6px 5px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}.shttable td input:focus{outline:none}.shttable td.sel{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}.shttable input.shterr{color:var(--warn);font-weight:700}#shtBarSvg{width:100%;height:280px;display:block;background:var(--panel)}#seqSvg{width:100%;height:340px;display:block;background:var(--panel);touch-action:none}.seqin{width:74px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);text-align:center;font-variant-numeric:tabular-nums}</style>
+<div id="dPaneSheet" class="hidden">
+      <div class="viewbox">
+        <div class="vhead">表計算（スプレッドシート） <span>セルに数や式を入れると、関係するセルがその場で計算し直されます</span></div>
+        <div style="padding:10px">
+          <div class="shtbar"><span class="addr" id="shtAddr">A1</span><input type="text" id="shtFormula" aria-label="選択中のセルの内容（数式バー）" placeholder="セルの内容（例：=SUM(B2:B9)）"><span class="note" id="shtValue" style="margin:0"></span></div>
+          <div class="shtwrap"><table class="shttable" id="shtTable" aria-label="表計算の表（10列×20行）"></table></div>
+          <p class="note" id="shtMsg" aria-live="polite">セルを選ぶと、上のバーに中身（式）が出ます。式は「=」から始めます。例：=A2+B2、=SUM(B2:B9)、=AVERAGE(B2:B9)、=MAX(B2:B9)、=MIN(B2:B9)。範囲は B2:B9 のように「:」で結びます。かけ算は * 、割り算は / で書きます。</p>
+        </div>
+      </div>
+      <div class="viewbox" style="margin-top:12px">
+        <div class="vhead">棒グラフ <span id="shtBarHead">右の「グラフへの連携」で列を選ぶと、その列の数が棒グラフになります</span></div>
+        <svg id="shtBarSvg" viewBox="0 0 640 280" preserveAspectRatio="xMidYMid meet" aria-label="表計算の列の棒グラフ"></svg>
       </div>
     </div>
   </div>
@@ -2088,6 +2106,26 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <p class="note">相関係数 r は −1〜＋1 の間の数で、＋1に近いほど強い正の相関、−1に近いほど強い負の相関、0に近いほど相関が見えにくいことを表します。回帰直線は、各点との縦のずれの二乗の合計が最も小さくなるように引いた直線です（最小二乗法）。どちらも高校・数学I「データの分析」で学びます。</p>
       </section>
     </div>
+<div id="dSideSheet" class="hidden">
+      <section class="card">
+        <h2>式の書き方</h2>
+        <p class="note" style="margin-top:0">セルには、数・文字・式が入れられます。式は「=」から始め、他のセルは A1 のように「列の文字＋行の番号」で指します。参照先のセルを変えると、式の結果もその場で変わります。使える計算は ＋ － ＊（*） ÷（/） と累乗（^）で、関数は SUM（合計）・AVERAGE（平均）・MAX（最大）・MIN（最小）です。範囲は SUM(B2:B9) のように書きます。ぐるぐる参照し合う形（循環参照）や 0 での割り算は、エラーとしてセルに出ます。</p>
+        <div class="row">
+          <button class="btn small" type="button" id="shtExample">例の表に戻す</button>
+          <button class="btn small" type="button" id="shtClear">表を全部消す</button>
+        </div>
+        <p class="note" style="margin-bottom:0">高校・数学I「データの分析」では、表計算ソフトを使ってデータを整理・集計します。この表は、その考え方をこのページの中で試すための簡易版です（10列×20行）。</p>
+      </section>
+      <section class="card">
+        <h2>グラフへの連携</h2>
+        <div class="row"><label for="shtColX">散布図の x にする列</label><select id="shtColX" aria-label="散布図のxにする列"></select></div>
+        <div class="row"><label for="shtColY">散布図の y にする列</label><select id="shtColY" aria-label="散布図のyにする列"></select></div>
+        <div class="row"><button class="btn primary" type="button" id="shtToScat">2列を散布図に送る</button></div>
+        <p class="note" id="shtScatMsg">数字が入っている行どうしを組にして、「散布図と相関」タブへ送ります（3組以上必要です）。</p>
+        <div class="row"><label for="shtBarCol">棒グラフにする列</label><select id="shtBarCol" aria-label="棒グラフにする列"></select></div>
+        <p class="note" style="margin-bottom:0">棒グラフは、選んだ列の数字をその場で下の図に描きます。列の先頭に名前（文字）が入っていれば、それがグラフの題になります。</p>
+      </section>
+    </div>
   </aside>
 </div>
 </div>
@@ -2105,6 +2143,7 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <button id="nSubArea" type="button">面積図・式の計算（中2・中3）</button>
         <button id="nSubSimul" type="button">連立方程式（中2）</button>
         <button id="nSubQuad" type="button">2次方程式（中3）</button>
+        <button id="nSubSeq" type="button">数列（高校）</button>
       </div>
       <span class="firsthint" id="numHint">点Aと点Bを左右にドラッグすると、位置・絶対値・A＋Bの矢印がその場で変わります。</span>
       <button class="btn btn-wide" type="button" data-wide="numMode" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span class="wide-label">広く見る</span></button>
@@ -2210,6 +2249,22 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         <dl class="kv" id="quadGraphStats"></dl>
         <p class="note">放物線 y＝x²＋c と x軸（y＝0）の交点の x座標が、方程式 x²＋c＝0 の解です。c を動かすと、交点が2つ→1つ（接する）→0つ（解なし）に変わります。</p>
         <div class="row"><button class="btn small" type="button" id="quadToGraph">関数モードで放物線を見る</button></div>
+      </div>
+    </div>
+<div id="nPaneSeq" class="hidden">
+      <div class="viewbox">
+        <div class="vhead">数列の点 <span id="seqHead">項を点として並べます。点の並び方で、増え方の様子が見えます</span></div>
+        <svg id="seqSvg" viewBox="0 0 640 340" preserveAspectRatio="xMidYMid meet" aria-label="数列の項のプロット"></svg>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h2>数列の読み取り</h2>
+        <dl class="kv" id="seqStats"></dl>
+        <p class="note">項の値・一般項・和は「式としての答え」に当たるため、右の「答え合わせ表示」が ON のときにだけ出ます。点の図そのものは常に出ています（高校・数学B「数列」）。</p>
+      </div>
+      <div class="card hidden" id="seqTableCard" style="margin-top:12px">
+        <h2>項の一覧</h2>
+        <div class="dtablewrap"><table class="dtable" id="seqTable" aria-label="数列の項の一覧" style="min-width:0"></table></div>
+        <p class="note" id="seqTableNote" style="margin-bottom:0"></p>
       </div>
     </div>
 <section class="card" id="chkCard" style="margin-top:12px" aria-label="答え合わせ（検算）">
@@ -2540,6 +2595,28 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
           <input type="number" id="qgCNum" min="-9" max="4" step="1" value="-4" style="width:74px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel)" aria-label="c の数値入力">
         </div>
         <p class="note">y＝x²＋c の c です。c が負のとき交点は2つ、c＝0 で1つ（接する）、c が正のとき交点はなく、解もありません。</p>
+      </section>
+    </div>
+<div id="nSideSeq" class="hidden">
+      <section class="card">
+        <h2>数列の種類と数</h2>
+        <div class="seg" role="group" aria-label="数列の種類" style="flex-wrap:wrap;margin-bottom:8px">
+          <button id="seqTArith" class="on" type="button">等差数列</button>
+          <button id="seqTGeo" type="button">等比数列</button>
+          <button id="seqTRec" type="button">漸化式</button>
+        </div>
+        <div class="row"><label for="seqA1">初項 a₁</label><input type="text" class="seqin" id="seqA1" value="2" inputmode="text"></div>
+        <div class="row" id="seqRowD"><label for="seqD">公差 d</label><input type="text" class="seqin" id="seqD" value="3" inputmode="text"></div>
+        <div class="row hidden" id="seqRowR"><label for="seqR">公比 r</label><input type="text" class="seqin" id="seqR" value="2" inputmode="text"></div>
+        <div class="row hidden" id="seqRowP"><label for="seqP">p（a(n+1)＝p・a(n)＋q の p）</label><input type="text" class="seqin" id="seqP" value="2" inputmode="text"></div>
+        <div class="row hidden" id="seqRowQ"><label for="seqQ">q（a(n+1)＝p・a(n)＋q の q）</label><input type="text" class="seqin" id="seqQ" value="1" inputmode="text"></div>
+        <div class="row"><label for="seqN">何項目まで（n）</label><input type="range" id="seqN" min="5" max="30" step="1" value="15" style="flex:1 1 auto"><span id="seqNVal" style="font-weight:700">15</span></div>
+        <p class="note" id="seqTypeNote" style="margin-bottom:0">等差数列は、一定の数（公差）ずつ増えたり減ったりする数列です。数は分数（1/2 のように）でも入れられます。</p>
+      </section>
+      <section class="card">
+        <h2>答え合わせ</h2>
+        <div class="row"><button class="btn" type="button" id="seqAnswersBtn">答え合わせ表示：OFF</button></div>
+        <p class="note" style="margin-bottom:0">ONにすると、左に一般項・第n項・第n項までの和が出て、項の一覧表も出ます。点の図は、ON・OFFどちらでも出ています。</p>
       </section>
     </div>
   </aside>
@@ -8103,6 +8180,594 @@ casChips("data-cas-solve", function(b){ cas$("casSolveIn").value = b.getAttribut
 casChips("data-cas-sim", function(b){ var pr = b.getAttribute("data-cas-sim").split("|"); cas$("casSimIn1").value = pr[0]; cas$("casSimIn2").value = pr[1] || ""; casUpdSimul(); });
 casChips("data-cas-sub", function(b){ cas$("casSubIn").value = b.getAttribute("data-cas-sub"); casUpdSub(); cas$("casSubIn").focus(); });
 casUpdAll();
+})();
+</script>
+<script>
+"use strict";
+(function(){
+function $(id){ return document.getElementById(id); }
+function escS(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fracH(s){ return (typeof fracHTML === "function") ? fracHTML(s) : escS(s); }
+function mkTxt(parent, x, y, str, attrs){ var t = svgEl("text", attrs || {}, parent); t.setAttribute("x", x); t.setAttribute("y", y); t.textContent = str; return t; }
+var TXA = { fill: "var(--ink)", "font-size": "12", "text-anchor": "middle" };
+var TXB = { fill: "var(--sub)", "font-size": "11", "text-anchor": "middle" };
+function niceScale(min, max){
+  var span = max - min; if (!(span > 0)) span = Math.abs(max) || 1;
+  var step0 = span / 5, mag = Math.pow(10, Math.floor(Math.log10(step0))), norm = step0 / mag;
+  var step = norm < 1.5 ? mag : norm < 3.5 ? 2 * mag : norm < 7.5 ? 5 * mag : 10 * mag;
+  var lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+  if (hi <= lo) hi = lo + step;
+  var dec = step >= 1 ? 0 : step >= 0.1 ? 1 : 2;
+  return { lo: lo, hi: hi, step: step, dec: dec };
+}
+
+/* ================= 表計算（スプレッドシート） ================= */
+var SHT = { cols: 10, rows: 20, cells: {}, vals: {}, sel: "A1", built: false, barCol: 1 };
+var SHTDEF = { "A1": "勉強時間", "B1": "点数",
+  "A2": "1", "B2": "42", "A3": "2", "B3": "48", "A4": "2.5", "B4": "52", "A5": "3", "B5": "55",
+  "A6": "3.5", "B6": "57", "A7": "4", "B7": "64", "A8": "5", "B8": "69", "A9": "6", "B9": "85",
+  "D1": "合計", "E1": "=SUM(B2:B9)", "D2": "平均", "E2": "=AVERAGE(B2:B9)",
+  "D3": "最大", "E3": "=MAX(B2:B9)", "D4": "最小", "E4": "=MIN(B2:B9)" };
+function shtKey(c, r){ return String.fromCharCode(65 + c) + (r + 1); }
+function shtFmt(v){
+  if (!isFinite(v)) return "#値!";
+  var r = Math.round(v * 1e6) / 1e6; if (r === 0) r = 0;
+  return String(r);
+}
+function shtErr(code){ var e = new Error(code); e.shtCode = code; return e; }
+
+/* --- formula tokenizer / parser / evaluator --- */
+function shtTokens(src){
+  var toks = [], i = 0;
+  while (i < src.length){
+    var ch = src[i];
+    if (ch === " " || ch === "　"){ i++; continue; }
+    if (/[0-9]/.test(ch) || (ch === "." && /[0-9]/.test(src[i + 1] || ""))){
+      var j = i; while (j < src.length && /[0-9.]/.test(src[j])) j++;
+      var ns = src.slice(i, j);
+      if ((ns.match(/\./g) || []).length > 1) throw shtErr("#値!");
+      toks.push({ t: "num", v: parseFloat(ns) }); i = j; continue;
+    }
+    if (/[A-Za-z]/.test(ch)){
+      var j2 = i; while (j2 < src.length && /[A-Za-z]/.test(src[j2])) j2++;
+      var word = src.slice(i, j2).toUpperCase(); i = j2;
+      var digits = "";
+      while (i < src.length && /[0-9]/.test(src[i])){ digits += src[i]; i++; }
+      toks.push({ t: "id", w: word, d: digits }); continue;
+    }
+    if ("+-*/^(),:".indexOf(ch) >= 0){ toks.push({ t: ch }); i++; continue; }
+    throw shtErr("#値!");
+  }
+  return toks;
+}
+function shtRefOf(tok){
+  if (!tok || tok.t !== "id" || tok.d === "") return null;
+  if (!/^[A-J]$/.test(tok.w)) return null;
+  var r = parseInt(tok.d, 10);
+  if (!(r >= 1 && r <= 20)) return null;
+  return tok.w + r;
+}
+var SHTFUNCS = { SUM: 1, AVERAGE: 1, AVG: 1, MAX: 1, MIN: 1 };
+function shtEvalFormula(src, cellNum, rangeNums){
+  var toks = shtTokens(src), pos = 0;
+  function peek(){ return toks[pos]; }
+  function nxt(){ return toks[pos++]; }
+  function parseExpr(){
+    var v = parseTerm();
+    while (peek() && (peek().t === "+" || peek().t === "-")){ var op = nxt().t; var r = parseTerm(); v = (op === "+") ? v + r : v - r; }
+    return v;
+  }
+  function parseTerm(){
+    var v = parseFactor();
+    while (peek() && (peek().t === "*" || peek().t === "/")){
+      var op = nxt().t; var r = parseFactor();
+      if (op === "*") v = v * r; else { if (r === 0) throw shtErr("#DIV/0!"); v = v / r; }
+    }
+    return v;
+  }
+  function parseFactor(){
+    var tk = peek();
+    if (tk && (tk.t === "-" || tk.t === "+")){ nxt(); var a = parseFactor(); return tk.t === "-" ? -a : a; }
+    return parsePower();
+  }
+  function parsePower(){
+    var base = parseAtom();
+    var tk = peek();
+    if (tk && tk.t === "^"){ nxt(); var ex = parseFactor(); var v = Math.pow(base, ex); if (!isFinite(v) || isNaN(v)) throw shtErr("#値!"); return v; }
+    return base;
+  }
+  function parseAtom(){
+    var tk = nxt();
+    if (!tk) throw shtErr("#値!");
+    if (tk.t === "num") return tk.v;
+    if (tk.t === "("){ var v = parseExpr(); var c = nxt(); if (!c || c.t !== ")") throw shtErr("#値!"); return v; }
+    if (tk.t === "id"){
+      var after = peek();
+      if (after && after.t === "("){
+        var fname = tk.w;
+        if (!SHTFUNCS[fname]) throw shtErr("#名前?");
+        nxt();
+        var nums = [];
+        if (!(peek() && peek().t === ")")){
+          while (true){
+            var save = pos;
+            var r1 = shtRefOf(peek());
+            var isRange = false;
+            if (r1){ var p2 = pos + 1; if (toks[p2] && toks[p2].t === ":"){ var r2 = shtRefOf(toks[p2 + 1]); if (r2){ pos = p2 + 2; rangeNums(r1, r2).forEach(function(x){ nums.push(x); }); isRange = true; } } }
+            if (!isRange){ pos = save; nums.push(parseExpr()); }
+            if (peek() && peek().t === ","){ nxt(); continue; }
+            break;
+          }
+        }
+        var cl = nxt(); if (!cl || cl.t !== ")") throw shtErr("#値!");
+        if (fname === "SUM"){ var s = 0; nums.forEach(function(x){ s += x; }); return s; }
+        if (fname === "AVERAGE" || fname === "AVG"){ if (!nums.length) throw shtErr("#DIV/0!"); var s2 = 0; nums.forEach(function(x){ s2 += x; }); return s2 / nums.length; }
+        if (!nums.length) throw shtErr("#値!");
+        return fname === "MAX" ? Math.max.apply(null, nums) : Math.min.apply(null, nums);
+      }
+      var ref = shtRefOf(tk);
+      if (!ref) throw shtErr("#REF!");
+      return cellNum(ref);
+    }
+    throw shtErr("#値!");
+  }
+  if (!toks.length) throw shtErr("#値!");
+  var v = parseExpr();
+  if (pos < toks.length) throw shtErr("#値!");
+  if (typeof v !== "number" || isNaN(v)) throw shtErr("#値!");
+  return v;
+}
+function shtCompute(){
+  var memo = {}, visiting = {};
+  function cellVal(key){
+    if (key in memo) return memo[key];
+    if (visiting[key]) throw shtErr("#循環!");
+    var raw = SHT.cells[key];
+    if (raw === undefined || String(raw).trim() === ""){ memo[key] = { t: "empty" }; return memo[key]; }
+    visiting[key] = 1;
+    var res;
+    try {
+      var s = String(raw).trim();
+      if (s.charAt(0) === "=") res = { t: "num", v: shtEvalFormula(s.slice(1), cellNum, rangeNums) };
+      else { var n = (typeof parseNum === "function") ? parseNum(s) : parseFloat(s); res = isFinite(n) ? { t: "num", v: n } : { t: "text", v: s }; }
+    } catch (e) { res = { t: "err", v: (e && e.shtCode) || "#値!" }; }
+    delete visiting[key];
+    memo[key] = res;
+    return res;
+  }
+  function cellNum(key){
+    var r = cellVal(key);
+    if (r.t === "num") return r.v;
+    if (r.t === "empty") return 0;
+    if (r.t === "err") throw shtErr(r.v);
+    throw shtErr("#値!");
+  }
+  function rangeNums(a, b){
+    var ca = a.charCodeAt(0) - 65, ra = parseInt(a.slice(1), 10) - 1;
+    var cb = b.charCodeAt(0) - 65, rb = parseInt(b.slice(1), 10) - 1;
+    var out = [];
+    for (var c = Math.min(ca, cb); c <= Math.max(ca, cb); c++)
+      for (var r = Math.min(ra, rb); r <= Math.max(ra, rb); r++){
+        var v = cellVal(shtKey(c, r));
+        if (v.t === "num") out.push(v.v);
+        else if (v.t === "err") throw shtErr(v.v);
+      }
+    return out;
+  }
+  for (var k in SHT.cells){ try { cellVal(k); } catch (e) {} }
+  SHT.vals = memo;
+}
+function shtRender(){
+  var tb = $("shtTable"); if (!tb) return;
+  var act = document.activeElement;
+  tb.querySelectorAll("input[data-k]").forEach(function(inp){
+    var key = inp.getAttribute("data-k");
+    var res = SHT.vals[key], raw = SHT.cells[key];
+    inp.classList.toggle("shterr", !!(res && res.t === "err"));
+    var td = inp.parentNode; if (td) td.classList.toggle("sel", key === SHT.sel);
+    if (inp === act) return;
+    if (raw === undefined || String(raw).trim() === "") inp.value = "";
+    else if (!res) inp.value = String(raw);
+    else if (res.t === "num") inp.value = shtFmt(res.v);
+    else if (res.t === "text") inp.value = res.v;
+    else if (res.t === "err") inp.value = res.v;
+    else inp.value = "";
+  });
+  var addr = $("shtAddr"); if (addr) addr.textContent = SHT.sel;
+  var val = $("shtValue"), res2 = SHT.vals[SHT.sel];
+  if (val){
+    if (!res2) val.textContent = "";
+    else if (res2.t === "num") val.textContent = "＝ " + shtFmt(res2.v);
+    else if (res2.t === "text") val.textContent = "（文字）";
+    else if (res2.t === "err") val.textContent = res2.v + "（参照先や式を確認してください）";
+    else val.textContent = "";
+  }
+  var bar = $("shtFormula");
+  if (bar && document.activeElement !== bar) bar.value = SHT.cells[SHT.sel] || "";
+}
+function shtRecalcAll(){ shtCompute(); shtRender(); shtDrawBar(); }
+function shtDrawBar(){
+  var svg = $("shtBarSvg"); if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  var col = SHT.barCol, letter = String.fromCharCode(65 + col);
+  var items = [];
+  for (var r = 0; r < SHT.rows; r++){ var v = SHT.vals[shtKey(col, r)]; if (v && v.t === "num") items.push({ row: r + 1, v: v.v }); }
+  var head = $("shtBarHead");
+  var titleRes = SHT.vals[shtKey(col, 0)];
+  var title = (titleRes && titleRes.t === "text") ? titleRes.v : "";
+  if (head) head.textContent = items.length ? (letter + "列" + (title ? "（" + title + "）" : "") + "の棒グラフ") : "右の「グラフへの連携」で列を選ぶと、その列の数が棒グラフになります";
+  var W = 640, H = 280, L = 48, R = 14, T = 22, B = 32, plotW = W - L - R, plotH = H - T - B;
+  if (!items.length){ mkTxt(svg, W / 2, H / 2, "この列には、まだ数字がありません", { fill: "var(--sub)", "font-size": "13", "text-anchor": "middle" }); return; }
+  var mn = Math.min.apply(null, items.map(function(d){ return d.v; }).concat([0]));
+  var mx = Math.max.apply(null, items.map(function(d){ return d.v; }).concat([0]));
+  var sc = niceScale(mn, mx);
+  function Y(v){ return T + (sc.hi - v) / (sc.hi - sc.lo) * plotH; }
+  for (var gv = sc.lo; gv <= sc.hi + 1e-9; gv += sc.step){
+    var y = Y(gv);
+    svgEl("line", { x1: L, y1: y, x2: W - R, y2: y, stroke: "var(--line)", "stroke-width": Math.abs(gv) < 1e-9 ? 1.4 : 0.7 }, svg);
+    var lb = mkTxt(svg, L - 6, y + 4, (typeof fmtDec === "function" ? fmtDec(gv, sc.dec) : String(gv)), TXA); lb.setAttribute("text-anchor", "end");
+  }
+  var bw = plotW / items.length;
+  items.forEach(function(d, i){
+    var cx = L + bw * i, wdt = Math.max(2, bw * 0.62), x0 = cx + (bw - wdt) / 2;
+    var yTop = Y(Math.max(d.v, 0)), yBot = Y(Math.min(d.v, 0));
+    svgEl("rect", { x: x0, y: yTop, width: wdt, height: Math.max(1, yBot - yTop), fill: "#3f9db8", opacity: "0.85", stroke: "#2b6f86", "stroke-width": "1" }, svg);
+    mkTxt(svg, cx + bw / 2, (d.v >= 0 ? yTop - 5 : yBot + 14), shtFmt(d.v), { fill: "var(--ink)", "font-size": "11", "text-anchor": "middle" });
+    mkTxt(svg, cx + bw / 2, H - 12, String(d.row) + "行", TXB);
+  });
+  mkTxt(svg, L, 14, letter + "列" + (title ? "：" + title : ""), { fill: "var(--sub)", "font-size": "11.5", "text-anchor": "start" });
+}
+function shtBuild(){
+  if (SHT.built) return;
+  var tb = $("shtTable"); if (!tb) return;
+  SHT.built = true;
+  var html = "<thead><tr><th style='width:34px'></th>";
+  for (var c = 0; c < SHT.cols; c++) html += "<th>" + String.fromCharCode(65 + c) + "</th>";
+  html += "</tr></thead><tbody>";
+  for (var r = 0; r < SHT.rows; r++){
+    html += "<tr><th>" + (r + 1) + "</th>";
+    for (var c2 = 0; c2 < SHT.cols; c2++){ var k = shtKey(c2, r); html += "<td><input type='text' data-k='" + k + "' aria-label='セル " + k + "'></td>"; }
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  tb.innerHTML = html;
+  tb.addEventListener("focusin", function(e){
+    var inp = e.target; if (!inp.getAttribute || !inp.getAttribute("data-k")) return;
+    SHT.sel = inp.getAttribute("data-k");
+    inp.value = SHT.cells[SHT.sel] || "";
+    shtRender();
+    var bar = $("shtFormula"); if (bar) bar.value = SHT.cells[SHT.sel] || "";
+  });
+  tb.addEventListener("input", function(e){
+    var inp = e.target; if (!inp.getAttribute || !inp.getAttribute("data-k")) return;
+    var key = inp.getAttribute("data-k");
+    SHT.cells[key] = inp.value;
+    SHT.sel = key;
+    shtCompute(); shtRender(); shtDrawBar();
+  });
+  tb.addEventListener("focusout", function(e){
+    var inp = e.target; if (!inp.getAttribute || !inp.getAttribute("data-k")) return;
+    shtRender();
+  });
+  [["shtColX", 0], ["shtColY", 1], ["shtBarCol", 1]].forEach(function(p){
+    var sel = $(p[0]); if (!sel) return;
+    sel.innerHTML = "";
+    for (var c3 = 0; c3 < SHT.cols; c3++){ var o = document.createElement("option"); o.value = c3; o.textContent = String.fromCharCode(65 + c3) + "列"; sel.appendChild(o); }
+    sel.value = p[1];
+  });
+  SHT.barCol = 1;
+  var bc = $("shtBarCol"); if (bc) bc.addEventListener("change", function(){ SHT.barCol = Number(bc.value); shtDrawBar(); });
+  var bar2 = $("shtFormula");
+  if (bar2){
+    bar2.addEventListener("input", function(){ SHT.cells[SHT.sel] = bar2.value; shtCompute(); shtRender(); shtDrawBar(); });
+    bar2.addEventListener("focus", function(){ bar2.value = SHT.cells[SHT.sel] || ""; });
+  }
+  var ex = $("shtExample"); if (ex) ex.onclick = function(){ SHT.cells = {}; for (var k2 in SHTDEF) SHT.cells[k2] = SHTDEF[k2]; shtRecalcAll(); var m = $("shtMsg"); if (m) m.textContent = "例の表に戻しました。E列の合計・平均・最大・最小は、B列を参照する式で計算されています。B列の数字を変えると、E列も変わります。"; };
+  var cl = $("shtClear"); if (cl) cl.onclick = function(){ SHT.cells = {}; var act = document.activeElement; if (act && act.getAttribute && act.getAttribute("data-k")) act.value = ""; if (bar2) bar2.value = ""; shtRecalcAll(); };
+  var to = $("shtToScat");
+  if (to) to.onclick = function(){
+    var msg = $("shtScatMsg");
+    if (typeof SC === "undefined" || typeof setDataSub !== "function"){ if (msg) msg.textContent = "散布図への連携が読み込めていません。ページを再読み込みしてください。"; return; }
+    var xi = Number($("shtColX").value), yi = Number($("shtColY").value);
+    var pairs = [];
+    for (var r2 = 0; r2 < SHT.rows; r2++){
+      var vx = SHT.vals[shtKey(xi, r2)], vy = SHT.vals[shtKey(yi, r2)];
+      if (vx && vx.t === "num" && vy && vy.t === "num") pairs.push([vx.v, vy.v]);
+    }
+    if (pairs.length < 3){ if (msg) msg.textContent = "組が " + pairs.length + " 組しかありません。両方の列に数字が入っている行が3行以上必要です。"; return; }
+    var note = "";
+    if (pairs.length > 30){ pairs = pairs.slice(0, 30); note = "（散布図は30組までのため、最初の30組を送りました）"; }
+    function colName(ci){ var h = SHT.vals[shtKey(ci, 0)]; return (h && h.t === "text") ? h.v : "表計算 " + String.fromCharCode(65 + ci) + "列"; }
+    SC.pts = pairs; SC.xName = colName(xi); SC.yName = colName(yi);
+    var xn = $("scatXName"), yn = $("scatYName");
+    if (xn) xn.value = SC.xName; if (yn) yn.value = SC.yName;
+    shtHide();
+    setDataSub("scat");
+    var sm = $("scatMsg"); if (sm) sm.textContent = "表計算から " + pairs.length + " 組を送りました。" + note + " 組は3〜30組まで変えられます。";
+  };
+  SHT.cells = {}; for (var k3 in SHTDEF) SHT.cells[k3] = SHTDEF[k3];
+  shtRecalcAll();
+}
+
+/* --- data-mode tab wiring for the sheet --- */
+var DATA_SUBS = [["dSubDist", "dPaneDist", "dSideDist"], ["dSubBox", "dPaneBox", "dSideBox"], ["dSubProb", "dPaneProb", "dSideProb"], ["dSubSamp", "dPaneSamp", "dSideSamp"], ["dSubScat", "dPaneScat", "dSideScat"]];
+function shtHide(){
+  var p = $("dPaneSheet"), s = $("dSideSheet"), b = $("dSubSheet");
+  if (p) p.classList.add("hidden"); if (s) s.classList.add("hidden"); if (b) b.classList.remove("on");
+}
+function shtShow(){
+  DATA_SUBS.forEach(function(p){
+    var b = $(p[0]), pn = $(p[1]), sd = $(p[2]);
+    if (b) b.classList.remove("on"); if (pn) pn.classList.add("hidden"); if (sd) sd.classList.add("hidden");
+  });
+  var p2 = $("dPaneSheet"), s2 = $("dSideSheet"), b2 = $("dSubSheet");
+  if (p2) p2.classList.remove("hidden"); if (s2) s2.classList.remove("hidden"); if (b2) b2.classList.add("on");
+  var h = $("dataHint"); if (h) h.textContent = "セルに数や式（=SUM(B2:B9) など）を入れると、参照しているセルも含めて、その場で計算し直されます。列を散布図や棒グラフにも送れます。";
+  try { if (typeof DS !== "undefined") DS.sub = "sheet"; } catch (e) {}
+  shtBuild(); shtRecalcAll();
+}
+DATA_SUBS.forEach(function(p){ var b = $(p[0]); if (b) b.addEventListener("click", shtHide); });
+var shtBtn = $("dSubSheet"); if (shtBtn) shtBtn.addEventListener("click", shtShow);
+
+/* ================= 数列（高校・数学B） ================= */
+var SEQ = { type: "arith", answers: false };
+function seqNum(v){
+  if (!isFinite(v)) return "―";
+  var s;
+  if (typeof fmtFrac === "function"){ s = fmtFrac(v, 4); if (s.indexOf("/") >= 0) return s.replace(/^-/, "−"); }
+  s = (typeof fmtDec === "function") ? fmtDec(v, 4) : String(v);
+  return s.replace(/^-/, "−");
+}
+function seqParams(){
+  function pv(id){ var el = $(id); return el ? parseNum(el.value) : NaN; }
+  var nel = $("seqN");
+  return { a1: pv("seqA1"), d: pv("seqD"), r: pv("seqR"), p: pv("seqP"), q: pv("seqQ"), N: nel ? Number(nel.value) : 15 };
+}
+function seqTerms(){
+  var pr = seqParams();
+  var need = SEQ.type === "arith" ? ["a1", "d"] : SEQ.type === "geo" ? ["a1", "r"] : ["a1", "p", "q"];
+  for (var i = 0; i < need.length; i++) if (!isFinite(pr[need[i]])) return { err: "右の欄に、数として読める値を入れてください（分数は 1/2 のように書けます）。" };
+  var terms = [], cur = pr.a1, trunc = false;
+  for (var n = 1; n <= pr.N; n++){
+    if (!isFinite(cur) || Math.abs(cur) > 1e15){ trunc = true; break; }
+    terms.push(cur);
+    if (SEQ.type === "arith") cur = cur + pr.d;
+    else if (SEQ.type === "geo") cur = cur * pr.r;
+    else cur = pr.p * cur + pr.q;
+  }
+  if (!terms.length) return { err: "値が大きくなりすぎて、項を計算できませんでした。初項や公比・p を小さくしてください。" };
+  return { terms: terms, pr: pr, trunc: trunc };
+}
+function seqLinHTML(coef, con){
+  if (coef === 0) return fracH(seqNum(con));
+  var t;
+  if (coef === 1) t = "n";
+  else if (coef === -1) t = "−n";
+  else t = fracH(seqNum(coef)) + "n";
+  if (con === 0) return t;
+  return t + (con > 0 ? " ＋ " : " − ") + fracH(seqNum(Math.abs(con)));
+}
+function seqPowHTML(base){
+  var bs = seqNum(base);
+  var b = (base < 0 || bs.indexOf("/") >= 0) ? "（" + fracH(bs) + "）" : fracH(bs);
+  return b + "<sup>n−1</sup>";
+}
+function seqGeneralHTML(pr){
+  if (SEQ.type === "arith"){
+    if (pr.d === 0) return "a<sub>n</sub> ＝ " + fracH(seqNum(pr.a1)) + "（ずっと同じ値）";
+    return "a<sub>n</sub> ＝ " + fracH(seqNum(pr.a1)) + " ＋ (n−1)・" + (pr.d < 0 ? "（" + fracH(seqNum(pr.d)) + "）" : fracH(seqNum(pr.d))) + " ＝ " + seqLinHTML(pr.d, pr.a1 - pr.d);
+  }
+  if (SEQ.type === "geo"){
+    if (pr.r === 1) return "a<sub>n</sub> ＝ " + fracH(seqNum(pr.a1)) + "（ずっと同じ値）";
+    if (pr.a1 === 0) return "a<sub>n</sub> ＝ 0（ずっと同じ値）";
+    if (pr.r === 0) return "a<sub>1</sub> ＝ " + fracH(seqNum(pr.a1)) + "、a<sub>n</sub> ＝ 0（n ≧ 2）";
+    var head = (pr.a1 === 1) ? "" : fracH(seqNum(pr.a1)) + "・";
+    return "a<sub>n</sub> ＝ " + head + seqPowHTML(pr.r);
+  }
+  /* recurrence a(n+1) = p*a(n) + q */
+  if (pr.p === 1){
+    if (pr.q === 0) return "a<sub>n</sub> ＝ " + fracH(seqNum(pr.a1)) + "（ずっと同じ値）";
+    return "a<sub>n</sub> ＝ " + seqLinHTML(pr.q, pr.a1 - pr.q) + "（公差 " + fracH(seqNum(pr.q)) + " の等差数列と同じ）";
+  }
+  if (pr.q === 0){
+    if (pr.a1 === 0) return "a<sub>n</sub> ＝ 0（ずっと同じ値）";
+    if (pr.p === 0) return "a<sub>1</sub> ＝ " + fracH(seqNum(pr.a1)) + "、a<sub>n</sub> ＝ 0（n ≧ 2）";
+    var head2 = (pr.a1 === 1) ? "" : fracH(seqNum(pr.a1)) + "・";
+    return "a<sub>n</sub> ＝ " + head2 + seqPowHTML(pr.p) + "（等比数列と同じ）";
+  }
+  if (pr.p === 0) return "a<sub>1</sub> ＝ " + fracH(seqNum(pr.a1)) + "、a<sub>n</sub> ＝ " + fracH(seqNum(pr.q)) + "（n ≧ 2）";
+  var alpha = pr.q / (1 - pr.p), diff = pr.a1 - alpha;
+  if (diff === 0) return "a<sub>n</sub> ＝ " + fracH(seqNum(alpha)) + "（ずっと同じ値）";
+  var mid = (diff === 1) ? "" : (diff === -1 ? "−" : fracH(seqNum(diff)) + "・");
+  var body = mid + seqPowHTML(pr.p);
+  if (alpha === 0) return "a<sub>n</sub> ＝ " + body;
+  return "a<sub>n</sub> ＝ " + fracH(seqNum(alpha)) + (diff < 0 ? " − " : " ＋ ") + (diff === 1 || diff === -1 ? seqPowHTML(pr.p) : fracH(seqNum(Math.abs(diff))) + "・" + seqPowHTML(pr.p)) +
+    "（特性方程式 x ＝ " + fracH(seqNum(pr.p)) + "x ＋ " + fracH(seqNum(pr.q)) + " の解 x ＝ " + fracH(seqNum(alpha)) + " を使う形）";
+}
+function seqSumHTML(pr, N){
+  function powN(base){ var bs = seqNum(base); var b = (base < 0 || bs.indexOf("/") >= 0) ? "（" + fracH(bs) + "）" : fracH(bs); return b + "<sup>n</sup>"; }
+  if (SEQ.type === "arith"){
+    var c2 = pr.d / 2, c1 = pr.a1 - pr.d / 2;
+    var parts = [];
+    if (c2 !== 0) parts.push({ v: c2, t: (Math.abs(c2) === 1 ? "" : fracH(seqNum(Math.abs(c2)))) + "n<sup>2</sup>" });
+    if (c1 !== 0) parts.push({ v: c1, t: (Math.abs(c1) === 1 ? "" : fracH(seqNum(Math.abs(c1)))) + "n" });
+    if (!parts.length) return "S<sub>n</sub> ＝ 0";
+    var out = "S<sub>n</sub> ＝ ";
+    parts.forEach(function(pt, i){ out += (i === 0 ? (pt.v < 0 ? "−" : "") : (pt.v < 0 ? " − " : " ＋ ")) + pt.t; });
+    return out + "（n/2｛2a<sub>1</sub>＋(n−1)d｝を整理した形。n に " + N + " を入れると上の和になります）";
+  }
+  if (SEQ.type === "geo" || (SEQ.type === "rec" && pr.q === 0)){
+    var rr = SEQ.type === "geo" ? pr.r : pr.p;
+    if (rr === 1) return "S<sub>n</sub> ＝ " + fracH(seqNum(pr.a1)) + "n";
+    var cc = pr.a1 / (rr - 1);
+    return "S<sub>n</sub> ＝ " + (cc === 1 ? "" : fracH(seqNum(cc)) + "・") + "（" + powN(rr) + " − 1）（n に " + N + " を入れると上の和になります）";
+  }
+  if (SEQ.type === "rec" && pr.p === 1){
+    var c2b = pr.q / 2, c1b = pr.a1 - pr.q / 2, parts2 = [];
+    if (c2b !== 0) parts2.push({ v: c2b, t: (Math.abs(c2b) === 1 ? "" : fracH(seqNum(Math.abs(c2b)))) + "n<sup>2</sup>" });
+    if (c1b !== 0) parts2.push({ v: c1b, t: (Math.abs(c1b) === 1 ? "" : fracH(seqNum(Math.abs(c1b)))) + "n" });
+    if (!parts2.length) return "S<sub>n</sub> ＝ 0";
+    var out2 = "S<sub>n</sub> ＝ ";
+    parts2.forEach(function(pt, i){ out2 += (i === 0 ? (pt.v < 0 ? "−" : "") : (pt.v < 0 ? " − " : " ＋ ")) + pt.t; });
+    return out2 + "（等差数列の和と同じ形。n に " + N + " を入れると上の和になります）";
+  }
+  if (SEQ.type === "rec" && pr.p === 0){
+    return "S<sub>n</sub> ＝ " + fracH(seqNum(pr.a1)) + " ＋ (n−1)・" + fracH(seqNum(pr.q));
+  }
+  var al = pr.q / (1 - pr.p), df = pr.a1 - al, cf = df / (pr.p - 1);
+  var o = "S<sub>n</sub> ＝ ";
+  var first = true;
+  if (al !== 0){ o += (al < 0 ? "−" : "") + (Math.abs(al) === 1 ? "" : fracH(seqNum(Math.abs(al)))) + "n"; first = false; }
+  if (cf !== 0){ o += (first ? (cf < 0 ? "−" : "") : (cf < 0 ? " − " : " ＋ ")) + (Math.abs(cf) === 1 ? "" : fracH(seqNum(Math.abs(cf))) + "・") + "（" + powN(pr.p) + " − 1）"; first = false; }
+  if (first) o += "0";
+  return o;
+}
+function seqTrend(res){
+  var t = res.terms, pr = res.pr;
+  if (SEQ.type === "arith"){
+    if (pr.d > 0) return "右へ行くほど、一定の幅で増えていきます（点が一直線に並びます）。";
+    if (pr.d < 0) return "右へ行くほど、一定の幅で減っていきます（点が一直線に並びます）。";
+    return "ずっと同じ値で、点は横一列に並びます。";
+  }
+  if (SEQ.type === "geo"){
+    if (pr.r === 1 || pr.a1 === 0) return "ずっと同じ値で、点は横一列に並びます。";
+    if (pr.r === 0) return "第2項から 0 になります。";
+    if (pr.r > 1) return pr.a1 > 0 ? "増え方がだんだん速くなります。" : "減り方がだんだん速くなります（下へ大きく離れます）。";
+    if (pr.r > 0) return "0 に近づいていきます。";
+    return "符号が交互に入れ替わりながら、点が上下に振れます（振動）。" + (Math.abs(pr.r) > 1 ? "振れ幅はだんだん大きくなります。" : Math.abs(pr.r) < 1 ? "振れ幅はだんだん小さくなり、0 に近づきます。" : "振れ幅は変わりません。");
+  }
+  var hasUp = false, hasDown = false;
+  for (var k = 1; k < t.length; k++){ var d3 = t[k] - t[k - 1]; if (d3 > 1e-12) hasUp = true; if (d3 < -1e-12) hasDown = true; }
+  if (!hasUp && !hasDown) return "項はずっと同じ値です。";
+  if (hasUp && !hasDown) return "右へ行くほど増えていきます。";
+  if (hasDown && !hasUp) return "右へ行くほど減っていきます。";
+  return "増えたり減ったりが混ざっています（符号の入れ替わりなど）。点の並びで様子を見てください。";
+}
+function drawSeq(){
+  var svg = $("seqSvg"); if (!svg) return;
+  var res = seqTerms();
+  var stats = $("seqStats"), card = $("seqTableCard"), tbl = $("seqTable"), note = $("seqTableNote");
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  var W = 640, H = 340, P = { L: 54, R: 16, T: 16, B: 42 };
+  if (res.err){
+    mkTxt(svg, W / 2, H / 2, "数を入れてください", { fill: "var(--sub)", "font-size": "13", "text-anchor": "middle" });
+    if (stats) stats.innerHTML = "<dt>状態</dt><dd>" + escS(res.err) + "</dd>";
+    if (card) card.classList.add("hidden");
+    return;
+  }
+  var terms = res.terms, pr = res.pr, N = terms.length;
+  var ys = terms.slice(); ys.push(0);
+  var yMin = Math.min.apply(null, ys), yMax = Math.max.apply(null, ys);
+  var pad = (yMax - yMin) * 0.12 || 1;
+  var sy = niceScale(yMin - pad, yMax + pad);
+  var sx = { lo: 0, hi: Math.max(N + 1, 6) };
+  function X(n){ return P.L + (n - sx.lo) / (sx.hi - sx.lo) * (W - P.L - P.R); }
+  function Y(v){ return P.T + (sy.hi - v) / (sy.hi - sy.lo) * (H - P.T - P.B); }
+  var v;
+  for (v = sy.lo; v <= sy.hi + 1e-9; v += sy.step){
+    var y = Y(v);
+    svgEl("line", { x1: P.L, y1: y, x2: W - P.R, y2: y, stroke: "var(--line)", "stroke-width": Math.abs(v) < 1e-9 ? 1.4 : 0.7 }, svg);
+    var lb = mkTxt(svg, P.L - 6, y + 4, (typeof fmtDec === "function" ? fmtDec(v, sy.dec) : String(v)), TXA); lb.setAttribute("text-anchor", "end");
+  }
+  for (var n = 1; n <= N; n++){
+    var x = X(n);
+    svgEl("line", { x1: x, y1: P.T, x2: x, y2: H - P.B, stroke: "var(--line)", "stroke-width": 0.5 }, svg);
+    if (N <= 20 || n % 5 === 0 || n === 1) mkTxt(svg, x, H - P.B + 18, String(n), TXB);
+  }
+  svgEl("line", { x1: P.L, y1: H - P.B, x2: W - P.R, y2: H - P.B, stroke: "var(--ink)", "stroke-width": "1.4" }, svg);
+  svgEl("line", { x1: P.L, y1: P.T, x2: P.L, y2: H - P.B, stroke: "var(--ink)", "stroke-width": "1.4" }, svg);
+  mkTxt(svg, (P.L + W - P.R) / 2, H - 6, "n（何項目か）", TXB);
+  var yt = mkTxt(svg, 14, P.T + 2, "a_n の値", TXB); yt.setAttribute("text-anchor", "start");
+  if (terms.length > 1){
+    var pts = terms.map(function(tv, i){ return X(i + 1) + "," + Y(tv); }).join(" ");
+    svgEl("polyline", { points: pts, fill: "none", stroke: "#2f7fd0", "stroke-width": "1.4", opacity: "0.35" }, svg);
+  }
+  terms.forEach(function(tv, i){
+    svgEl("circle", { cx: X(i + 1), cy: Y(tv), r: "5.5", fill: "#2f7fd0", stroke: "#1d4f82", "stroke-width": "1.3" }, svg);
+    if (SEQ.answers && N <= 20) mkTxt(svg, X(i + 1), Y(tv) - 10, seqNum(tv), { fill: "var(--ink)", "font-size": "10.5", "text-anchor": "middle", "font-weight": "700" });
+  });
+  var typeName = SEQ.type === "arith" ? "等差数列" : SEQ.type === "geo" ? "等比数列" : "漸化式 a(n+1)＝p・a(n)＋q";
+  var h = "<dt>種類</dt><dd>" + typeName + "</dd>" +
+    "<dt>表示している項</dt><dd>第1項 〜 第" + N + "項" + (res.trunc ? "（値が大きくなりすぎたため、ここまで）" : "") + "</dd>" +
+    "<dt>増え方</dt><dd>" + escS(seqTrend(res)) + "</dd>";
+  if (SEQ.answers){
+    var sum = 0; terms.forEach(function(tv){ sum += tv; });
+    h += "<dt>一般項</dt><dd>" + seqGeneralHTML(pr) + "</dd>" +
+      "<dt>第" + N + "項</dt><dd>a<sub>" + N + "</sub> ＝ " + fracH(seqNum(terms[N - 1])) + "</dd>" +
+      "<dt>第" + N + "項までの和</dt><dd>S<sub>" + N + "</sub> ＝ " + fracH(seqNum(sum)) + "</dd>" +
+      "<dt>和の公式</dt><dd>" + seqSumHTML(pr, N) + "</dd>";
+  } else {
+    h += "<dt>一般項・項の値・和</dt><dd>答え合わせ表示がONのときに出ます（右の「答え合わせ」）。</dd>";
+  }
+  if (stats) stats.innerHTML = h;
+  if (card && tbl){
+    if (SEQ.answers){
+      card.classList.remove("hidden");
+      var r1 = "<tr><th>n</th>", r2 = "<tr><th>a_n</th>";
+      terms.forEach(function(tv, i){ r1 += "<td>" + (i + 1) + "</td>"; r2 += "<td>" + escS(seqNum(tv)) + "</td>"; });
+      r1 += "</tr>"; r2 += "</tr>";
+      tbl.innerHTML = "<tbody>" + r1 + r2 + "</tbody>";
+      if (note) note.textContent = res.trunc ? "値が大きくなりすぎたため、第" + N + "項までで止めています。" : "表は横にスクロールできます。n を増やすと、項も増えます。";
+    } else card.classList.add("hidden");
+  }
+}
+function seqSetType(t){
+  SEQ.type = t;
+  [["seqTArith", "arith"], ["seqTGeo", "geo"], ["seqTRec", "rec"]].forEach(function(p){ var b = $(p[0]); if (b) b.classList.toggle("on", p[1] === t); });
+  var rd = $("seqRowD"), rrr = $("seqRowR"), rp = $("seqRowP"), rq = $("seqRowQ");
+  if (rd) rd.classList.toggle("hidden", t !== "arith");
+  if (rrr) rrr.classList.toggle("hidden", t !== "geo");
+  if (rp) rp.classList.toggle("hidden", t !== "rec");
+  if (rq) rq.classList.toggle("hidden", t !== "rec");
+  var note = $("seqTypeNote");
+  if (note) note.textContent = t === "arith" ? "等差数列は、一定の数（公差）ずつ増えたり減ったりする数列です。数は分数（1/2 のように）でも入れられます。"
+    : t === "geo" ? "等比数列は、一定の数（公比）をかけ続ける数列です。公比が負の数だと、符号が交互に入れ替わります。数は分数（1/2 のように）でも入れられます。"
+    : "漸化式 a(n+1)＝p・a(n)＋q は、「次の項は、今の項を p 倍して q を足したもの」という決め方です。p＝1 なら等差数列、q＝0 なら等比数列と同じになります。";
+  drawSeq();
+}
+[["seqTArith", "arith"], ["seqTGeo", "geo"], ["seqTRec", "rec"]].forEach(function(p){ var b = $(p[0]); if (b) b.onclick = function(){ seqSetType(p[1]); }; });
+["seqA1", "seqD", "seqR", "seqP", "seqQ"].forEach(function(id){ var el = $(id); if (el) el.addEventListener("input", drawSeq); });
+var seqNEl = $("seqN");
+if (seqNEl) seqNEl.addEventListener("input", function(){ var lab = $("seqNVal"); if (lab) lab.textContent = seqNEl.value; drawSeq(); });
+var seqAnsBtn = $("seqAnswersBtn");
+if (seqAnsBtn) seqAnsBtn.onclick = function(){ SEQ.answers = !SEQ.answers; seqAnsBtn.textContent = "答え合わせ表示：" + (SEQ.answers ? "ON" : "OFF"); seqAnsBtn.classList.toggle("on", SEQ.answers); drawSeq(); };
+
+/* --- num-mode tab wiring for sequences --- */
+var NUM_PANES = [["nPaneLine", "nSideLine"], ["nPaneMoji", "nSideMoji"], ["nPaneEq1", "nSideEq1"], ["nPaneSqrt", "nSideSqrt"], ["nPanePow", "nSidePow"], ["nPaneArea", "nSideArea"], ["nPaneSimul", "nSideSimul"], ["nPaneQuad", "nSideQuad"]];
+var NUM_BTNS = ["nSubLine", "nSubMoji", "nSubEq1", "nSubSqrt", "nSubPow", "nSubArea", "nSubSimul", "nSubQuad"];
+function seqHide(){
+  var p = $("nPaneSeq"), s = $("nSideSeq"), b = $("nSubSeq");
+  if (p) p.classList.add("hidden"); if (s) s.classList.add("hidden"); if (b) b.classList.remove("on");
+}
+function seqShow(){
+  NUM_PANES.forEach(function(p){ var pn = $(p[0]), sd = $(p[1]); if (pn) pn.classList.add("hidden"); if (sd) sd.classList.add("hidden"); });
+  NUM_BTNS.forEach(function(id){ var b = $(id); if (b) b.classList.remove("on"); });
+  var p2 = $("nPaneSeq"), s2 = $("nSideSeq"), b2 = $("nSubSeq");
+  if (p2) p2.classList.remove("hidden"); if (s2) s2.classList.remove("hidden"); if (b2) b2.classList.add("on");
+  var h = $("numHint"); if (h) h.textContent = "初項と公差（公比・p と q）を変えると、項の点がその場で動きます。項の値・一般項・和は、答え合わせ表示ONのときに出ます。";
+  drawSeq();
+}
+NUM_BTNS.forEach(function(id){ var b = $(id); if (b) b.addEventListener("click", seqHide); });
+var seqBtn = $("nSubSeq"); if (seqBtn) seqBtn.addEventListener("click", seqShow);
+
+/* --- coverage table (高校) wiring --- */
+try {
+  if (typeof UNIT_DESC !== "undefined"){
+    UNIT_DESC["h-sheet"] = "表計算のセルに数や式を入れると、参照先を変えたときに全体が計算し直される様子が見られます。列を散布図や棒グラフにも送れます。";
+    UNIT_DESC["h-seq"] = "等差数列・等比数列・漸化式の項を点として並べ、増え方が見られます。一般項と和は答え合わせ表示ONで出ます。";
+  }
+} catch (e) {}
+function covGo(unit, mode){
+  if (typeof setTopMode === "function") setTopMode(mode);
+  if (unit === "h-sheet") shtShow(); else seqShow();
+  try { if (typeof showUnitBanner === "function"){ var b = document.querySelector('[data-unit="' + unit + '"]'); if (b) showUnitBanner(unit, b.textContent.replace(/\s+/g, " ").trim()); } } catch (e) {}
+  window.scrollTo({ top: 0, behavior: (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth" });
+}
+document.querySelectorAll('[data-unit="h-sheet"]').forEach(function(b){ b.onclick = function(){ covGo("h-sheet", "data"); }; });
+document.querySelectorAll('[data-unit="h-seq"]').forEach(function(b){ b.onclick = function(){ covGo("h-seq", "num"); }; });
+
+try { shtBuild(); } catch (e) {}
+try { drawSeq(); } catch (e) {}
 })();
 </script>
 </body>
