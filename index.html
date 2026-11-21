@@ -1450,13 +1450,14 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
     </section>
     <section class="card" id="custMoveCard">
       <h2>図形をまとめて移動</h2>
-      <p class="note" style="margin-top:0">図形を1つ選んで、平行移動・回転移動・対称移動（線対称）で写した図形を、新しい図形として残します。元の図形はそのまま残るので、移動の前と後を見比べられます。中学の「図形の移動」の学習に使えます。</p>
+      <p class="note" style="margin-top:0">図形を1つ選んで、平行移動・回転移動・対称移動（線対称）・拡大・縮小（相似変換）で写した図形を、新しい図形として残します。元の図形はそのまま残るので、移動の前と後を見比べられます。中学の「図形の移動」と「相似」の学習に使えます。</p>
       <div class="row"><label for="custMoveShape">移動する図形</label>
         <select id="custMoveShape"></select></div>
       <div class="seg" role="group" aria-label="移動の種類" style="margin-bottom:8px">
         <button id="custMoveModeT" class="on" type="button">平行移動</button>
         <button id="custMoveModeR" type="button">回転移動</button>
         <button id="custMoveModeS" type="button">対称移動</button>
+        <button id="custMoveModeD" type="button">拡大・縮小</button>
       </div>
       <div id="custMoveTrans">
         <div class="row"><label for="custMoveDx">移動量 x・y</label>
@@ -1472,6 +1473,21 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
           <input type="range" id="custMoveAngRange" min="-180" max="180" step="5" value="90" style="flex:1 1 90px" aria-label="回転角（スライダー）">
           <input type="number" id="custMoveAng" min="-360" max="360" step="5" value="90" style="width:70px" aria-label="回転角（数値）"><span>°</span></div>
         <p class="note">＋は反時計回り、－は時計回りです。「ドラッグで決める」をONにしてキャンバスの上をドラッグすると、中心のまわりの回転角を目で見ながら決められます。</p>
+      </div>
+      <div id="custMoveScale" class="hidden">
+        <div class="row"><label for="custMoveScaleCenter">拡大・縮小の中心</label>
+          <select id="custMoveScaleCenter"></select></div>
+        <div class="row"><label for="custMoveScaleVal">倍率</label>
+          <input type="range" id="custMoveScaleRange" min="0.25" max="3" step="0.05" value="2" style="flex:1 1 90px" aria-label="倍率（スライダー）">
+          <input type="text" id="custMoveScaleVal" value="2" style="width:76px" aria-label="倍率（数値・分数でも書けます）"><span>倍</span>
+          <span class="val" id="custMoveScaleRead"></span></div>
+        <div class="row"><span class="note" style="margin:0">分数でも書けます：</span>
+          <button class="btn small" type="button" data-mv-scale="1/2">1/2倍</button>
+          <button class="btn small" type="button" data-mv-scale="2/3">2/3倍</button>
+          <button class="btn small" type="button" data-mv-scale="3/2">3/2倍</button>
+          <button class="btn small" type="button" data-mv-scale="2">2倍</button>
+          <button class="btn small" type="button" data-mv-scale="3">3倍</button></div>
+        <p class="note">倍率は「2」「0.5」のほか「1/2」「3/2」のような分数でも書けます。中心から見て、すべての長さが倍率だけ変わります（1より小さいと縮小、大きいと拡大）。円は半径が倍率で変わります。「ドラッグで決める」をONにしてキャンバスをドラッグすると、中心からの距離の伸び縮みで倍率を決められます。</p>
       </div>
       <div id="custMoveSym" class="hidden">
         <div class="row"><label for="custMoveAxisKind">対称軸</label>
@@ -4194,14 +4210,15 @@ function fillSel(sel,opts,cur){
 function mvShapeIdx(){var s=$("custMoveShape");if(!s||s.value==="")return -1;var i=parseInt(s.value,10);return isNaN(i)?-1:i}
 function mvSetMode(m){
   MV.mode=m;
-  [["custMoveModeT","t"],["custMoveModeR","r"],["custMoveModeS","s"]].forEach(function(pr){var b=$(pr[0]);if(b)b.classList.toggle("on",MV.mode===pr[1])});
+  [["custMoveModeT","t"],["custMoveModeR","r"],["custMoveModeS","s"],["custMoveModeD","d"]].forEach(function(pr){var b=$(pr[0]);if(b)b.classList.toggle("on",MV.mode===pr[1])});
   $("custMoveTrans").classList.toggle("hidden",m!=="t");
   $("custMoveRot").classList.toggle("hidden",m!=="r");
   $("custMoveSym").classList.toggle("hidden",m!=="s");
+  var sc=$("custMoveScale");if(sc)sc.classList.toggle("hidden",m!=="d");
   refreshPreview();
 }
-["custMoveModeT","custMoveModeR","custMoveModeS"].forEach(function(id,ix){
-  var b=$(id);if(b)b.addEventListener("click",function(){mvSetMode(["t","r","s"][ix])});
+["custMoveModeT","custMoveModeR","custMoveModeS","custMoveModeD"].forEach(function(id,ix){
+  var b=$(id);if(b)b.addEventListener("click",function(){mvSetMode(["t","r","s","d"][ix])});
 });
 function mvAxisKindUI(){
   var k=$("custMoveAxisKind").value;
@@ -4220,6 +4237,7 @@ function mvRefresh(){
   sel.disabled=!opts.length;
   var popts=CUST.points.map(function(p){return [p.name,"点"+p.name]});
   fillSel($("custMoveCenter"),[["","図形の中心（頂点の平均）"]].concat(popts));
+  fillSel($("custMoveScaleCenter"),[["","図形の中心（頂点の平均）"]].concat(popts));
   var a1=$("custMoveAxis1"),a2=$("custMoveAxis2");
   fillSel(a1,popts);fillSel(a2,popts);
   if(a1&&a2&&popts.length>=2&&a1.value===a2.value)a2.value=popts[1][0];
@@ -4259,6 +4277,40 @@ function mvAxis(){
   if(MV.freeAxis)return MV.freeAxis;
   return{a:{x:0,y:0},d:{x:1,y:0}};
 }
+/* 倍率の読み取り：「2」「0.5」のほか「1/2」「3/2」のような分数も受け付ける。読めなければ NaN */
+function mvParseScale(raw){
+  if(raw===null||raw===undefined)return NaN;
+  var s=String(raw).trim().replace(/倍$/,"").replace(/×/g,"").trim();
+  if(!s)return NaN;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(m){var den=parseFloat(m[2]);if(!den)return NaN;return parseFloat(m[1])/den}
+  var v=parseFloat(s);
+  return (String(v)===s||/^-?\d+(?:\.\d+)?$/.test(s))?v:NaN;
+}
+function mvScaleValue(){var e=$("custMoveScaleVal");return e?mvParseScale(e.value):NaN}
+function mvScaleLabel(k){
+  if(!isFinite(k))return"";
+  var e=$("custMoveScaleVal"),raw=e?String(e.value).trim():"";
+  if(raw.indexOf("/")>=0)return raw.replace(/\s+/g,"")+"倍（約"+fmtDec(k,2)+"倍）";
+  if(typeof fmtFrac==="function"){var f=fmtFrac(k);if(f&&f.indexOf("/")>=0)return f+"倍（約"+fmtDec(k,2)+"倍）"}
+  return fmtDec(k,2)+"倍";
+}
+function mvSyncScaleRead(){
+  var rd=$("custMoveScaleRead");if(!rd)return;
+  var k=mvScaleValue();
+  if(!isFinite(k))rd.textContent="倍率が読めません（例：2、0.5、1/2）";
+  else if(k<=0)rd.textContent="倍率は0より大きい数にしてください";
+  else if(k===1)rd.textContent="1倍（大きさは変わりません）";
+  else rd.textContent="＝ "+mvScaleLabel(k);
+}
+function mvSetScale(raw,fromSlider){
+  var e=$("custMoveScaleVal");if(!e)return;
+  var k=mvParseScale(raw);
+  if(!isFinite(k))return;
+  if(!fromSlider)e.value=String(raw).trim();
+  var r=$("custMoveScaleRange");if(r)r.value=Math.max(0.25,Math.min(3,k));
+  mvSyncScaleRead();refreshPreview();
+}
 function mvParams(){
   if(MV.mode==="t")return{kind:"t",dx:num("custMoveDx"),dy:num("custMoveDy")};
   if(MV.mode==="r"){
@@ -4267,10 +4319,20 @@ function mvParams(){
     else c=shapeAnchorAvg(mvShapeIdx(),pos);
     return{kind:"r",c:c,ang:num("custMoveAng")*Math.PI/180};
   }
+  if(MV.mode==="d"){
+    var pos2=custResolve().pos,sel=$("custMoveScaleCenter"),cs2=sel?sel.value:"",c2=null;
+    if(cs2&&pos2[cs2])c2={x:pos2[cs2].x,y:pos2[cs2].y};
+    else c2=shapeAnchorAvg(mvShapeIdx(),pos2);
+    return{kind:"d",c:c2,k:mvScaleValue()};
+  }
   return{kind:"s",axis:mvAxis()};
 }
 function xf(p,pr){
   if(pr.kind==="t")return{x:p.x+pr.dx,y:p.y+pr.dy};
+  if(pr.kind==="d"){
+    if(!pr.c||!isFinite(pr.k))return{x:p.x,y:p.y};
+    return{x:pr.c.x+(p.x-pr.c.x)*pr.k,y:pr.c.y+(p.y-pr.c.y)*pr.k};
+  }
   if(pr.kind==="r"){
     if(!pr.c)return{x:p.x,y:p.y};
     var dx=p.x-pr.c.x,dy=p.y-pr.c.y,cs=Math.cos(pr.ang),sn=Math.sin(pr.ang);
@@ -4294,6 +4356,7 @@ function renderPreview(s){
   if(pr.kind==="s"&&!pr.axis)return;
   if(pr.kind==="t"&&pr.dx===0&&pr.dy===0)return;
   if(pr.kind==="r"&&(!pr.c||Math.abs(pr.ang)<1e-9))return;
+  if(pr.kind==="d"&&(!pr.c||!isFinite(pr.k)||pr.k<=0||Math.abs(pr.k-1)<1e-9))return;
   var g=el("g",{id:"custMoveG","pointer-events":"none"},s);
   var col="var(--gold)",dash="0.32 0.22";
   function P(p){return{x:p.x,y:-p.y}}
@@ -4310,7 +4373,7 @@ function renderPreview(s){
       el("line",{x1:da.x,y1:da.y,x2:db.x,y2:db.y,stroke:col,"stroke-width":.07,"stroke-dasharray":dash},g);
     }else{
       var cc=P(xf({x:gm.cx,y:gm.cy},pr));
-      el("circle",{cx:cc.x,cy:cc.y,r:gm.r,fill:"none",stroke:col,"stroke-width":.07,"stroke-dasharray":dash},g);
+      el("circle",{cx:cc.x,cy:cc.y,r:(pr.kind==="d"?gm.r*pr.k:gm.r),fill:"none",stroke:col,"stroke-width":.07,"stroke-dasharray":dash},g);
     }
   }else if(gm.kind==="line"){
     var len=Math.hypot(gm.dx,gm.dy)||1,ux=gm.dx/len,uy=gm.dy/len;
@@ -4320,10 +4383,16 @@ function renderPreview(s){
     var qa=P(xf(A,pr)),qb=P(xf(B,pr));
     el("line",{x1:qa.x,y1:qa.y,x2:qb.x,y2:qb.y,stroke:col,"stroke-width":.07,"stroke-dasharray":dash},g);
   }
-  if(pr.kind==="r"&&pr.c){
+  if((pr.kind==="r"||pr.kind==="d")&&pr.c){
     var c0=P(pr.c);
     el("line",{x1:c0.x-.35,y1:c0.y,x2:c0.x+.35,y2:c0.y,stroke:col,"stroke-width":.07},g);
     el("line",{x1:c0.x,y1:c0.y-.35,x2:c0.x,y2:c0.y+.35,stroke:col,"stroke-width":.07},g);
+    if(pr.kind==="d"){
+      var anchD=shapeAnchorAvg(idx,R.pos);
+      if(anchD){var d0=P(anchD),d1=P(xf(anchD,pr));
+        el("line",{x1:c0.x,y1:c0.y,x2:d0.x,y2:d0.y,stroke:col,"stroke-width":.05,"stroke-dasharray":dash,opacity:.75},g);
+        el("line",{x1:c0.x,y1:c0.y,x2:d1.x,y2:d1.y,stroke:col,"stroke-width":.06,"stroke-dasharray":dash},g);}
+    }
   }
   if(pr.kind==="s"&&pr.axis){
     var a=pr.axis.a,d=pr.axis.d,L2=Math.hypot(d.x,d.y)||1,ux2=d.x/L2,uy2=d.y/L2;
@@ -4338,9 +4407,13 @@ function renderPreview(s){
 }
 function refreshPreview(){var s=$("custSvg");if(s)renderPreview(s)}
 overlayFns.push(renderPreview);
-["custMoveDx","custMoveDy","custMoveAng","custMoveCenter","custMoveAxis1","custMoveAxis2","custMoveAxisShape"].forEach(function(id){
+["custMoveDx","custMoveDy","custMoveAng","custMoveCenter","custMoveAxis1","custMoveAxis2","custMoveAxisShape","custMoveScaleCenter"].forEach(function(id){
   var e=$(id);if(e)e.addEventListener("input",refreshPreview);if(e)e.addEventListener("change",refreshPreview);
 });
+if($("custMoveScaleRange"))$("custMoveScaleRange").addEventListener("input",function(){var e=$("custMoveScaleVal");if(e)e.value=this.value;mvSyncScaleRead();refreshPreview()});
+if($("custMoveScaleVal"))$("custMoveScaleVal").addEventListener("input",function(){var k=mvScaleValue();var r=$("custMoveScaleRange");if(r&&isFinite(k))r.value=Math.max(0.25,Math.min(3,k));mvSyncScaleRead();refreshPreview()});
+document.querySelectorAll("[data-mv-scale]").forEach(function(b){b.addEventListener("click",function(){mvSetScale(b.getAttribute("data-mv-scale"))})});
+mvSyncScaleRead();
 if($("custMoveAngRange"))$("custMoveAngRange").addEventListener("input",function(){$("custMoveAng").value=this.value;refreshPreview()});
 if($("custMoveAng"))$("custMoveAng").addEventListener("input",function(){var r=$("custMoveAngRange");if(r)r.value=Math.max(-180,Math.min(180,num("custMoveAng")))});
 if($("custMovePreview"))$("custMovePreview").addEventListener("change",refreshPreview);
@@ -4355,7 +4428,9 @@ svg.addEventListener("pointerdown",function(e){
   MV.drag={id:e.pointerId,start:m,mode:MV.mode,
     dx:num("custMoveDx"),dy:num("custMoveDy"),
     ang:num("custMoveAng"),
-    c:pr.kind==="r"?pr.c:null,
+    k:(pr.kind==="d"&&isFinite(pr.k))?pr.k:NaN,
+    c:(pr.kind==="r"||pr.kind==="d")?pr.c:null,
+    startDist:pr.kind==="d"&&pr.c?Math.hypot(m.x-pr.c.x,m.y-pr.c.y):0,
     startAng:pr.kind==="r"&&pr.c?Math.atan2(m.y-pr.c.y,m.x-pr.c.x):0};
   try{svg.setPointerCapture(e.pointerId)}catch(err){}
 },true);
@@ -4371,6 +4446,12 @@ window.addEventListener("pointermove",function(e){
     while(deg>180)deg-=360;while(deg<-180)deg+=360;
     $("custMoveAng").value=Math.round(deg);
     var r=$("custMoveAngRange");if(r)r.value=Math.max(-180,Math.min(180,Math.round(deg)));
+  }else if(d.mode==="d"&&d.c&&isFinite(d.k)&&d.startDist>.3){
+    var nk=d.k*(Math.hypot(m.x-d.c.x,m.y-d.c.y)/d.startDist);
+    nk=Math.max(0.05,Math.min(10,nk));
+    var se=$("custMoveScaleVal");if(se)se.value=String(r2(nk));
+    var sr=$("custMoveScaleRange");if(sr)sr.value=Math.max(0.25,Math.min(3,nk));
+    mvSyncScaleRead();
   }else if(d.mode==="s"){
     if(Math.hypot(m.x-d.start.x,m.y-d.start.y)>.2){
       MV.freeAxis={a:{x:d.start.x,y:d.start.y},d:{x:m.x-d.start.x,y:m.y-d.start.y}};
@@ -4387,7 +4468,8 @@ function buildCopy(sh,pos,pr,idx){
   function NP(p){var q=xf(p,pr);var nm=custNextName();CUST.points.push({name:nm,def:{type:"free",x:r2(q.x),y:r2(q.y)}});if(!firstNew)firstNew=nm;return nm}
   function NPt(nm){return NP(pos[nm])}
   var t=sh.type;
-  if(pr.kind==="t"){
+  if(pr.kind==="t"||pr.kind==="d"){
+    /* 平行移動と拡大・縮小（相似変換）は角度が保たれるので、線の種類をそのまま保てる。円の数値半径だけ倍率で変える */
     if(t==="seg"||t==="line")return{type:t,a:NPt(sh.a),b:NPt(sh.b)};
     if(t==="pline"||t==="perp")return{type:t,through:NPt(sh.through),a:NPt(sh.a),b:NPt(sh.b)};
     if(t==="bis"||t==="exbis")return{type:t,a:NPt(sh.a),v:NPt(sh.v),b:NPt(sh.b)};
@@ -4399,7 +4481,7 @@ function buildCopy(sh,pos,pr,idx){
       if(sh.diamA&&sh.diamB)return{type:"circle",diamA:NPt(sh.diamA),diamB:NPt(sh.diamB)};
       if(sh.rA&&sh.rB)return{type:"circle",c:NPt(sh.c),rA:NPt(sh.rA),rB:NPt(sh.rB)};
       if(sh.through)return{type:"circle",c:NPt(sh.c),through:NPt(sh.through)};
-      return{type:"circle",c:NPt(sh.c),r:sh.r};
+      return{type:"circle",c:NPt(sh.c),r:(pr.kind==="d"?r2((+sh.r||0)*pr.k):sh.r)};
     }
     if(t==="poly"){var out={type:"poly",pts:sh.pts.map(function(nm){return NPt(nm)})};if(sh.filled)out.filled=true;return out}
     return null;
@@ -4429,6 +4511,10 @@ if($("custMoveApply"))$("custMoveApply").onclick=function(){
   if(pr.kind==="r"&&!pr.c){msg.textContent="回転の中心が決まっていません。";return}
   if(pr.kind==="t"&&pr.dx===0&&pr.dy===0){msg.textContent="移動量が x・y ともに0です。ずらす量を決めてください。";return}
   if(pr.kind==="r"&&Math.abs(pr.ang)<1e-9){msg.textContent="回転角が0°です。回す角度を決めてください。";return}
+  if(pr.kind==="d"&&!pr.c){msg.textContent="拡大・縮小の中心が決まっていません。中心にする点か、図形の中心を選んでください。";return}
+  if(pr.kind==="d"&&!isFinite(pr.k)){msg.textContent="倍率が読めません。「2」「0.5」「1/2」のように書いてください。";return}
+  if(pr.kind==="d"&&pr.k<=0){msg.textContent="倍率は0より大きい数にしてください（0倍やマイナスでは図形ができません）。";return}
+  if(pr.kind==="d"&&Math.abs(pr.k-1)<1e-9){msg.textContent="倍率が1倍です。大きさは変わらないので、1以外の倍率を決めてください。";return}
   var before=CUST.points.length;
   custPushHistory();
   var ns=buildCopy(sh,R.pos,pr,idx);
@@ -4439,7 +4525,7 @@ if($("custMoveApply"))$("custMoveApply").onclick=function(){
   CUST.shapes.push(ns);
   var newNames=CUST.points.slice(before).map(function(p){return p.name});
   if(newNames.length)CUST.sel=newNames[0];
-  var modeName=pr.kind==="t"?("平行移動（x に "+fmtDec(pr.dx,1)+"、y に "+fmtDec(pr.dy,1)+"）"):pr.kind==="r"?("回転移動（"+Math.round(pr.ang*180/Math.PI)+"°）"):"対称移動（線対称）";
+  var modeName=pr.kind==="t"?("平行移動（x に "+fmtDec(pr.dx,1)+"、y に "+fmtDec(pr.dy,1)+"）"):pr.kind==="r"?("回転移動（"+Math.round(pr.ang*180/Math.PI)+"°）"):pr.kind==="d"?((pr.k>1?"拡大":"縮小")+"（"+mvScaleLabel(pr.k)+"・相似変換）"):"対称移動（線対称）";
   RP.pendingLabel="図形「"+custShapeLabel(sh,idx)+"」を"+modeName+"で写す";
   msg.textContent=modeName+"で写した図形「"+custShapeLabel(ns,CUST.shapes.length-1)+"」を追加しました。新しい点（"+newNames.join("・")+"）は自由な点なので、ドラッグで動かせます。元の図形はそのまま残っています。";
   drawCust();syncCustForms();
