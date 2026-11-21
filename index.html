@@ -2283,6 +2283,56 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
         </div>
       </div>
     </section>
+    <style>.cas-row{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}.cas-row input[type=text]{flex:1 1 220px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);font-size:15px;min-height:42px}.cas-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px;align-items:center}.cas-valrow{display:flex;gap:8px;align-items:center;margin-top:6px}.cas-valrow label{font-weight:700}.cas-valrow input[type=text]{width:140px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);font-size:15px;min-height:40px}</style>
+    <section class="card" id="casCard" style="margin-top:12px" aria-label="式の計算（文字のまま）">
+      <h2>式の計算（文字のまま）</h2>
+      <p class="note" style="margin-top:0">式を文字のまま打つと、展開・因数分解・方程式の解などを計算するコーナーです。出るのは<strong>結果だけ</strong>で、計算の手順や途中式は出しません。結果は「答え合わせ表示」が ON のときだけ表示されます（入力した式そのものは常に見えます）。書き方は上の「答え合わせ（検算）」と違い、係数を1つずつ分けて入れるのではなく、式をそのまま打つ形です。全角のまま打っても大丈夫です。使える文字は2つまで、式は2次まで。対応していない式は、理由を表示して、答えは出しません。</p>
+      <div class="row"><button class="btn" type="button" id="casAnswersBtn">答え合わせ表示：OFF</button></div>
+      <div class="seg" role="group" aria-label="式の計算の種類" style="flex-wrap:wrap;margin-bottom:8px">
+        <button id="casTabExp" class="on" type="button">展開</button>
+        <button id="casTabFact" type="button">因数分解</button>
+        <button id="casTabSolve" type="button">方程式</button>
+        <button id="casTabSimul" type="button">連立方程式</button>
+        <button id="casTabSub" type="button">代入</button>
+      </div>
+
+      <div id="casPaneExp">
+        <div class="cas-row"><input type="text" id="casExpIn" value="(x+2)(x-3)" aria-label="展開する式"></div>
+        <div class="cas-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-cas-exp="(x+2)(x-3)">(x＋2)(x−3)</button><button class="btn small" type="button" data-cas-exp="(x+a)^2">(x＋a)²</button><button class="btn small" type="button" data-cas-exp="(2x+1)(x-2)">(2x＋1)(x−2)</button><button class="btn small" type="button" data-cas-exp="3(x-4)+2x">3(x−4)＋2x</button></div>
+        <p class="note">かっこのある式を、かっこのない形に広げます。同類項をまとめるだけの式（3x＋2−x＋5 など）も計算できます。文字は2つまで、2次までです。</p>
+        <div id="casExpAns" aria-live="polite"></div>
+      </div>
+
+      <div id="casPaneFact" class="hidden">
+        <div class="cas-row"><input type="text" id="casFactIn" value="x^2+5x+6" aria-label="因数分解する式"></div>
+        <div class="cas-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-cas-fact="x^2+5x+6">x²＋5x＋6</button><button class="btn small" type="button" data-cas-fact="x^2-9">x²−9</button><button class="btn small" type="button" data-cas-fact="2x^2+7x+3">2x²＋7x＋3</button><button class="btn small" type="button" data-cas-fact="3x^2-6x">3x²−6x</button></div>
+        <p class="note">共通因数でくくる形、x²＋bx＋c 型、たすき掛け、平方の差（x²−9 など）の範囲で因数分解します。文字は1つだけの式が対象です。</p>
+        <div id="casFactAns" aria-live="polite"></div>
+      </div>
+
+      <div id="casPaneSolve" class="hidden">
+        <div class="cas-row"><input type="text" id="casSolveIn" value="x^2-5x+6=0" aria-label="解く方程式"></div>
+        <div class="cas-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-cas-solve="2x+3=7">2x＋3＝7</button><button class="btn small" type="button" data-cas-solve="x^2-5x+6=0">x²−5x＋6＝0</button><button class="btn small" type="button" data-cas-solve="x^2-2=0">x²−2＝0</button><button class="btn small" type="button" data-cas-solve="x^2+6x+9=0">x²＋6x＋9＝0</button></div>
+        <p class="note">1次方程式と2次方程式を解きます。2次方程式は解の公式で解くので、√を含む解や分数の解もそのまま出ます。文字は1つだけの式が対象です。</p>
+        <div id="casSolveAns" aria-live="polite"></div>
+      </div>
+
+      <div id="casPaneSimul" class="hidden">
+        <div class="cas-row"><input type="text" id="casSimIn1" value="x+y=5" aria-label="連立方程式：1つ目の式"></div>
+        <div class="cas-row" style="margin-top:6px"><input type="text" id="casSimIn2" value="2x-y=4" aria-label="連立方程式：2つ目の式"></div>
+        <div class="cas-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-cas-sim="x+y=5|2x-y=4">x＋y＝5／2x−y＝4</button><button class="btn small" type="button" data-cas-sim="x+y=6|x-y=2">x＋y＝6／x−y＝2</button><button class="btn small" type="button" data-cas-sim="2x+y=8|x-y=1">2x＋y＝8／x−y＝1</button></div>
+        <p class="note">2つの式をセットで解きます（2元1次連立方程式）。文字どうしのかけ算（xy など）を含む式は対象外です。</p>
+        <div id="casSimAns" aria-live="polite"></div>
+      </div>
+
+      <div id="casPaneSub" class="hidden">
+        <div class="cas-row"><input type="text" id="casSubIn" value="x^2+2x" aria-label="代入する式"></div>
+        <div id="casSubVals"></div>
+        <div class="cas-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-cas-sub="x^2+2x">x²＋2x</button><button class="btn small" type="button" data-cas-sub="2x+3y">2x＋3y</button><button class="btn small" type="button" data-cas-sub="x^2+y^2">x²＋y²</button></div>
+        <p class="note">式の中の文字に数を代入したときの値を計算します。値には、分数（1/2）や √（√2、2√3、1＋√2 など）も使えます。</p>
+        <div id="casSubAns" aria-live="polite"></div>
+      </div>
+    </section>
   </div>
 
   <aside class="side">
@@ -7509,6 +7559,550 @@ exBindBar("exInputC","exAddC","exMsgC","data-exc",function(r,msg){
 });
 window.__exParse=exParseInput;
 window.__exEvalRaw=exEvalRaw;
+})();
+</script>
+<script>"use strict";(function(){
+/* CAS-lite core: exact rational / polynomial / surd arithmetic + parsers.
+   Pure logic only (no DOM). Errors: CasErr (message shown as-is).
+   kind: "err" (cannot read / invalid) | "scope" (out of supported range). */
+function CasErr(msg, kind){ this.msg = msg; this.kind = kind || "err"; }
+CasErr.prototype = Object.create(Error.prototype);
+
+/* ---------- rationals ---------- */
+function cgcd(a, b){ a = Math.abs(a); b = Math.abs(b); while (b){ var t = a % b; a = b; b = t; } return a || 1; }
+function R(n, d){ d = (d === undefined) ? 1 : d; if (d === 0) throw new CasErr("0で割ることはできません。"); if (d < 0){ n = -n; d = -d; } if (n === 0) return { n: 0, d: 1 }; var g = cgcd(n, d); return { n: n / g, d: d / g }; }
+function radd(a, b){ return R(a.n * b.d + b.n * a.d, a.d * b.d); }
+function rsub(a, b){ return R(a.n * b.d - b.n * a.d, a.d * b.d); }
+function rmul(a, b){ return R(a.n * b.n, a.d * b.d); }
+function rdiv(a, b){ if (b.n === 0) throw new CasErr("0で割ることはできません。"); return R(a.n * b.d, a.d * b.n); }
+function rneg(a){ return { n: -a.n, d: a.d }; }
+function ris0(a){ return a.n === 0; }
+function rfmt(a){ return a.d === 1 ? String(a.n) : a.n + "/" + a.d; } /* ASCII; display layer converts */
+function rfmtAbs(a){ var v = Math.abs(a.n); return a.d === 1 ? String(v) : v + "/" + a.d; }
+
+/* ---------- normalize (same notation rules as the stage-2 parser) ---------- */
+function casNormalize(s){
+  s = String(s == null ? "" : s);
+  var out = "", i, c, ch;
+  for (i = 0; i < s.length; i++){ c = s.charCodeAt(i); ch = s[i];
+    if (c >= 0xFF01 && c <= 0xFF5E) out += String.fromCharCode(c - 0xFEE0);
+    else if (ch === "　" || ch === " ") out += "";
+    else out += ch; }
+  s = out;
+  s = s.split("−").join("-").split("―").join("-").split("×").join("*").split("÷").join("/")
+       .split("²").join("^2").split("³").join("^3");
+  return s;
+}
+
+/* ---------- tokenizer ---------- */
+var CAS_FUNCS = { sin:1, cos:1, tan:1, log:1, ln:1, exp:1, sqrt:1, abs:1 };
+function casTokens(s){
+  var toks = [], i = 0;
+  while (i < s.length){
+    var ch = s[i];
+    if ((ch >= "0" && ch <= "9") || (ch === "." && /[0-9]/.test(s[i + 1] || ""))){
+      var j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++;
+      var numStr = s.slice(i, j);
+      if ((numStr.match(/\./g) || []).length > 1) throw new CasErr("数字「" + numStr + "」が読めません。小数点は1つだけにしてください。");
+      toks.push({ t: "num", v: casDecimal(numStr), raw: numStr }); i = j; continue;
+    }
+    if (/[A-Za-z]/.test(ch)){
+      var j2 = i; while (j2 < s.length && /[A-Za-z]/.test(s[j2])) j2++;
+      var id = s.slice(i, j2); i = j2;
+      var low = id.toLowerCase();
+      if (CAS_FUNCS[low]) throw new CasErr("関数（" + low + " など）を含む式は対象外です。このコーナーは、多項式の計算だけを扱います。", "scope");
+      if (low === "pi") throw new CasErr("π を含む式は対象外です。", "scope");
+      for (var k = 0; k < id.length; k++){ toks.push({ t: "var", v: id[k], raw: id[k] }); if (k < id.length - 1) toks.push({ t: "op", v: "*", raw: "" }); }
+      continue;
+    }
+    if (ch === "π") throw new CasErr("π を含む式は対象外です。", "scope");
+    if (ch === "√"){ toks.push({ t: "sqrt", raw: "√" }); i++; continue; }
+    if (ch === "(" || ch === ")"){ toks.push({ t: ch, raw: ch }); i++; continue; }
+    if ("+-*/^".indexOf(ch) >= 0){ toks.push({ t: "op", v: ch, raw: ch }); i++; continue; }
+    throw new CasErr("「" + ch + "」は読み取れませんでした。使える記号は ＋ － × ÷ ^ √ （ ） です。");
+  }
+  return toks;
+}
+function casDecimal(str){
+  var dot = str.indexOf(".");
+  if (dot < 0) return R(parseInt(str, 10), 1);
+  var ip = str.slice(0, dot) || "0", fp = str.slice(dot + 1);
+  var d = 1; for (var i = 0; i < fp.length; i++) d *= 10;
+  return R(parseInt(ip, 10) * d + parseInt(fp || "0", 10), d);
+}
+
+/* ---------- AST parser ---------- */
+function casParse(s){
+  var toks = casTokens(s), pos = 0;
+  function peek(){ return toks[pos]; }
+  function nxt(){ return toks[pos++]; }
+  function parseExpr(){ var n = parseTerm(); while (peek() && peek().t === "op" && (peek().v === "+" || peek().v === "-")){ var op = nxt().v; var r = parseTerm(); n = { k: "bin", op: op, l: n, r: r }; } return n; }
+  function parseTerm(){ var n = parseFactor(); while (true){ var tk = peek(); if (!tk) break;
+    if (tk.t === "op" && (tk.v === "*" || tk.v === "/")){ nxt(); var r = parseFactor(); n = { k: "bin", op: tk.v, l: n, r: r }; }
+    else if (tk.t === "num" || tk.t === "var" || tk.t === "sqrt" || tk.t === "("){ var r2 = parseFactor(); n = { k: "bin", op: "*", l: n, r: r2 }; }
+    else break; } return n; }
+  function parseFactor(){ var tk = peek(); if (tk && tk.t === "op" && (tk.v === "-" || tk.v === "+")){ nxt(); var a = parseFactor(); return tk.v === "-" ? { k: "neg", a: a } : a; } return parsePower(); }
+  function parsePower(){ var base = parseAtom(); var tk = peek(); if (tk && tk.t === "op" && tk.v === "^"){ nxt(); if (!peek()) throw new CasErr("「^」のあとに指数がありません。例：x^2"); var ex = parseFactor(); return { k: "pow", l: base, r: ex }; } return base; }
+  function parseAtom(){
+    var tk = nxt();
+    if (!tk) throw new CasErr("式が途中で終わっています。記号のあとに数字や文字があるか確認してください。");
+    if (tk.t === "num") return { k: "num", v: tk.v };
+    if (tk.t === "var") return { k: "var", name: tk.v };
+    if (tk.t === "sqrt"){ var a = parseAtom(); return { k: "sqrt", a: a }; }
+    if (tk.t === "("){ if (peek() && peek().t === ")") throw new CasErr("（ ）の中が空です。"); var e = parseExpr(); var c = nxt(); if (!c || c.t !== ")") throw new CasErr("「（」に対応する「）」がありません。"); return e; }
+    if (tk.t === "op") throw new CasErr("「" + tk.v + "」の前に式がありません。");
+    if (tk.t === ")") throw new CasErr("「）」が余っています。");
+    throw new CasErr("式が読めませんでした。");
+  }
+  if (!toks.length) throw new CasErr("式が入力されていません。");
+  var ast = parseExpr();
+  if (pos < toks.length){ var rest = toks[pos]; throw new CasErr("「" + (rest.raw || rest.v || "") + "」のあたりが読めませんでした。式全体を確認してください。"); }
+  return ast;
+}
+function casAstVars(ast, out){
+  out = out || {};
+  if (!ast) return out;
+  if (ast.k === "var") out[ast.name] = 1;
+  if (ast.l) casAstVars(ast.l, out);
+  if (ast.r) casAstVars(ast.r, out);
+  if (ast.a) casAstVars(ast.a, out);
+  return out;
+}
+function casVarRank(v){ if (v === "x") return 0; if (v === "y") return 1; if (v === "z") return 2; return 3; }
+function casSortVars(names){ return names.slice().sort(function(a, b){ var d = casVarRank(a) - casVarRank(b); if (d) return d; return a < b ? -1 : a > b ? 1 : 0; }); }
+function casCheckVarCount(names){
+  if (names.length > 2) throw new CasErr("文字が3つ以上ある式は対象外です（使われている文字：" + names.join("、") + "）。このコーナーで使える文字は2つまでです。", "scope");
+}
+
+/* ---------- polynomials (exact rational coefficients, total degree <= 2) ---------- */
+/* poly = { terms: { key: { mono: {var:exp}, coef: R } } }, key = canonical string */
+function monoKey(mono){ var ks = Object.keys(mono).filter(function(v){ return mono[v] > 0; }).sort(function(a, b){ var d = casVarRank(a) - casVarRank(b); if (d) return d; return a < b ? -1 : 1; }); return ks.map(function(v){ return v + "^" + mono[v]; }).join("*"); }
+function monoDeg(mono){ var d = 0; for (var v in mono) d += mono[v]; return d; }
+function polyNew(){ return { terms: {} }; }
+function polyConst(r){ var p = polyNew(); if (!ris0(r)) p.terms[""] = { mono: {}, coef: r }; return p; }
+function polyVar(name){ var p = polyNew(); var m = {}; m[name] = 1; p.terms[monoKey(m)] = { mono: m, coef: R(1) }; return p; }
+function polyAddTerm(p, mono, coef){
+  if (ris0(coef)) return;
+  var k = monoKey(mono);
+  if (p.terms[k]){ var nc = radd(p.terms[k].coef, coef); if (ris0(nc)) delete p.terms[k]; else p.terms[k] = { mono: mono, coef: nc }; }
+  else p.terms[k] = { mono: mono, coef: coef };
+}
+function polyAdd(a, b){ var p = polyNew(); var k; for (k in a.terms) polyAddTerm(p, a.terms[k].mono, a.terms[k].coef); for (k in b.terms) polyAddTerm(p, b.terms[k].mono, b.terms[k].coef); return p; }
+function polyNeg(a){ var p = polyNew(); for (var k in a.terms) p.terms[k] = { mono: a.terms[k].mono, coef: rneg(a.terms[k].coef) }; return p; }
+function polySub(a, b){ return polyAdd(a, polyNeg(b)); }
+function polyMul(a, b){
+  var p = polyNew();
+  for (var k1 in a.terms) for (var k2 in b.terms){
+    var m = {}; var v;
+    for (v in a.terms[k1].mono) m[v] = a.terms[k1].mono[v];
+    for (v in b.terms[k2].mono) m[v] = (m[v] || 0) + b.terms[k2].mono[v];
+    if (monoDeg(m) > 2) throw new CasErr("3次以上の項が出てくる式は対象外です。このコーナーは2次までの式を扱います。", "scope");
+    polyAddTerm(p, m, rmul(a.terms[k1].coef, b.terms[k2].coef));
+  }
+  return p;
+}
+function polyIsConst(p){ for (var k in p.terms) if (k !== "") return false; return true; }
+function polyConstVal(p){ var t = p.terms[""]; return t ? t.coef : R(0); }
+function polyVars(p){ var s = {}; for (var k in p.terms) for (var v in p.terms[k].mono) s[v] = 1; return casSortVars(Object.keys(s)); }
+function polyEval(node){
+  switch (node.k){
+    case "num": return polyConst(node.v);
+    case "var": return polyVar(node.name);
+    case "neg": return polyNeg(polyEval(node.a));
+    case "sqrt": throw new CasErr("√ を含む式は対象外です（√が使えるのは「代入」の値だけです）。", "scope");
+    case "pow": {
+      var base = polyEval(node.l);
+      var ex = polyEval(node.r);
+      if (!polyIsConst(ex)) throw new CasErr("指数に文字を含む式は対象外です。", "scope");
+      var ev = polyConstVal(ex);
+      if (ev.d !== 1 || ev.n < 0 || ev.n > 10) throw new CasErr("指数は0以上10以下の整数だけ対応しています。", "scope");
+      var res = polyConst(R(1));
+      for (var i = 0; i < ev.n; i++) res = polyMul(res, base);
+      return res;
+    }
+    case "bin": {
+      var l = polyEval(node.l), r = polyEval(node.r);
+      if (node.op === "+") return polyAdd(l, r);
+      if (node.op === "-") return polySub(l, r);
+      if (node.op === "*") return polyMul(l, r);
+      /* division: only by a nonzero constant */
+      if (!polyIsConst(r)) throw new CasErr("文字で割る式は対象外です（割れるのは数だけです）。", "scope");
+      var dv = polyConstVal(r);
+      if (ris0(dv)) throw new CasErr("0で割ることはできません。");
+      var p = polyNew(); for (var k in l.terms) p.terms[k] = { mono: l.terms[k].mono, coef: rdiv(l.terms[k].coef, dv) };
+      return p;
+    }
+  }
+  throw new CasErr("式が読めませんでした。");
+}
+function polyDegree(p){ var d = 0; for (var k in p.terms) d = Math.max(d, monoDeg(p.terms[k].mono)); return d; }
+function polyCoefOf(p, mono){ var t = p.terms[monoKey(mono)]; return t ? t.coef : R(0); }
+
+/* polynomial -> display text (ASCII digits, "−"/"＋" signs, fractions as n/d; HTML layer stacks fractions) */
+function casSup(e){ return e === 2 ? "²" : e === 3 ? "³" : "^" + e; }
+function polyToText(p){
+  var vars = polyVars(p);
+  var list = Object.keys(p.terms).map(function(k){ return p.terms[k]; });
+  list.sort(function(t1, t2){
+    var d = monoDeg(t2.mono) - monoDeg(t1.mono); if (d) return d;
+    for (var i = 0; i < vars.length; i++){ var e = (t2.mono[vars[i]] || 0) - (t1.mono[vars[i]] || 0); if (e) return e; }
+    return 0;
+  });
+  if (!list.length) return "0";
+  var out = "";
+  list.forEach(function(t, idx){
+    var neg = t.coef.n < 0;
+    var varpart = vars.filter(function(v){ return t.mono[v] > 0; }).sort().map(function(v){ return v + (t.mono[v] > 1 ? casSup(t.mono[v]) : ""); }).join("");
+    var body;
+    if (!varpart) body = rfmtAbs(t.coef);
+    else if (t.coef.n === 1 || t.coef.n === -1) { if (t.coef.d === 1) body = varpart; else body = rfmtAbs(t.coef) + varpart; }
+    else body = rfmtAbs(t.coef) + varpart;
+    if (idx === 0) out += (neg ? "−" : "") + body;
+    else out += (neg ? "−" : "＋") + body;
+  });
+  return out;
+}
+
+/* ---------- surds (exact values: sum of rational * sqrt(squarefree)) ---------- */
+/* surd = { m: R } for squarefree m (m=1 is the rational part) */
+function sqrtDecomp(n){ /* n = s^2 * m, m squarefree */
+  var s = 1, m = n;
+  for (var p = 2; p * p <= m; p++){ var pp = p * p; while (m % pp === 0){ m /= pp; s *= p; } }
+  return { s: s, m: m };
+}
+function surdNew(){ return {}; }
+function surdConst(r){ var o = {}; if (!ris0(r)) o[1] = r; return o; }
+function surdAdd(a, b){ var o = {}; var k; for (k in a) o[k] = a[k]; for (k in b){ o[k] = o[k] ? radd(o[k], b[k]) : b[k]; if (o[k] && ris0(o[k])) delete o[k]; } return o; }
+function surdNeg(a){ var o = {}; for (var k in a) o[k] = rneg(a[k]); return o; }
+function surdSub(a, b){ return surdAdd(a, surdNeg(b)); }
+function surdMul(a, b){
+  var o = {};
+  for (var m1 in a) for (var m2 in b){
+    var prod = (+m1) * (+m2); var dec = sqrtDecomp(prod);
+    var c = rmul(rmul(a[m1], b[m2]), R(dec.s));
+    o[dec.m] = o[dec.m] ? radd(o[dec.m], c) : c;
+    if (ris0(o[dec.m])) delete o[dec.m];
+  }
+  return o;
+}
+function surdIsZero(a){ return Object.keys(a).length === 0; }
+function surdDiv(a, b){
+  var ks = Object.keys(b);
+  if (!ks.length) throw new CasErr("0で割ることはできません。");
+  if (ks.length > 1) throw new CasErr("√を2つ含む数で割る計算は対象外です。", "scope");
+  var m = +ks[0], c = b[m];
+  /* 1/(c*sqrt(m)) = sqrt(m)/(c*m) */
+  var inv = {}; inv[m] = rdiv(R(1), rmul(c, R(m)));
+  return surdMul(a, inv);
+}
+function surdPow(a, n){
+  var res = surdConst(R(1));
+  for (var i = 0; i < n; i++) res = surdMul(res, a);
+  return res;
+}
+function surdSqrt(a){
+  var ks = Object.keys(a);
+  if (!ks.length) return {};
+  if (ks.length > 1 || ks[0] !== "1") throw new CasErr("√の中に√を含む式は対象外です。", "scope");
+  var r = a[1];
+  if (r.n < 0) throw new CasErr("√の中が負の数になっています。");
+  /* sqrt(p/q) = sqrt(p*q)/q */
+  var dec = sqrtDecomp(r.n * r.d);
+  var o = {}; o[dec.m] = R(dec.s, r.d);
+  return o;
+}
+function surdEval(node, env){
+  switch (node.k){
+    case "num": return surdConst(node.v);
+    case "var": {
+      if (env && env[node.name]) return env[node.name];
+      throw new CasErr("値に文字は使えません。数だけを入れてください。");
+    }
+    case "neg": return surdNeg(surdEval(node.a, env));
+    case "sqrt": return surdSqrt(surdEval(node.a, env));
+    case "pow": {
+      var ex = surdEval(node.r, {});
+      var eks = Object.keys(ex);
+      if (eks.length > 1 || (eks.length === 1 && eks[0] !== "1")) throw new CasErr("指数に√や文字を含む式は対象外です。", "scope");
+      var ev = eks.length ? ex[1] : R(0);
+      if (ev.d !== 1 || ev.n < -4 || ev.n > 4) throw new CasErr("値の指数は−4以上4以下の整数だけ対応しています。", "scope");
+      var base = surdEval(node.l, env);
+      if (ev.n >= 0) return surdPow(base, ev.n);
+      if (surdIsZero(base)) throw new CasErr("0で割ることはできません。");
+      return surdDiv(surdConst(R(1)), surdPow(base, -ev.n));
+    }
+    case "bin": {
+      var l = surdEval(node.l, env), r = surdEval(node.r, env);
+      if (node.op === "+") return surdAdd(l, r);
+      if (node.op === "-") return surdSub(l, r);
+      if (node.op === "*") return surdMul(l, r);
+      return surdDiv(l, r);
+    }
+  }
+  throw new CasErr("式が読めませんでした。");
+}
+function surdToText(a){
+  var ks = Object.keys(a).map(Number).sort(function(x, y){ return x - y; });
+  if (!ks.length) return "0";
+  var out = "";
+  ks.forEach(function(m, idx){
+    var c = a[m], neg = c.n < 0;
+    var body;
+    if (m === 1) body = rfmtAbs(c);
+    else if (c.n === 1 && c.d === 1 || c.n === -1 && c.d === 1) body = "√" + m;
+    else body = rfmtAbs(c) + "√" + m;
+    if (idx === 0) out += (neg ? "−" : "") + body;
+    else out += (neg ? "−" : "＋") + body;
+  });
+  return out;
+}
+
+/* ---------- operations ---------- */
+function casParseSide(str, tabLabel){
+  var s = casNormalize(str);
+  return { s: s, ast: null };
+}
+function casSplitEq(raw, needEq){
+  var s = casNormalize(raw);
+  var parts = s.split("=");
+  if (parts.length > 2) throw new CasErr("＝ は1つだけにしてください。");
+  if (needEq && parts.length < 2) throw new CasErr("＝ がありません。方程式は ＝ で結んだ形で入れてください（例：2x＋3＝7）。");
+  if (!needEq && parts.length > 1) throw new CasErr("＝ のある式は「方程式」や「連立方程式」のタブで入れてください。");
+  return parts;
+}
+
+/* 展開: expression text -> expanded polynomial text */
+function casExpand(raw){
+  var parts = casSplitEq(raw, false);
+  var ast = casParse(parts[0]);
+  casCheckVarCount(casSortVars(Object.keys(casAstVars(ast))));
+  var p = polyEval(ast);
+  return { type: "ans", text: polyToText(p) };
+}
+
+/* 因数分解 (single variable) */
+function casFactorStr(p, q, v){
+  var xs = p === 1 ? v : p + v;
+  if (q === 0) return xs;
+  return xs + (q > 0 ? "＋" + q : "−" + (-q));
+}
+function casFactor(raw){
+  var parts = casSplitEq(raw, false);
+  var ast = casParse(parts[0]);
+  var p = polyEval(ast);
+  var vars = polyVars(p);
+  if (vars.length > 1) throw new CasErr("因数分解は、文字が1つの式だけ対応しています（今の式には " + vars.join(" と ") + " の2つの文字があります）。", "scope");
+  if (!vars.length){ return { type: "ans", text: polyToText(p) }; }
+  var v = vars[0];
+  if (polyDegree(p) === 0) return { type: "ans", text: polyToText(p) };
+  /* strip x^k */
+  var exps = Object.keys(p.terms).map(function(k){ return p.terms[k].mono[v] || 0; });
+  var kmin = Math.min.apply(null, exps);
+  var p1 = polyNew();
+  Object.keys(p.terms).forEach(function(k){ var t = p.terms[k]; var m = {}; if ((t.mono[v] || 0) - kmin > 0) m[v] = (t.mono[v] || 0) - kmin; polyAddTerm(p1, m, t.coef); });
+  /* content g and primitive integer Q */
+  var coefs = Object.keys(p1.terms).map(function(k){ return p1.terms[k].coef; });
+  var L = 1; coefs.forEach(function(c){ L = L * c.d / cgcd(L, c.d); });
+  var Ns = coefs.map(function(c){ return c.n * (L / c.d); });
+  var G = 0; Ns.forEach(function(n){ G = cgcd(G, n); });
+  var leadExp = Math.max.apply(null, Object.keys(p1.terms).map(function(k){ return p1.terms[k].mono[v] || 0; }));
+  var leadN = 0;
+  Object.keys(p1.terms).forEach(function(k){ var t = p1.terms[k]; if ((t.mono[v] || 0) === leadExp) leadN = t.coef.n * (L / t.coef.d); });
+  var g = R(G, L); if (leadN < 0) g = rneg(g);
+  var Q = polyNew();
+  Object.keys(p1.terms).forEach(function(k){ var t = p1.terms[k]; polyAddTerm(Q, t.mono, rdiv(t.coef, g)); });
+  /* Q now has integer coefficients, gcd 1, positive leading coefficient */
+  function qCoef(e){ var m = {}; if (e > 0) m[v] = e; return polyCoefOf(Q, m); }
+  var degQ = polyDegree(Q);
+  var prefix = [];
+  if (!(g.n === 1 && g.d === 1)) prefix.push(rfmt(g).replace("-", "−"));
+  if (kmin > 0) prefix.push(v + (kmin > 1 ? casSup(kmin) : ""));
+  function joinParts(extra){ return prefix.concat(extra).join(""); }
+  if (degQ === 0){ return { type: "ans", text: joinParts([]) || "1" }; }
+  if (degQ === 1){
+    var A = qCoef(1).n, B = qCoef(0).n;
+    return { type: "ans", text: joinParts(["(" + casFactorStr(A, B, v) + ")"]) };
+  }
+  /* degree 2: tasuki-gake */
+  var a = qCoef(2).n, b = qCoef(1).n, c = qCoef(0).n;
+  var found = null;
+  for (var pp = 1; pp <= a && !found; pp++){ if (a % pp) continue; var rr = a / pp;
+    for (var qq = -Math.abs(c); qq <= Math.abs(c) && !found; qq++){ if (qq === 0 || c % qq) continue; var ss = c / qq;
+      if (pp * ss + rr * qq === b) found = [pp, qq, rr, ss]; } }
+  if (found){
+    if (c < 0 && found[1] < 0 && found[3] > 0){ var swf = found; found = [swf[2], swf[3], swf[0], swf[1]]; }
+    var f1 = casFactorStr(found[0], found[1], v), f2 = casFactorStr(found[2], found[3], v);
+    if (f1 === f2) return { type: "ans", text: joinParts(["(" + f1 + ")²"]) };
+    return { type: "ans", text: joinParts(["(" + f1 + ")(" + f2 + ")"]) };
+  }
+  var qText = polyToText(Q);
+  if (prefix.length) return { type: "ans", text: joinParts(["(" + qText + ")"]), note: "かっこの中は、整数の範囲ではこれ以上因数分解できません。" };
+  return { type: "ans", text: qText, note: "整数の範囲では因数分解できません。" };
+}
+
+/* 方程式 (single variable, degree <= 2) */
+function casSolve(raw){
+  var parts = casSplitEq(raw, true);
+  var astL = casParse(parts[0]), astR = casParse(parts[1]);
+  casCheckVarCount(casSortVars(Object.keys(casAstVars(astL)).concat(Object.keys(casAstVars(astR))).filter(function(x, i, arr){ return arr.indexOf(x) === i; })));
+  var p = polySub(polyEval(astL), polyEval(astR));
+  var vars = polyVars(p);
+  if (vars.length > 1) throw new CasErr("文字が2つある方程式は、このタブでは解けません。2式そろっているときは「連立方程式」のタブを使ってください。", "scope");
+  if (!vars.length){
+    var c0 = polyConstVal(p);
+    return { type: "ans", text: ris0(c0) ? "x がどんな数でも成り立ちます" : "成り立つ x はありません" };
+  }
+  var v = vars[0];
+  function cf(e){ var m = {}; if (e > 0) m[v] = e; return polyCoefOf(p, m); }
+  var A = cf(2), B = cf(1), C = cf(0);
+  if (ris0(A)){
+    if (ris0(B)) return { type: "ans", text: ris0(C) ? v + " がどんな数でも成り立ちます" : "成り立つ " + v + " はありません" };
+    return { type: "ans", text: v + " ＝ " + rfmt(rdiv(rneg(C), B)).replace("-", "−") };
+  }
+  var D = rsub(rmul(B, B), rmul(R(4), rmul(A, C)));
+  if (D.n < 0) return { type: "ans", text: "実数の解はありません" };
+  var twoA = rmul(R(2), A), nb = rneg(B);
+  if (D.n === 0) return { type: "ans", text: v + " ＝ " + rfmt(rdiv(nb, twoA)).replace("-", "−") };
+  var prod = D.n * D.d, dec = sqrtDecomp(prod), s = dec.s, m = dec.m;
+  var P0 = nb.n * D.d * twoA.d, S0 = s * nb.d * twoA.d, Q0 = nb.d * D.d * twoA.n;
+  if (Q0 < 0){ Q0 = -Q0; P0 = -P0; }
+  S0 = Math.abs(S0);
+  var gg = cgcd(cgcd(P0, S0), Q0); P0 /= gg; S0 /= gg; Q0 /= gg;
+  var av = A.n / A.d, bv = B.n / B.d, cv = C.n / C.d, dv = bv * bv - 4 * av * cv, rt = Math.sqrt(Math.max(0, dv));
+  var r1 = (-bv + rt) / (2 * av), r2 = (-bv - rt) / (2 * av);
+  if (r2 > r1){ var sw = r1; r1 = r2; r2 = sw; }
+  function dec2(x){ return String(parseFloat(x.toFixed(2))); }
+  var approx = "（≒ " + dec2(r1).replace("-", "−") + "、" + dec2(r2).replace("-", "−") + "）";
+  if (m === 1){
+    var f1 = R(P0 + S0, Q0), f2 = R(P0 - S0, Q0);
+    return { type: "ans", text: v + " ＝ " + rfmt(f1).replace("-", "−") + "、" + v + " ＝ " + rfmt(f2).replace("-", "−") };
+  }
+  function radNum(sign){
+    var sq = S0 === 1 ? "√" + m : S0 + "√" + m;
+    if (P0 === 0) return (sign < 0 ? "−" : "") + sq;
+    return String(P0).replace("-", "−") + (sign < 0 ? " − " : " ＋ ") + sq;
+  }
+  if (Q0 === 1) return { type: "ans", text: v + " ＝ " + radNum(1) + "、" + v + " ＝ " + radNum(-1) + " " + approx };
+  return { type: "ans", frac: [ { num: radNum(1), den: Q0 }, { num: radNum(-1), den: Q0 } ], vname: v, approx: approx };
+}
+
+/* 連立方程式 (2 equations, 2 variables, linear) */
+function casSimul(raw1, raw2){
+  function sideEq(raw){
+    var parts = casSplitEq(raw, true);
+    var p = polySub(polyEval(casParse(parts[0])), polyEval(casParse(parts[1])));
+    return p;
+  }
+  var p1 = sideEq(raw1), p2 = sideEq(raw2);
+  [p1, p2].forEach(function(p){
+    Object.keys(p.terms).forEach(function(k){ if (monoDeg(p.terms[k].mono) > 1) throw new CasErr("2次以上の項や、文字どうしのかけ算（xy など）を含む式は、連立方程式では対象外です。", "scope"); });
+  });
+  var vars = casSortVars(polyVars(p1).concat(polyVars(p2)).filter(function(x, i, arr){ return arr.indexOf(x) === i; }));
+  casCheckVarCount(vars);
+  if (vars.length < 2) throw new CasErr("連立方程式には、文字が2つ必要です。文字が1つだけの方程式は「方程式」のタブで解けます。", "scope");
+  var v1 = vars[0], v2 = vars[1];
+  function row(p){ var m1 = {}; m1[v1] = 1; var m2 = {}; m2[v2] = 1; return { a: polyCoefOf(p, m1), b: polyCoefOf(p, m2), c: rneg(polyCoefOf(p, {})) }; }
+  var r1 = row(p1), r2 = row(p2);
+  var det = rsub(rmul(r1.a, r2.b), rmul(r2.a, r1.b));
+  if (!ris0(det)){
+    var x = rdiv(rsub(rmul(r1.c, r2.b), rmul(r2.c, r1.b)), det);
+    var y = rdiv(rsub(rmul(r1.a, r2.c), rmul(r2.a, r1.c)), det);
+    return { type: "ans", text: v1 + " ＝ " + rfmt(x).replace("-", "−") + "、" + v2 + " ＝ " + rfmt(y).replace("-", "−") };
+  }
+  var zero = R(0);
+  var badRow = (ris0(r1.a) && ris0(r1.b) && !ris0(r1.c)) || (ris0(r2.a) && ris0(r2.b) && !ris0(r2.c));
+  if (badRow) return { type: "ans", text: "解はありません" };
+  var cons = req(rmul(r1.a, r2.c), rmul(r2.a, r1.c)) && req(rmul(r1.b, r2.c), rmul(r2.b, r1.c));
+  return { type: "ans", text: cons ? "解は無数にあります（2つの式は同じ直線を表しています）" : "解はありません" };
+}
+function req(a, b){ return a.n === b.n && a.d === b.d; }
+
+/* 代入: expression AST + values {var: surd} */
+function casSubstitute(rawExpr, valueStrs){
+  var parts = casSplitEq(rawExpr, false);
+  var ast = casParse(parts[0]);
+  var names = casSortVars(Object.keys(casAstVars(ast)));
+  casCheckVarCount(names);
+  var env = {};
+  for (var i = 0; i < names.length; i++){
+    var nm = names[i], vs = valueStrs ? valueStrs[nm] : undefined;
+    if (vs === undefined || String(vs).trim() === "") return { type: "prompt", text: nm + " の値を入れてください。" };
+    var vast;
+    try { vast = casParse(casNormalize(vs)); }
+    catch (e){ if (e instanceof CasErr) return { type: "err", text: nm + " の値：" + e.msg }; throw e; }
+    try { env[nm] = surdEval(vast, {}); }
+    catch (e){ if (e instanceof CasErr) return { type: "err", text: nm + " の値：" + e.msg }; throw e; }
+  }
+  var val = surdEval(ast, env);
+  return { type: "ans", text: surdToText(val) };
+}
+
+function cas$(id){ return document.getElementById(id); }
+function casEsc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function casHTML(s){ return casEsc(s).replace(/(\d+)\/(\d+)/g, function(_, n, d){ return "<span class='vfrac'><span class='top'>" + n + "</span><span class='bot'>" + d + "</span></span>"; }); }
+var CAS = { answers: false, subVals: { x: "3" }, subVarSet: null };
+function casShow(el, res){
+  if (!el) return;
+  if (res.type === "err" || res.type === "scope"){ el.innerHTML = "<div class='msgerr'>" + casEsc(res.text) + "</div>"; return; }
+  if (res.type === "prompt"){ el.innerHTML = "<div class='okbox chkans'>" + casEsc(res.text) + "</div>"; return; }
+  if (!CAS.answers){ el.innerHTML = "<div class='okbox chkans'>結果は「答え合わせ表示」が ON のときに表示されます（このカードの上のボタンで切り替えます）。</div>"; return; }
+  var html;
+  if (res.frac){
+    html = res.frac.map(function(f){ return casEsc(res.vname) + " ＝ <span class='vfrac'><span class='top'>" + casEsc(f.num) + "</span><span class='bot'>" + f.den + "</span></span>"; }).join("、") + " " + casEsc(res.approx || "");
+  } else {
+    html = casHTML(res.text);
+    if (res.note) html += "<br><span>" + casEsc(res.note) + "</span>";
+  }
+  el.innerHTML = "<div class='okbox chkans'>答え： " + html + "</div>";
+}
+function casRun(fn, el){
+  var res;
+  try { res = fn(); }
+  catch (e){
+    if (e instanceof CasErr){ casShow(el, { type: "err", text: e.msg }); return; }
+    casShow(el, { type: "err", text: "式が読めませんでした。入力を確認してください。" });
+    return;
+  }
+  casShow(el, res);
+}
+function casUpdExp(){ casRun(function(){ return casExpand(cas$("casExpIn").value); }, cas$("casExpAns")); }
+function casUpdFact(){ casRun(function(){ return casFactor(cas$("casFactIn").value); }, cas$("casFactAns")); }
+function casUpdSolve(){ casRun(function(){ return casSolve(cas$("casSolveIn").value); }, cas$("casSolveAns")); }
+function casUpdSimul(){ casRun(function(){ return casSimul(cas$("casSimIn1").value, cas$("casSimIn2").value); }, cas$("casSimAns")); }
+function casBuildSubVals(names){
+  var box = cas$("casSubVals"); if (!box) return;
+  box.innerHTML = "";
+  names.forEach(function(nm){
+    var row = document.createElement("div"); row.className = "cas-valrow";
+    var lab = document.createElement("label"); lab.textContent = nm + " ＝"; lab.setAttribute("for", "casVal_" + nm);
+    var inp = document.createElement("input"); inp.type = "text"; inp.id = "casVal_" + nm;
+    inp.value = CAS.subVals[nm] || ""; inp.setAttribute("aria-label", nm + " の値");
+    inp.addEventListener("input", function(){ CAS.subVals[nm] = inp.value; casUpdSub(); });
+    row.appendChild(lab); row.appendChild(inp); box.appendChild(row);
+  });
+}
+function casUpdSub(){
+  var inp = cas$("casSubIn"); if (!inp) return;
+  var names = [];
+  try { names = casSortVars(Object.keys(casAstVars(casParse(casNormalize(inp.value.replace(/=.*$/, "")))))); } catch (e) { names = []; }
+  var key = names.join(",");
+  if (key !== CAS.subVarSet){ CAS.subVarSet = key; casBuildSubVals(names); }
+  casRun(function(){ return casSubstitute(inp.value, CAS.subVals); }, cas$("casSubAns"));
+}
+function casUpdAll(){ casUpdExp(); casUpdFact(); casUpdSolve(); casUpdSimul(); casUpdSub(); }
+var CASTABS = [["casTabExp","casPaneExp"],["casTabFact","casPaneFact"],["casTabSolve","casPaneSolve"],["casTabSimul","casPaneSimul"],["casTabSub","casPaneSub"]];
+function casShowTab(paneId){ CASTABS.forEach(function(p){ var t = cas$(p[0]), pn = cas$(p[1]); if (t) t.classList.toggle("on", p[1] === paneId); if (pn) pn.classList.toggle("hidden", p[1] !== paneId); }); }
+CASTABS.forEach(function(p){ var t = cas$(p[0]); if (t) t.onclick = function(){ casShowTab(p[1]); }; });
+var ab = cas$("casAnswersBtn");
+if (ab) ab.onclick = function(){ CAS.answers = !CAS.answers; ab.textContent = "答え合わせ表示：" + (CAS.answers ? "ON" : "OFF"); ab.classList.toggle("on", CAS.answers); casUpdAll(); };
+[["casExpIn", casUpdExp],["casFactIn", casUpdFact],["casSolveIn", casUpdSolve],["casSimIn1", casUpdSimul],["casSimIn2", casUpdSimul],["casSubIn", casUpdSub]].forEach(function(p){ var el = cas$(p[0]); if (el) el.addEventListener("input", p[1]); });
+function casChips(attr, fn){ document.querySelectorAll("[" + attr + "]").forEach(function(b){ b.addEventListener("click", function(){ fn(b); }); }); }
+casChips("data-cas-exp", function(b){ cas$("casExpIn").value = b.getAttribute("data-cas-exp"); casUpdExp(); cas$("casExpIn").focus(); });
+casChips("data-cas-fact", function(b){ cas$("casFactIn").value = b.getAttribute("data-cas-fact"); casUpdFact(); cas$("casFactIn").focus(); });
+casChips("data-cas-solve", function(b){ cas$("casSolveIn").value = b.getAttribute("data-cas-solve"); casUpdSolve(); cas$("casSolveIn").focus(); });
+casChips("data-cas-sim", function(b){ var pr = b.getAttribute("data-cas-sim").split("|"); cas$("casSimIn1").value = pr[0]; cas$("casSimIn2").value = pr[1] || ""; casUpdSimul(); });
+casChips("data-cas-sub", function(b){ cas$("casSubIn").value = b.getAttribute("data-cas-sub"); casUpdSub(); cas$("casSubIn").focus(); });
+casUpdAll();
 })();
 </script>
 </body>
