@@ -605,12 +605,8 @@ body>#homeView{flex:1 1 auto;min-height:0;overflow-y:auto;width:100%}
   /* 定規で作図の説明文（定規・コンパスの扱い）も、広く見るでは畳んでキャンバスを主役にする */
   #planeMode.is-wide #consPane>.note{display:none!important}
 }
-/* 右端の縦タブ「道具・設定」は、ステージ右端の余白の上にだけ重ねる。
-   タブが出ている間（広く見るで道具を閉じている間／通常表示でサイドを閉じている間）は、
-   ステージと単元バナーの右にタブ幅ぶんの余白を確保し、読むテキストが決して隠れないようにする */
-.is-wide:not(.wide-tools-open) .stage,.side-closed:not(.is-wide) .stage{padding-right:42px}
-.is-wide:not(.wide-tools-open) .unit-banner,.side-closed:not(.is-wide) .unit-banner{padding-right:42px}
-@media print{.is-wide:not(.wide-tools-open) .stage,.side-closed:not(.is-wide) .stage,.is-wide:not(.wide-tools-open) .unit-banner,.side-closed:not(.is-wide) .unit-banner{padding-right:0}}
+/* 右端の縦タブ「道具・設定」はキャンバスに重なる浮動要素として扱い、レイアウト上の場所は空けない。
+   折りたたんでいる間もステージや単元バナーにタブ幅ぶんの余白は確保せず、その分は全部キャンバスに充てる */
 /* 道具パレットのアイコン＋ラベル（線画で統一） */
 .toolgrid button,.shapegrid button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:9px 4px 7px;line-height:1.25}
 .toolgrid button svg,.shapegrid button svg{width:26px;height:26px;flex:0 0 auto}
@@ -661,6 +657,16 @@ body>#homeView{flex:1 1 auto;min-height:0;overflow-y:auto;width:100%}
   /* 1行に畳んだ説明文は、クリック／タップ／Enter・Spaceでその場で全文に開ける（titleだけに頼らない） */
   #custIntro,#custDimNote,#planeHint,.viewbar .firsthint,.viewbar .d-note{cursor:pointer}
   #custIntro.txt-open,#custDimNote.txt-open,#planeHint.txt-open,.viewbar .firsthint.txt-open,.viewbar .d-note.txt-open{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+}
+</style>
+<style>
+/* ===== スマホ通常表示：キャンバスを画面の横いっぱいに広げる =====
+   道具・設定は右端タブ（キャンバスに重なる浮動要素）に折りたたんであるので、その分の場所は空けない。
+   レイアウト左右の余白（8px）もキャンバスの箱（.viewbox）には充て、画面の左右端まで届かせる。
+   操作行やカードは従来どおり余白の中に置く。キャンバスの箱が広がるだけで縮尺は変えず、
+   見える範囲が横に広がる（各キャンバスは実寸で描き直される）。 */
+@media (max-width:900px){
+  #solidMode:not(.is-wide) .stage .viewbox,#planeMode:not(.is-wide) .stage .viewbox,#theoremMode:not(.is-wide) .stage .viewbox,#customMode:not(.is-wide) .stage .viewbox,#dataMode:not(.is-wide) .stage .viewbox,#numMode:not(.is-wide) .stage .viewbox,#graphMode:not(.is-wide) .stage .viewbox{width:calc(100% + 16px);margin-left:-8px;margin-right:-8px;border-left-width:0;border-right-width:0;border-radius:0}
 }
 </style>
 <link rel="canonical" href="https://sugakulab.pages.dev/" />
