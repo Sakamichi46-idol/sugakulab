@@ -1581,7 +1581,7 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
     </section>
     <section class="card c3d-sec" id="c3SecShape">
       <h2>形を選んで置く（立体）</h2>
-      <p class="note" style="margin-top:0">ボタンを押すと、キャンバスの中央（床の上）にその立体が出ます。立方体・直方体・角柱・角錐は点・辺・面で作られるので、頂点の名前を使って「辺の上の点」など、そのまま続きが作れます。円柱・円錐・球は曲面の立体で、置いたあと下に出るスライダーと数値入力で、半径と高さのほか、置く位置（中心の座標）も変えられます。どれも「元に戻す」で戻せて、下書きにも残ります。</p>
+      <p class="note" style="margin-top:0">ボタンを押すと、キャンバスの中央（床の上）にその立体が出ます。立方体・直方体・角柱・角錐は点・辺・面で作られるので、頂点の名前を使って「辺の上の点」など、そのまま続きが作れます。円柱・円錐・球は曲面の立体で、置いたあと下に出るスライダーと数値入力で、半径と高さのほか、置く位置（中心の x・y と、いちばん下の高さ z）も変えられます。どれも「元に戻す」で戻せて、下書きにも残ります。</p>
       <div class="row" style="flex-wrap:wrap;gap:6px;margin:0">
         <button class="btn" type="button" data-c3shape="cube">立方体</button>
         <button class="btn" type="button" data-c3shape="box">直方体</button>
@@ -2764,7 +2764,7 @@ function c3SyncHistBtns(){var u=el("c3Undo"),r=el("c3Redo");if(u)u.disabled=!c3U
 function c3PushHistory(){c3UndoStack.push(c3Snapshot());if(c3UndoStack.length>60)c3UndoStack.shift();c3RedoStack=[];c3SyncHistBtns()}
 var c3SaveTimer=null;
 function c3Save(){if(c3SaveTimer)clearTimeout(c3SaveTimer);c3SaveTimer=setTimeout(function(){c3SaveTimer=null;try{if(c3HasContent())localStorage.setItem(DRAFT3_KEY,c3Snapshot());else localStorage.removeItem(DRAFT3_KEY)}catch(e){}},400)}
-function c3Restore(j){try{var o=JSON.parse(j);C3.points=o.points||[];C3.edges=o.edges||[];C3.faces=o.faces||[];C3.curved=(o.curved||[]).filter(function(s){return s&&isFinite(s.r)&&(s.kind==="sphere"||((s.kind==="cyl"||s.kind==="cone")&&isFinite(s.h)))}).map(function(s){return{kind:s.kind,name:(typeof s.name==="string"&&s.name)?s.name:(s.kind==="cyl"?"円柱":s.kind==="cone"?"円錐":"球"),r:clamp(snap05(s.r),0.5,5),h:s.kind==="sphere"?0:clamp(snap05(s.h),0.5,10),cx:isFinite(s.cx)?clamp(snap05(s.cx),-5,5):0,cy:isFinite(s.cy)?clamp(snap05(s.cy),-5,5):0}});C3.selPoint=o.selPoint||null;if(C3.selPoint&&!P(C3.selPoint))C3.selPoint=null;if(o.net&&typeof o.net==="object"){var nn=o.net;C3.net.on=!!nn.on;C3.net.pat=(typeof nn.pat==="number"&&isFinite(nn.pat))?Math.max(0,Math.floor(nn.pat)):0;C3.net.target=(typeof nn.target==="string")?nn.target:"";C3.net.strA=(typeof nn.strA==="string")?nn.strA:"";C3.net.strB=(typeof nn.strB==="string")?nn.strB:"";C3.net.alt=0;C3.net.calt=0;if(nn.cv&&typeof nn.cv==="object")["th1","z1","th2","z2"].forEach(function(k){if(isFinite(nn.cv[k]))C3.net.cv[k]=nn.cv[k]})}c3FacePickSel=[];c3CurveArm=true;c3SyncAll()}catch(e){}}
+function c3Restore(j){try{var o=JSON.parse(j);C3.points=o.points||[];C3.edges=o.edges||[];C3.faces=o.faces||[];C3.curved=(o.curved||[]).filter(function(s){return s&&isFinite(s.r)&&(s.kind==="sphere"||((s.kind==="cyl"||s.kind==="cone")&&isFinite(s.h)))}).map(function(s){return{kind:s.kind,name:(typeof s.name==="string"&&s.name)?s.name:(s.kind==="cyl"?"円柱":s.kind==="cone"?"円錐":"球"),r:clamp(snap05(s.r),0.5,5),h:s.kind==="sphere"?0:clamp(snap05(s.h),0.5,10),cx:isFinite(s.cx)?clamp(snap05(s.cx),-5,5):0,cy:isFinite(s.cy)?clamp(snap05(s.cy),-5,5):0,cz:isFinite(s.cz)?clamp(snap05(s.cz),-5,5):0}});C3.selPoint=o.selPoint||null;if(C3.selPoint&&!P(C3.selPoint))C3.selPoint=null;if(o.net&&typeof o.net==="object"){var nn=o.net;C3.net.on=!!nn.on;C3.net.pat=(typeof nn.pat==="number"&&isFinite(nn.pat))?Math.max(0,Math.floor(nn.pat)):0;C3.net.target=(typeof nn.target==="string")?nn.target:"";C3.net.strA=(typeof nn.strA==="string")?nn.strA:"";C3.net.strB=(typeof nn.strB==="string")?nn.strB:"";C3.net.alt=0;C3.net.calt=0;if(nn.cv&&typeof nn.cv==="object")["th1","z1","th2","z2"].forEach(function(k){if(isFinite(nn.cv[k]))C3.net.cv[k]=nn.cv[k]})}c3FacePickSel=[];c3CurveArm=true;c3SyncAll()}catch(e){}}
 function c3UndoFn(){if(!c3UndoStack.length)return;c3RedoStack.push(c3Snapshot());c3Restore(c3UndoStack.pop());c3SyncHistBtns();c3Save()}
 function c3RedoFn(){if(!c3RedoStack.length)return;c3UndoStack.push(c3Snapshot());c3Restore(c3RedoStack.pop());c3SyncHistBtns();c3Save()}
 /* ---------- 3D描画 ---------- */
@@ -2808,7 +2808,7 @@ function buildScene3(){
   C3.curved.forEach(function(s,ci){
     var isSph=s.kind==="sphere";
     var geo=isSph?new THREE.SphereGeometry(s.r,36,24):s.kind==="cyl"?new THREE.CylinderGeometry(s.r,s.r,s.h,44,1,false):new THREE.CylinderGeometry(0.001,s.r,s.h,44,1,false);
-    var grp=new THREE.Group();grp.position.set(s.cx||0,isSph?s.r:s.h/2,-(s.cy||0));
+    var grp=new THREE.Group();grp.position.set(s.cx||0,(s.cz||0)+(isSph?s.r:s.h/2),-(s.cy||0));
     var mesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x2f7fd0,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false}));
     mesh.userData.c3curve=ci;c3CurvePick.push(mesh);
     grp.add(mesh);
@@ -2946,7 +2946,7 @@ function c3SyncMeasure(){
     else if(C3.faces.length)h+="<p class='note'>面でぴったり閉じた立体になると、体積と表面積が出ます（いまはまだ閉じていません）。</p>";
     if(C3.points.length&&!C3.edges.length&&!C3.faces.length)h+="<p class='note'>辺を引くと長さが、面を作ると面積が出ます。</p>";
     C3.curved.forEach(function(s){var m=curvedMeasures(s);
-      h+="<strong>"+s.name+"（半径 "+fmt(s.r)+(s.kind==="sphere"?"":"・高さ "+fmt(s.h))+"・中心 ("+fmt(s.cx||0)+", "+fmt(s.cy||0)+")）</strong><div class='c3-list'>"
+      h+="<strong>"+s.name+"（半径 "+fmt(s.r)+(s.kind==="sphere"?"":"・高さ "+fmt(s.h))+"・中心 ("+fmt(s.cx||0)+", "+fmt(s.cy||0)+")・高さ z "+fmt(s.cz||0)+"）</strong><div class='c3-list'>"
         +"<div class='rowline'><span>体積</span><span>"+fmtPi(m.vol)+"</span></div>"
         +(m.side!=null?"<div class='rowline'><span>側面積</span><span>"+fmtPi(m.side)+"</span></div>":"")
         +(m.base!=null?"<div class='rowline'><span>底面積（1つ）</span><span>"+fmtPi(m.base)+"</span></div>":"")
@@ -3011,7 +3011,7 @@ function placeShape3(def){
   c3PushHistory();
   var off=[0,0,0];
   if(typeof controls!=="undefined"&&controls&&controls.target){var td=[controls.target.x,-controls.target.z,controls.target.y-0.8];for(var ai=0;ai<3;ai++){var mn=1e9,mx=-1e9;def.pts.forEach(function(p){if(p[ai]<mn)mn=p[ai];if(p[ai]>mx)mx=p[ai]});off[ai]=clamp(snap05(td[ai]),-5-mn,5-mx)}}
-  if(C3.points.length||C3.curved.length){var ex={x0:1e9,x1:-1e9,y0:1e9,y1:-1e9,z0:1e9,z1:-1e9};C3.points.forEach(function(p){ex.x0=Math.min(ex.x0,p.x);ex.x1=Math.max(ex.x1,p.x);ex.y0=Math.min(ex.y0,p.y);ex.y1=Math.max(ex.y1,p.y);ex.z0=Math.min(ex.z0,p.z);ex.z1=Math.max(ex.z1,p.z)});C3.curved.forEach(function(sv){var ccx=sv.cx||0,ccy=sv.cy||0,top=sv.kind==="sphere"?2*sv.r:sv.h;ex.x0=Math.min(ex.x0,ccx-sv.r);ex.x1=Math.max(ex.x1,ccx+sv.r);ex.y0=Math.min(ex.y0,ccy-sv.r);ex.y1=Math.max(ex.y1,ccy+sv.r);ex.z0=Math.min(ex.z0,0);ex.z1=Math.max(ex.z1,top)});var dn={x0:1e9,x1:-1e9,y0:1e9,y1:-1e9,z0:1e9,z1:-1e9};def.pts.forEach(function(p){dn.x0=Math.min(dn.x0,p[0]+off[0]);dn.x1=Math.max(dn.x1,p[0]+off[0]);dn.y0=Math.min(dn.y0,p[1]+off[1]);dn.y1=Math.max(dn.y1,p[1]+off[1]);dn.z0=Math.min(dn.z0,p[2]+off[2]);dn.z1=Math.max(dn.z1,p[2]+off[2])});if(dn.x0<ex.x1&&dn.x1>ex.x0&&dn.y0<ex.y1&&dn.y1>ex.y0&&dn.z0<ex.z1&&dn.z1>ex.z0){var mnx=1e9,mxx=-1e9;def.pts.forEach(function(p){mnx=Math.min(mnx,p[0]);mxx=Math.max(mxx,p[0])});off[0]=clamp(snap05(ex.x1-dn.x0+0.5+off[0]),-5-mnx,5-mxx)}}
+  if(C3.points.length||C3.curved.length){var ex={x0:1e9,x1:-1e9,y0:1e9,y1:-1e9,z0:1e9,z1:-1e9};C3.points.forEach(function(p){ex.x0=Math.min(ex.x0,p.x);ex.x1=Math.max(ex.x1,p.x);ex.y0=Math.min(ex.y0,p.y);ex.y1=Math.max(ex.y1,p.y);ex.z0=Math.min(ex.z0,p.z);ex.z1=Math.max(ex.z1,p.z)});C3.curved.forEach(function(sv){var ccx=sv.cx||0,ccy=sv.cy||0,top=sv.kind==="sphere"?2*sv.r:sv.h;ex.x0=Math.min(ex.x0,ccx-sv.r);ex.x1=Math.max(ex.x1,ccx+sv.r);ex.y0=Math.min(ex.y0,ccy-sv.r);ex.y1=Math.max(ex.y1,ccy+sv.r);ex.z0=Math.min(ex.z0,sv.cz||0);ex.z1=Math.max(ex.z1,(sv.cz||0)+top)});var dn={x0:1e9,x1:-1e9,y0:1e9,y1:-1e9,z0:1e9,z1:-1e9};def.pts.forEach(function(p){dn.x0=Math.min(dn.x0,p[0]+off[0]);dn.x1=Math.max(dn.x1,p[0]+off[0]);dn.y0=Math.min(dn.y0,p[1]+off[1]);dn.y1=Math.max(dn.y1,p[1]+off[1]);dn.z0=Math.min(dn.z0,p[2]+off[2]);dn.z1=Math.max(dn.z1,p[2]+off[2])});if(dn.x0<ex.x1&&dn.x1>ex.x0&&dn.y0<ex.y1&&dn.y1>ex.y0&&dn.z0<ex.z1&&dn.z1>ex.z0){var mnx=1e9,mxx=-1e9;def.pts.forEach(function(p){mnx=Math.min(mnx,p[0]);mxx=Math.max(mxx,p[0])});off[0]=clamp(snap05(ex.x1-dn.x0+0.5+off[0]),-5-mnx,5-mxx)}}
   var names=def.pts.map(function(p){var nm=nextName();C3.points.push({name:nm,x:p[0]+off[0],y:p[1]+off[1],z:p[2]+off[2]});return nm});
   def.edges.forEach(function(e){addEdge3(names[e[0]],names[e[1]])});
   def.faces.forEach(function(f){addFace3(f.map(function(i){return names[i]}))});
@@ -3027,7 +3027,7 @@ function curvedName(kind){var base=kind==="cyl"?"円柱":kind==="cone"?"円錐":
 function c3SyncCurvedList(){
   var box=el("c3CurvedList");if(!box)return;box.innerHTML="";
   C3.curved.forEach(function(s,i){
-    function dimTxt(){return "半径 "+fmt(s.r)+(s.kind==="sphere"?"":" ・ 高さ "+fmt(s.h))+" ・ 中心 ("+fmt(s.cx||0)+", "+fmt(s.cy||0)+")"}
+    function dimTxt(){return "半径 "+fmt(s.r)+(s.kind==="sphere"?"":" ・ 高さ "+fmt(s.h))+" ・ 中心 ("+fmt(s.cx||0)+", "+fmt(s.cy||0)+") ・ 高さ z "+fmt(s.cz||0)}
     var wrap=document.createElement("div");wrap.style.marginTop="10px";wrap.style.borderTop="1px solid var(--line,#d8dcd8)";wrap.style.paddingTop="8px";
     var head=document.createElement("div");head.className="row";head.style.margin="0 0 2px";
     var nm=document.createElement("strong");nm.textContent=s.name;head.appendChild(nm);
@@ -3035,7 +3035,7 @@ function c3SyncCurvedList(){
     var del=document.createElement("button");del.type="button";del.className="btn small";del.textContent="消す";
     del.addEventListener("click",function(){c3PushHistory();C3.curved.splice(i,1);el("c3ShapeMsg").textContent=s.name+" を消しました";c3After()});
     head.appendChild(del);wrap.appendChild(head);
-    [["r","半径",0.5,5],["h","高さ",0.5,10],["cx","中心 x",-5,5],["cy","中心 y",-5,5]].filter(function(cfg){return s.kind!=="sphere"||cfg[0]!=="h"}).forEach(function(cfg){
+    [["r","半径",0.5,5],["h","高さ",0.5,10],["cx","中心 x",-5,5],["cy","中心 y",-5,5],["cz","高さ z",-5,5]].filter(function(cfg){return s.kind!=="sphere"||cfg[0]!=="h"}).forEach(function(cfg){
       var field=cfg[0],min=cfg[2],max=cfg[3];
       var row=document.createElement("div");row.className="c3-coord";
       var lab=document.createElement("label");lab.textContent=cfg[1];row.appendChild(lab);
@@ -3110,13 +3110,13 @@ function c3NetCompute(){
     var th1=cv.th1*Math.PI/180,th2=cv.th2*Math.PI/180,path=[],i;
     if(s.kind==="cyl"){
       var sol=NetMath.cylSolve(s.r,s.h,th1,cv.z1,th2,cv.z2);
-      for(i=0;i<=40;i++){var t=i/40,th=th1+sol.dth*t;path.push([(s.cx||0)+s.r*Math.cos(th),(s.cy||0)+s.r*Math.sin(th),cv.z1+(cv.z2-cv.z1)*t])}
+      for(i=0;i<=40;i++){var t=i/40,th=th1+sol.dth*t;path.push([(s.cx||0)+s.r*Math.cos(th),(s.cy||0)+s.r*Math.sin(th),(s.cz||0)+cv.z1+(cv.z2-cv.z1)*t])}
       netData={kind:"cyl",curve:s,sol:sol};
     }else{
       var sol2=NetMath.coneSolve(s.r,s.h,th1,cv.z1,th2,cv.z2);
       for(i=0;i<=40;i++){var t2=i/40,nx=sol2.p1[0]+(sol2.p2[0]-sol2.p1[0])*t2,ny=sol2.p1[1]+(sol2.p2[1]-sol2.p1[1])*t2;
         var dd=Math.hypot(nx,ny),ph=Math.atan2(nx,ny),ss=sol2.slant>0?dd/sol2.slant:0,thA=ph/sol2.k;
-        path.push([(s.cx||0)+s.r*ss*Math.cos(thA),(s.cy||0)+s.r*ss*Math.sin(thA),s.h*(1-ss)])}
+        path.push([(s.cx||0)+s.r*ss*Math.cos(thA),(s.cy||0)+s.r*ss*Math.sin(thA),(s.cz||0)+s.h*(1-ss)])}
       netData={kind:"cone",curve:s,sol:sol2};
     }
     netPath3=path;
@@ -3133,7 +3133,7 @@ function netCurveClick(p){
   var ci=parseInt(C3.net.target.slice(1),10),s=C3.curved[ci];if(!s)return;
   var mx=p.x-(s.cx||0),my=-p.z-(s.cy||0),mz=p.y;
   var th=Math.round(((Math.atan2(my,mx)*180/Math.PI)%360+360)%360);
-  var zz=snap05(clamp(mz,0,s.h));
+  var zz=snap05(clamp(mz-(s.cz||0),0,s.h));
   if(C3.net.calt%2===0){C3.net.cv.th1=th;C3.net.cv.z1=zz;C3.net.calt=1}else{C3.net.cv.th2=th;C3.net.cv.z2=zz;C3.net.calt=0}
   netRefresh();
 }
@@ -3353,7 +3353,7 @@ function wire(){
         if(typeof controls!=="undefined"&&controls&&controls.target){ccx=snap05(clamp(controls.target.x,-5,5));ccy=snap05(clamp(-controls.target.z,-5,5))}
         var shiftTry=0;
         while(shiftTry<3&&C3.curved.some(function(o){return Math.abs((o.cx||0)-ccx)<2.5&&Math.abs((o.cy||0)-ccy)<2.5})){ccx=snap05(clamp(ccx+3,-5,5));shiftTry++}
-        var s={kind:k,r:k==="sphere"?2:(k==="cyl"?2:3),h:k==="sphere"?0:(k==="cyl"?5:4),cx:ccx,cy:ccy};s.name=curvedName(k);C3.curved.push(s);
+        var s={kind:k,r:k==="sphere"?2:(k==="cyl"?2:3),h:k==="sphere"?0:(k==="cyl"?5:4),cx:ccx,cy:ccy,cz:0};s.name=curvedName(k);C3.curved.push(s);
         el("c3ShapeMsg").textContent=s.name+" を置きました（半径 "+fmt(s.r)+(k==="sphere"?"":"・高さ "+fmt(s.h))+"・中心 ("+fmt(ccx)+", "+fmt(ccy)+")）。下のスライダーで大きさと中心の位置を変えられます";
         c3After();return;
       }
