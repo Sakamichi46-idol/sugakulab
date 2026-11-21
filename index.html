@@ -102,6 +102,38 @@
 .hist-bar button:disabled{opacity:.45;cursor:not-allowed}
 @media (max-width:600px){.hist-bar button{padding:8px 16px;font-size:15px}}
 @media print{.hist-bar{display:none!important}}
+/* ===== スマホ幅の「広く見る」（自由キャンバス）：帯を細く・情報カードを畳む・浮動バーを隠す ===== */
+@media (max-width:600px){
+  /* 1) 左の操作帯を細くし、ボタン名を1行に収めてキャンバスを広げる */
+  #customMode.is-wide #custWideStrip{width:100px;padding:8px 4px;gap:8px}
+  #customMode.is-wide .layout{padding:6px 6px 6px 106px}
+  #custWideStrip .viewbar{gap:5px}
+  #custWideStrip .c2d-actions{gap:5px}
+  #custWideStrip .btn{font-size:11.5px;padding:6px 1px;white-space:nowrap;line-height:1.3}
+  #custWideStrip .btn svg{display:none}
+  #custWideStrip #custResetAll,#custWideStrip #c3ResetAll{font-size:10px;letter-spacing:-.05em}
+  #custWideStrip #custDimBar{gap:5px;padding-top:8px}
+  #custWideStrip #custDimBar .seg button{font-size:11.5px;padding:7px 1px;white-space:nowrap}
+  #custWideStrip .cust-penbar{gap:5px;padding-top:8px}
+  #custWideStrip .cust-penbar .seg button{font-size:11.5px;padding:7px 1px;white-space:nowrap}
+  #custWideStrip #custPenMsg{font-size:10.5px}
+  /* 帯が細くなった分、帯の右に出る固定パネルも左へ寄せる */
+  #customMode.is-wide #custExamplePanel{left:106px}
+  #customMode.is-wide #custSolidPanel{left:106px}
+  #customMode.is-wide #custTimeCard{left:106px;width:min(560px,calc(100vw - 118px))}
+  #customMode.is-wide #custResetConfirm,#customMode.is-wide #c3ResetConfirm{width:min(480px,calc(100vw - 118px))}
+  /* 2) キャンバス上の情報カードを1行に畳む（状態文と見出しは隠し、グリッド／座標軸と表示リセットは残す） */
+  #customMode.is-wide #custViewbox2d .vhead{flex-wrap:nowrap;padding:4px 8px;gap:6px;font-size:0;overflow-x:auto}
+  #customMode.is-wide #custSelHead{display:none}
+  #customMode.is-wide #custViewbox2d .vhead .cust-disp{font-size:11.5px!important;gap:6px;flex:none}
+  #customMode.is-wide #custViewbox2d .vhead .panreset{font-size:11.5px;padding:2px 6px;white-space:nowrap;flex:none}
+  #customMode.is-wide #c3Viewbox .vhead{padding:4px 8px;gap:6px;font-size:0}
+  #customMode.is-wide #c3SelHead{display:none}
+  #customMode.is-wide #c3Viewbox .c3-viewtoggles{margin-left:0;display:flex;flex-wrap:wrap;gap:4px}
+  #customMode.is-wide #c3Viewbox .c3-viewtoggles .btn{font-size:11px;padding:2px 6px;white-space:nowrap}
+  /* 3) 広く見ている間は下中央の浮動バー（元に戻す／やり直し）を隠す（同じボタンが帯の中にある） */
+  body.wide-on .hist-bar{display:none!important}
+}
 </style>
 <style>
 /* ===== 文字の大きさ設定（標準／大きめ／最大） ===== */
