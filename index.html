@@ -1469,6 +1469,14 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
       <div id="custShapeList" style="margin-top:8px"></div>
       <p class="note">図形の「消す」も、上の「元に戻す」で戻せます。</p>
     </section>
+    <section class="card" id="exBarCardC">
+      <h2>式を入力して関数を追加</h2>
+      <p class="note" style="margin-top:0">式を文字で打つと、関数が図形として加わります（他の関数と同じように、関数の上の点や格子点の計測も使えます）。式の表示は「答え合わせ表示」の方針に従います。全角のまま打っても大丈夫です。</p>
+      <div class="exb-row"><input type="text" id="exInputC" placeholder="例：y＝x^2－3x＋2" aria-label="追加する関数の式（作図キャンバス）"><button class="btn primary" type="button" id="exAddC">追加する</button></div>
+      <div id="exMsgC" role="status"></div>
+      <div class="exb-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-exc="x^3-3x">x³－3x</button><button class="btn small" type="button" data-exc="sqrt(x)">√x</button><button class="btn small" type="button" data-exc="|x-2|">|x－2|</button><button class="btn small" type="button" data-exc="sin(x)">sin(x)</button><button class="btn small" type="button" data-exc="2^x">2^x</button><button class="btn small" type="button" data-exc="x^2 (-1<=x<=2)">x²（−1≦x≦2）</button></div>
+      <p class="note">書ける式は関数グラフと同じです：多項式、√、絶対値、sin・cos・tan（弧度法）、指数、log（底10）・ln・log2、「変数（スライダー）」の名前、定義域（−1≦x≦2 など）。読めない式は理由を表示して追加しません。陰関数・媒介変数・極座標は対象外です。</p>
+    </section>
     <section class="card" id="custMoveCard">
       <h2>図形をまとめて移動</h2>
       <p class="note" style="margin-top:0">図形を1つ選んで、平行移動・回転移動・対称移動（線対称）・拡大・縮小（相似変換）で写した図形を、新しい図形として残します。元の図形はそのまま残るので、移動の前と後を見比べられます。中学の「図形の移動」と「相似」の学習に使えます。</p>
@@ -2519,6 +2527,15 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
       <div id="gList"></div>
       <button class="btn primary" id="gAdd" type="button">＋ 関数を追加</button>
       <p class="note">比例 y＝ax・反比例 y＝a/x（中1）、1次関数 y＝ax＋b（中2）、関数 y＝ax²（中3）を、最大6つまで重ねて描けます。</p>
+    </section>
+    <style>.exb-row{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}.exb-row input[type=text]{flex:1 1 190px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);font-size:15px;min-height:42px}.exb-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px;align-items:center}</style>
+    <section class="card" id="exBarCardG">
+      <h2>式を入力して追加</h2>
+      <p class="note" style="margin-top:0">式を文字で打って関数を足せます。関数リストに加わり、色・線種・交点・値の表・削除も、他の関数と同じに使えます。全角のまま打っても大丈夫です。</p>
+      <div class="exb-row"><input type="text" id="exInputG" placeholder="例：y＝x^2－3x＋2" aria-label="追加する関数の式（関数グラフ）"><button class="btn primary" type="button" id="exAddG">追加する</button></div>
+      <div id="exMsgG" role="status"></div>
+      <div class="exb-chips"><span class="note" style="margin:0">例：</span><button class="btn small" type="button" data-exg="x^3-3x">x³－3x</button><button class="btn small" type="button" data-exg="sqrt(x)">√x</button><button class="btn small" type="button" data-exg="|x-2|">|x－2|</button><button class="btn small" type="button" data-exg="sin(x)">sin(x)</button><button class="btn small" type="button" data-exg="2^x">2^x</button><button class="btn small" type="button" data-exg="x^2 (-1<=x<=2)">x²（−1≦x≦2）</button></div>
+      <p class="note">書ける式：多項式（x^2、x^3、1/2x のような分数の係数）、√（sqrt(x) とも書けます）、絶対値 |x|、sin(x)・cos(x)・tan(x)（角度は弧度法＝ラジアン）、2^x のような指数、log(x)（底は10。ln(x) は自然対数、log2(x) は底2）。下の「変数（スライダー）」で作った名前も係数に使えます。定義域は y＝x^2（−1≦x≦2）のように最後に書けます。読めない式は、どこが読めないかを表示して、グラフには出しません。陰関数（x と y の両方を使う式）・媒介変数・極座標は対象外で、その旨が表示されます。</p>
     </section>
     <section class="card" id="slVarCardG"><h2>変数（スライダー）</h2><div id="slVarPanelG"></div></section>
     <section class="card" id="gTableCard">
@@ -7091,6 +7108,407 @@ window.drawCust=function(){
   try{vecRenderAll()}catch(e){}
 };
 vecRenderAll();
+})();
+</script>
+<script>
+"use strict";
+/* ===== 第2段：入力バー＋任意の関数の式パーサ =====
+   関数グラフ（gState.funcs の type:"expr"）と自由キャンバス（shapes の fkind:"expr"）に、
+   文字で打った式から関数を追加する。式は AST に変換して評価し、推測では描かない。
+   陰関数・媒介変数・極座標・微分は対象外として理由を表示する。 */
+(function(){
+function ex$(id){return document.getElementById(id)}
+function exEsc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function exMsg(el,txt,isErr){if(!el)return;el.innerHTML=txt?"<div class='"+(isErr?"msgerr":"msgok")+"'>"+exEsc(txt)+"</div>":""}
+var EX_FUNCS={sin:1,cos:1,tan:1,sqrt:1,abs:1,log:1,ln:1,log2:1,log10:1,exp:1};
+var EX_FUNCNAMES=["sqrt","log2","log10","sin","cos","tan","log","ln","abs","exp"];
+function exNormalize(s){
+  s=String(s==null?"":s);
+  var out="",i,c,ch;
+  for(i=0;i<s.length;i++){c=s.charCodeAt(i);ch=s[i];
+    if(c>=0xFF01&&c<=0xFF5E)out+=String.fromCharCode(c-0xFEE0);
+    else if(ch==="　"||ch===" ")out+="";
+    else out+=ch;}
+  s=out;
+  s=s.split("−").join("-").split("―").join("-").split("×").join("*").split("÷").join("/")
+     .split("｜").join("|").split("≦").join("<=").split("≧").join(">=")
+     .split("≤").join("<=").split("≥").join(">")
+     .split("²").join("^2").split("³").join("^3");
+  s=s.replace(/log_(\d+)\(/g,"log$1(");
+  return s;
+}
+function exNumVal(str){
+  var m=String(str).match(/^(-?\d+(?:\.\d+)?)(?:\/(\d+(?:\.\d+)?))?$/);
+  if(!m)return NaN;
+  var v=parseFloat(m[1]);
+  if(m[2]!==undefined){var d=parseFloat(m[2]);if(d===0)return NaN;v=v/d}
+  return v;
+}
+var EX_NUMRE="-?\\d+(?:\\.\\d+)?(?:\\/\\d+(?:\\.\\d+)?)?";
+function exParseDomain(dstr){
+  var m;
+  m=dstr.match(new RegExp("^("+EX_NUMRE+")(<=|<)x(<=|<)("+EX_NUMRE+")$"));
+  if(m)return{lo:exNumVal(m[1]),hi:exNumVal(m[4]),loS:m[2]==="<",hiS:m[3]==="<"};
+  m=dstr.match(new RegExp("^x(>=|>)("+EX_NUMRE+")$"));
+  if(m)return{lo:exNumVal(m[2]),hi:null,loS:m[1]===">"};
+  m=dstr.match(new RegExp("^x(<=|<)("+EX_NUMRE+")$"));
+  if(m)return{lo:null,hi:exNumVal(m[2]),hiS:m[1]==="<"};
+  m=dstr.match(new RegExp("^("+EX_NUMRE+")(>=|>)x$"));
+  if(m)return{lo:null,hi:exNumVal(m[1]),hiS:m[2]===">"};
+  m=dstr.match(new RegExp("^("+EX_NUMRE+")(<=|<)x$"));
+  if(m)return{lo:exNumVal(m[1]),hi:null,loS:m[2]==="<"};
+  return null;
+}
+function exTokens(s){
+  var toks=[],i=0;
+  function isVar(n){try{return typeof slVarGet==="function"&&!!slVarGet(n)}catch(e){return false}}
+  while(i<s.length){
+    var ch=s[i];
+    if((ch>="0"&&ch<="9")||(ch==="."&&/[0-9]/.test(s[i+1]||""))){
+      var j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      var numStr=s.slice(i,j);
+      if((numStr.match(/\./g)||[]).length>1)throw new Error("数字「"+numStr+"」が読めません。小数点は1つだけにしてください。");
+      toks.push({t:"num",v:parseFloat(numStr),raw:numStr});i=j;continue;
+    }
+    if(/[A-Za-z]/.test(ch)){
+      var j2=i;while(j2<s.length&&/[A-Za-z0-9_]/.test(s[j2]))j2++;
+      var id=s.slice(i,j2);i=j2;
+      var low=id.toLowerCase(),nextCh=s[i]||"";
+      if(EX_FUNCS[low]&&nextCh==="("){toks.push({t:"fn",v:low,raw:id});continue}
+      if(id==="x"){toks.push({t:"x",raw:id});continue}
+      if(isVar(id)){toks.push({t:"var",v:id,raw:id});continue}
+      if(EX_FUNCS[low])throw new Error(id+" のあとは（ ）で式を囲んでください。例："+low+"(x)");
+      var fi,fname=null;
+      for(fi=0;fi<EX_FUNCNAMES.length;fi++){if(low.indexOf(EX_FUNCNAMES[fi])===0&&low.length>EX_FUNCNAMES[fi].length){fname=EX_FUNCNAMES[fi];break}}
+      if(fname)throw new Error(fname+" のあとは（ ）で式を囲んでください。例："+fname+"(x)");
+      if(low==="pi"){toks.push({t:"num",v:Math.PI,raw:"π"});continue}
+      if(id==="e"){toks.push({t:"num",v:Math.E,raw:"e"});continue}
+      if(id==="y")throw new Error("これは対象外です：x と y の両方を使う式（陰関数）は描けません。y＝（xだけの式）の形で入れてください。");
+      if(id==="t")throw new Error("t を使う媒介変数表示は対象外です。y＝（xの式）の形で入れてください。");
+      if(id.length>1){
+        var ok=true,k,c1;
+        for(k=0;k<id.length;k++){c1=id[k];if(!/[A-Za-z]/.test(c1)||!(c1==="x"||c1==="e"||isVar(c1))){ok=false;break}}
+        if(ok){for(k=0;k<id.length;k++){var c2=id[k];if(c2==="x")toks.push({t:"x",raw:c2});else if(c2==="e")toks.push({t:"num",v:Math.E,raw:"e"});else toks.push({t:"var",v:c2,raw:c2});if(k<id.length-1)toks.push({t:"op",v:"*",raw:""})}continue}
+        for(k=0;k<id.length;k++){var c3=id[k];if(/[A-Za-z]/.test(c3)&&!(c3==="x"||c3==="e"||isVar(c3)))throw new Error("「"+c3+"」は分からない文字です。使える文字は x と、変数（スライダー）で作った名前だけです。")}
+        throw new Error("「"+id+"」は読めませんでした。x の累乗は x^2 のように書いてください。");
+      }
+      throw new Error("「"+id+"」は分からない文字です。使える文字は x と、変数（スライダー）で作った名前だけです。係数として使いたいときは、先に「変数（スライダー）」でその名前を作ってください。");
+    }
+    if(ch==="π"){toks.push({t:"num",v:Math.PI,raw:"π"});i++;continue}
+    if(ch==="√"){toks.push({t:"fn",v:"sqrt",raw:"√",sym:true});i++;continue}
+    if(ch==="("||ch===")"||ch==="|"){toks.push({t:ch,v:ch,raw:ch});i++;continue}
+    if("+-*/^".indexOf(ch)>=0){toks.push({t:"op",v:ch,raw:ch});i++;continue}
+    throw new Error("「"+ch+"」は読み取れませんでした。使える記号は ＋ － × ÷ ^ √ π （ ） | | です。");
+  }
+  return toks;
+}
+function exParseExprStr(s){
+  var toks=exTokens(s),pos=0,absDepth=0;
+  function peek(){return toks[pos]}
+  function nxt(){return toks[pos++]}
+  function parseExpr(){var n=parseTerm();while(peek()&&peek().t==="op"&&(peek().v==="+"||peek().v==="-")){var op=nxt().v;var r=parseTerm();n={k:"bin",op:op,l:n,r:r}}return n}
+  function parseTerm(){var n=parseFactor();while(true){var tk=peek();if(!tk)break;if(tk.t==="op"&&(tk.v==="*"||tk.v==="/")){nxt();var r=parseFactor();n={k:"bin",op:tk.v,l:n,r:r}}else if(tk.t==="num"||tk.t==="x"||tk.t==="var"||tk.t==="fn"||tk.t==="("||(tk.t==="|"&&absDepth===0)){var r2=parseFactor();n={k:"bin",op:"*",l:n,r:r2}}else break}return n}
+  function parseFactor(){var tk=peek();if(tk&&tk.t==="op"&&(tk.v==="-"||tk.v==="+")){nxt();var a=parseFactor();return tk.v==="-"?{k:"neg",a:a}:a}return parsePower()}
+  function parsePower(){var base=parseAtom();var tk=peek();if(tk&&tk.t==="op"&&tk.v==="^"){nxt();if(!peek())throw new Error("「^」のあとに指数がありません。例：x^2");var ex=parseFactor();return{k:"pow",l:base,r:ex}}return base}
+  function parseAtom(){
+    var tk=nxt();
+    if(!tk)throw new Error("式が途中で終わっています。記号のあとに数字や x があるか確認してください。");
+    if(tk.t==="num")return{k:"num",v:tk.v};
+    if(tk.t==="x")return{k:"x"};
+    if(tk.t==="var")return{k:"var",name:tk.v};
+    if(tk.t==="fn"){
+      if(tk.sym){var a=parseAtom();return{k:"fn",name:"sqrt",a:a}}
+      var open=nxt();
+      if(!open||open.t!=="(")throw new Error(tk.raw+" のあとは（ ）で式を囲んでください。例："+tk.v+"(x)");
+      if(peek()&&peek().t===")")throw new Error("（ ）の中が空です。");
+      var inner=parseExpr();
+      var close=nxt();
+      if(!close||close.t!==")")throw new Error("「（」に対応する「）」がありません。");
+      return{k:"fn",name:tk.v,a:inner};
+    }
+    if(tk.t==="("){
+      if(peek()&&peek().t===")")throw new Error("（ ）の中が空です。");
+      var e=parseExpr();var c=nxt();
+      if(!c||c.t!==")")throw new Error("「（」に対応する「）」がありません。");
+      return e;
+    }
+    if(tk.t==="|"){
+      absDepth++;
+      var e2=parseExpr();
+      absDepth--;
+      var c2=nxt();
+      if(!c2||c2.t!=="|")throw new Error("絶対値の「|」が閉じていません。|x| のように両側に | が必要です。");
+      return{k:"abs",a:e2};
+    }
+    if(tk.t==="op")throw new Error("「"+tk.v+"」の前に式がありません。");
+    if(tk.t===")")throw new Error("「）」が余っています。");
+    if(tk.t==="|")throw new Error("「|」の位置が読めませんでした。");
+    throw new Error("式が読めませんでした。");
+  }
+  var ast=parseExpr();
+  if(pos<toks.length){var rest=toks[pos];throw new Error("「"+(rest.raw||rest.v||"")+"」のあたりが読めませんでした。式全体を確認してください。")}
+  return ast;
+}
+function exEval(node,x){
+  if(!node)return NaN;
+  switch(node.k){
+    case "num":return node.v;
+    case "x":return x;
+    case "var":try{return typeof slVarVal==="function"?slVarVal(node.name,NaN):NaN}catch(e){return NaN}
+    case "neg":return -exEval(node.a,x);
+    case "abs":return Math.abs(exEval(node.a,x));
+    case "bin":{var l=exEval(node.l,x),r=exEval(node.r,x);if(node.op==="+")return l+r;if(node.op==="-")return l-r;if(node.op==="*")return l*r;return l/r}
+    case "pow":return Math.pow(exEval(node.l,x),exEval(node.r,x));
+    case "fn":{var a=exEval(node.a,x);switch(node.name){
+      case "sin":return Math.sin(a);
+      case "cos":return Math.cos(a);
+      case "tan":return Math.tan(a);
+      case "sqrt":return a<0?NaN:Math.sqrt(a);
+      case "abs":return Math.abs(a);
+      case "log":case "log10":return a<=0?NaN:Math.log(a)/Math.LN10;
+      case "ln":return a<=0?NaN:Math.log(a);
+      case "log2":return a<=0?NaN:Math.log(a)/Math.LN2;
+      case "exp":return Math.exp(a);
+    }return NaN}
+  }
+  return NaN;
+}
+function exNumStr(v){
+  if(v==null||!isFinite(v))return "―";
+  var s;
+  if(Math.abs(v-Math.round(v))<1e-9)s=String(Math.round(v));
+  else s=String(parseFloat(v.toFixed(3)));
+  return s.replace("-","－");
+}
+function exPretty(s){
+  var p=s;
+  p=p.replace(/sqrt\(/g,"√(");
+  p=p.replace(/log10/g,"log").replace(/log2/g,"log₂");
+  p=p.replace(/\bpi\b/g,"π");
+  p=p.replace(/\^2/g,"²").replace(/\^3/g,"³");
+  p=p.split("*").join("×");
+  p=p.replace(/([0-9a-zA-Zπ\)])×(?=[a-zA-Zπ√\(])/g,"$1");
+  p=p.split("+").join("＋").split("-").join("－");
+  return p;
+}
+function exParseInput(raw){
+  var original=String(raw==null?"":raw).trim();
+  if(!original)return{err:"式が入力されていません。例のように、y＝x^2＋1 の形で入れてください。"};
+  if(original.indexOf("θ")>=0||original.indexOf("Θ")>=0)return{err:"θ を使う極座標の式は対象外です。y＝（xの式）の形で入れてください。"};
+  if(original.indexOf("'")>=0||original.indexOf("′")>=0||original.indexOf("’")>=0)return{err:"微分したグラフ（f'(x) など）は今回の対象外です。もとの関数の式を入れてください。"};
+  var s=exNormalize(original);
+  s=s.replace(/^y=/,"").replace(/^f\(x\)=/,"");
+  if(/^f\(x\)/.test(s))return{err:"「f(x)」と書くときは、f(x)＝x^2 のように ＝ のあとに式を続けてください。"};
+  if(s.indexOf(",")>=0)return{err:"カンマを使う書き方は対象外です（媒介変数表示など）。対数の底は log2(x) のように書いてください。"};
+  var lo=null,hi=null,loS=false,hiS=false;
+  var dm=s.match(/\(([^()]*)\)\s*$/);
+  if(dm&&/[<>]/.test(dm[1])&&/x/.test(dm[1])){
+    var d=exParseDomain(dm[1]);
+    if(!d)return{err:"定義域の書き方が読めませんでした：「"+dm[1]+"」。例：（−1≦x≦2）や（x≧0）のように書いてください。"};
+    lo=d.lo;hi=d.hi;loS=d.loS;hiS=d.hiS;s=s.slice(0,dm.index);
+  }
+  if(s.indexOf("=")>=0)return{err:"これは対象外です：x と y の両方を使う式（陰関数）は描けません。y＝（xだけの式）の形で入れてください。"};
+  if(!s)return{err:"式が入力されていません。例のように、y＝x^2＋1 の形で入れてください。"};
+  var ast;
+  try{ast=exParseExprStr(s)}catch(e){return{err:(e&&e.message)||"式が読めませんでした。"}}
+  var disp=exPretty(s);
+  if(lo!=null&&hi!=null)disp+="（"+exNumStr(lo)+(loS?"＜":"≦")+"x"+(hiS?"＜":"≦")+exNumStr(hi)+"）";
+  else if(lo!=null)disp+="（x"+(loS?"＞":"≧")+exNumStr(lo)+"）";
+  else if(hi!=null)disp+="（x"+(hiS?"＜":"≦")+exNumStr(hi)+"）";
+  return{ok:true,ast:ast,lo:lo,hi:hi,loS:loS,hiS:hiS,disp:disp,raw:original};
+}
+var EX_CACHE={};
+function exCompile(raw){
+  var sig=String(raw)+"||"+(typeof SLVARS!=="undefined"?SLVARS.map(function(v){return v.name}).join(","):"");
+  if(EX_CACHE[sig])return EX_CACHE[sig];
+  var r=exParseInput(raw);
+  EX_CACHE[sig]=r;
+  return r;
+}
+function exEvalRaw(raw,x,lo,hi){
+  var r=exCompile(raw);
+  if(!r.ok)return NaN;
+  if(lo!=null&&x<lo)return NaN;
+  if(hi!=null&&x>hi)return NaN;
+  return exEval(r.ast,x);
+}
+/* ---------- 関数グラフへの接続 ---------- */
+function exSolveNumeric(f1,f2){
+  var pts=[],N=1500,X0=-15,X1=15,prevX=null,prevD=null;
+  function D(x){var a=gEval(f1,x),b=gEval(f2,x);if(!isFinite(a)||!isFinite(b))return NaN;return a-b}
+  for(var i=0;i<=N;i++){
+    var x=X0+(X1-X0)*i/N,d=D(x);
+    if(!isFinite(d)){prevX=null;prevD=null;continue}
+    if(d===0){pts.push({x:x,y:gEval(f1,x)})}
+    else if(prevX!==null&&prevD!==null&&prevD*d<0){
+      var lo2=prevX,hi2=x,flo=prevD,mid,fm,it;
+      for(it=0;it<60;it++){mid=(lo2+hi2)/2;fm=D(mid);if(!isFinite(fm))break;if(flo*fm<=0){hi2=mid}else{lo2=mid;flo=fm}}
+      var rx=(lo2+hi2)/2,ry=gEval(f1,x),ry1=gEval(f1,rx),ry2=gEval(f2,rx);
+      if(isFinite(ry1)&&isFinite(ry2)&&Math.abs(ry1-ry2)<=0.01&&Math.abs(ry1)<=1e4)pts.push({x:rx,y:ry1});
+    }
+    prevX=x;prevD=d;
+  }
+  pts.sort(function(a,b){return a.x-b.x});
+  var out=[];
+  pts.forEach(function(p){if(!out.length||Math.abs(p.x-out[out.length-1].x)>1e-4)out.push(p)});
+  return out.length?{kind:"pts",pts:out}:{kind:"none"};
+}
+function exMakeGCard(f){
+  var isSel=false;
+  try{isSel=gState.selId===f.id}catch(e){}
+  var div=document.createElement("div");
+  div.className="gfunc"+(f.visible?"":" off")+(isSel?" sel":"");
+  var head=document.createElement("div");head.className="ghead";
+  var dash="";try{dash=gDashOf(f)}catch(e){}
+  var dname="";try{dname=gDashName(f)}catch(e){}
+  head.innerHTML='<input type="color" value="'+f.color+'" aria-label="色">'
+    +'<svg width="34" height="10" viewBox="0 0 34 10" aria-hidden="true" style="flex:0 0 auto"><line x1="1" y1="5" x2="33" y2="5" stroke="'+f.color+'" stroke-width="2.6"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/></svg>'
+    +'<span class="formula" style="color:'+f.color+'">'+exEsc(gFormula(f))+'</span>'
+    +'<span class="note" style="margin:0">'+exEsc(dname)+'</span>'+(f.visible?"":'<span class="gstat">非表示中</span>');
+  div.appendChild(head);
+  var acts=document.createElement("div");acts.className="gacts";
+  acts.innerHTML='<button class="btn small selbtn'+(isSel?" on":"")+'" type="button" data-act="sel">'+(isSel?"値の表を表示中":"値の表を見る")+'</button>'
+    +'<button class="btn small" type="button" data-act="vis">'+(f.visible?"非表示にする":"表示する")+'</button>'
+    +'<button class="btn small gdel" type="button" data-act="del">削除する</button>';
+  div.appendChild(acts);
+  var note=document.createElement("p");note.className="note";note.style.margin="2px 0";
+  note.textContent="式で追加した関数です。交点は数値計算で求めています。変数（スライダー）の値を変えると、グラフも変わります。";
+  div.appendChild(note);
+  var row=document.createElement("div");row.className="row";
+  var lab=document.createElement("label");lab.textContent="式";row.appendChild(lab);
+  var inp=document.createElement("input");inp.type="text";inp.value=f.expr||"";inp.setAttribute("aria-label","関数の式を直す");inp.style.flex="1 1 140px";inp.style.minWidth="0";
+  row.appendChild(inp);
+  var btn=document.createElement("button");btn.className="btn small";btn.type="button";btn.textContent="直す";row.appendChild(btn);
+  div.appendChild(row);
+  var msg=document.createElement("div");div.appendChild(msg);
+  function applyEdit(){
+    var r=exParseInput(inp.value);
+    if(!r.ok){exMsg(msg,r.err,true);return}
+    f.expr=r.raw;f.disp=r.disp;f.lo=r.lo;f.hi=r.hi;
+    buildGList();drawGraph();
+  }
+  btn.onclick=applyEdit;
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();applyEdit()}});
+  acts.querySelector('[data-act="sel"]').onclick=function(){gState.selId=f.id;buildGList();drawGraph()};
+  acts.querySelector('[data-act="vis"]').onclick=function(){f.visible=!f.visible;buildGList();drawGraph()};
+  acts.querySelector('[data-act="del"]').onclick=function(){var wasSel=gState.selId===f.id;gState.funcs=gState.funcs.filter(function(x){return x.id!==f.id});if(wasSel)gState.selId=gState.funcs.length?gState.funcs[0].id:null;buildGList();drawGraph()};
+  head.querySelector('input[type="color"]').addEventListener("input",function(){f.color=this.value;buildGList();drawGraph()});
+  return div;
+}
+function exBuildGList(orig){
+  var box=ex$("gList");
+  if(!box||typeof gState==="undefined"){orig();return}
+  var hasExpr=gState.funcs.some(function(f){return f.type==="expr"});
+  if(!hasExpr){orig();return}
+  var all=gState.funcs,savedSel=gState.selId;
+  gState.funcs=all.filter(function(f){return f.type!=="expr"});
+  try{orig()}finally{gState.funcs=all;gState.selId=savedSel}
+  var existing=Array.prototype.slice.call(box.children),p=0;
+  all.forEach(function(f){
+    if(f.type==="expr"){box.insertBefore(exMakeGCard(f),existing[p]||null)}
+    else p++;
+  });
+  /* 選択中カードの見た目を、保存しておいた選択に合わせて直す */
+  var kids=box.children;
+  for(var i=0;i<all.length&&i<kids.length;i++){
+    var f2=all[i],kid=kids[i],isSel=f2.id===savedSel;
+    kid.classList.toggle("sel",isSel);
+    var sb=kid.querySelector?kid.querySelector('[data-act="sel"]'):null;
+    if(sb){sb.classList.toggle("on",isSel);sb.textContent=isSel?"値の表を表示中":"値の表を見る"}
+  }
+  var add=ex$("gAdd");if(add)add.disabled=gState.funcs.length>=6;
+  if(typeof updateGTable==="function")updateGTable();
+}
+if(typeof gState!=="undefined"&&typeof gEval==="function"){
+  var _exGEval=gEval;
+  gEval=function(f,x){if(f&&f.type==="expr")return exEvalRaw(f.expr,x,f.lo,f.hi);return _exGEval(f,x)};
+  var _exGFormula=gFormula;
+  gFormula=function(f){if(f&&f.type==="expr")return "y ＝ "+(f.disp||"");return _exGFormula(f)};
+  var _exGSolve=gSolvePair;
+  gSolvePair=function(f1,f2){if((f1&&f1.type==="expr")||(f2&&f2.type==="expr"))return exSolveNumeric(f1,f2);return _exGSolve(f1,f2)};
+  var _exBuildGList=buildGList;
+  buildGList=function(){exBuildGList(_exBuildGList)};
+}
+/* ---------- 自由キャンバスへの接続 ---------- */
+function exFixCustExprItems(){
+  var sl=ex$("custShapeList");
+  if(!sl||typeof CUST==="undefined")return;
+  CUST.shapes.forEach(function(sh,i){
+    if(!sh||sh.type!=="func"||sh.fkind!=="expr")return;
+    var item=sl.children[i];if(!item)return;
+    var rows=item.querySelectorAll(".row"),r;
+    for(r=0;r<rows.length;r++){
+      var lb=rows[r].querySelector("label");
+      if(lb&&lb.textContent==="係数の決め方"){rows[r].style.display="none"}
+      if(lb&&lb.textContent==="係数 a"){
+        rows[r].innerHTML="";
+        var sp=document.createElement("span");sp.className="note";
+        sp.textContent="式で追加した関数："+custFuncText(sh)+"（係数スライダーは使いません。式を変えたいときは、この図形を消して「式を入力して関数を追加」から入れ直してください）";
+        rows[r].appendChild(sp);
+      }
+    }
+  });
+}
+function exFixMeasure(){
+  var box=ex$("custMeasure");
+  if(!box||typeof CUST==="undefined"||!CUST.answers)return;
+  var funcShapes=CUST.shapes.filter(function(sh){return sh&&sh.type==="func"});
+  if(!funcShapes.length)return;
+  var dds=box.querySelectorAll("dd"),fi=0;
+  for(var i=0;i<dds.length;i++){
+    var dd=dds[i];
+    if(dd.textContent.indexOf("格子点（xが整数で")<0)continue;
+    var sh=funcShapes[fi++];if(!sh)break;
+    if(sh.fkind!=="expr"||sh.disp==="hide")continue;
+    var span=null,spans=dd.querySelectorAll("span");
+    for(var j=0;j<spans.length;j++){if(spans[j].textContent.indexOf("格子点")>=0)span=spans[j]}
+    dd.innerHTML=exEsc("式："+custFuncText(sh)+"（入力バーで追加した関数です）")+(span?"<br>":"")+ (span?span.outerHTML:"");
+  }
+}
+if(typeof CUST!=="undefined"&&typeof custFuncY==="function"){
+  var _exCustFuncY=custFuncY;
+  custFuncY=function(sh,x){if(sh&&sh.fkind==="expr")return exEvalRaw(sh.expr,x,sh.lo,sh.hi);return _exCustFuncY(sh,x)};
+  var _exCustFuncText=custFuncText;
+  custFuncText=function(sh){if(sh&&sh.fkind==="expr")return "y＝"+(sh.disp||"");return _exCustFuncText(sh)};
+  var _exSyncCustForms=syncCustForms;
+  syncCustForms=function(){_exSyncCustForms();try{exFixCustExprItems()}catch(e){}};
+  var _exDrawCust=drawCust;
+  drawCust=function(){_exDrawCust();try{exFixMeasure()}catch(e){}};
+}
+/* ---------- 入力バーの操作 ---------- */
+function exBindBar(inputId,btnId,msgId,chipAttr,onAdd){
+  var inp=ex$(inputId),btn=ex$(btnId),msg=ex$(msgId);
+  if(!inp||!btn)return;
+  function go(){
+    var r=exParseInput(inp.value);
+    if(!r.ok){exMsg(msg,r.err,true);inp.focus();return}
+    onAdd(r,msg);
+  }
+  btn.onclick=go;
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();go()}});
+  document.querySelectorAll("["+chipAttr+"]").forEach(function(b){
+    b.addEventListener("click",function(){inp.value=b.getAttribute(chipAttr);exMsg(msg,"",false);inp.focus()});
+  });
+}
+exBindBar("exInputG","exAddG","exMsgG","data-exg",function(r,msg){
+  if(typeof gState==="undefined")return;
+  if(gState.funcs.length>=6){exMsg(msg,"関数は最大6つまでです。どれか「削除する」で消してから追加してください。",true);return}
+  var f=gAddFunc("expr",0,0);
+  f.expr=r.raw;f.disp=r.disp;f.lo=r.lo;f.hi=r.hi;
+  gState.selId=f.id;
+  buildGList();drawGraph();
+  exMsg(msg,"追加しました："+gFormula(f),false);
+});
+exBindBar("exInputC","exAddC","exMsgC","data-exc",function(r,msg){
+  if(typeof CUST==="undefined")return;
+  custPushHistory();
+  CUST.shapes.push({type:"func",fkind:"expr",fmode:"expr",expr:r.raw,disp:r.disp,lo:r.lo,hi:r.hi,a:0,b:0});
+  CUST.selShape=CUST.shapes.length-1;
+  drawCust();syncCustForms();
+  exMsg(msg,"追加しました：y＝"+r.disp+"（図形リストと計測にも出ています）",false);
+});
+window.__exParse=exParseInput;
+window.__exEvalRaw=exEvalRaw;
 })();
 </script>
 </body>
