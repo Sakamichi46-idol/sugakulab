@@ -229,6 +229,23 @@ html.fs-xlarge .draft-row .ddate{font-size:14.5px}
 .draft-row .btn{white-space:nowrap;flex:0 0 auto}
 .draft-empty{font-size:13px;color:var(--sub);margin:4px 0}
 </style>
+<style>
+/* ===== GeoGebra風サイド開閉（PC・通常表示）：右の道具パネルが横からスライド開閉し、キャンバスが広がる ===== */
+.side-edge-tab{display:none}
+@media (min-width:901px){
+#solidMode:not(.is-wide) .side,#planeMode:not(.is-wide) .side,#theoremMode:not(.is-wide) .side,#customMode:not(.is-wide) .side,#dataMode:not(.is-wide) .side,#numMode:not(.is-wide) .side,#graphMode:not(.is-wide) .side{transition:margin-right .28s ease}
+#solidMode.side-closed:not(.is-wide) .side,#planeMode.side-closed:not(.is-wide) .side,#theoremMode.side-closed:not(.is-wide) .side,#customMode.side-closed:not(.is-wide) .side,#dataMode.side-closed:not(.is-wide) .side,#numMode.side-closed:not(.is-wide) .side,#graphMode.side-closed:not(.is-wide) .side{margin-right:-372px}
+#solidMode.side-gone:not(.is-wide) .side,#planeMode.side-gone:not(.is-wide) .side,#theoremMode.side-gone:not(.is-wide) .side,#customMode.side-gone:not(.is-wide) .side,#dataMode.side-gone:not(.is-wide) .side,#numMode.side-gone:not(.is-wide) .side,#graphMode.side-gone:not(.is-wide) .side{visibility:hidden}
+#solidMode.side-anim:not(.is-wide) .layout,#solidMode.side-closed:not(.is-wide) .layout,#planeMode.side-anim:not(.is-wide) .layout,#planeMode.side-closed:not(.is-wide) .layout,#theoremMode.side-anim:not(.is-wide) .layout,#theoremMode.side-closed:not(.is-wide) .layout,#customMode.side-anim:not(.is-wide) .layout,#customMode.side-closed:not(.is-wide) .layout,#dataMode.side-anim:not(.is-wide) .layout,#dataMode.side-closed:not(.is-wide) .layout,#numMode.side-anim:not(.is-wide) .layout,#numMode.side-closed:not(.is-wide) .layout,#graphMode.side-anim:not(.is-wide) .layout,#graphMode.side-closed:not(.is-wide) .layout{overflow-x:clip}
+#solidMode:not(.is-wide) .wide-drawer-head,#planeMode:not(.is-wide) .wide-drawer-head,#theoremMode:not(.is-wide) .wide-drawer-head,#customMode:not(.is-wide) .wide-drawer-head,#dataMode:not(.is-wide) .wide-drawer-head,#numMode:not(.is-wide) .wide-drawer-head,#graphMode:not(.is-wide) .wide-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:700;padding:0 2px}
+#solidMode.side-closed:not(.is-wide) .wide-tools-btn,#planeMode.side-closed:not(.is-wide) .wide-tools-btn,#theoremMode.side-closed:not(.is-wide) .wide-tools-btn,#customMode.side-closed:not(.is-wide) .wide-tools-btn,#dataMode.side-closed:not(.is-wide) .wide-tools-btn,#numMode.side-closed:not(.is-wide) .wide-tools-btn,#graphMode.side-closed:not(.is-wide) .wide-tools-btn{display:inline-flex;align-items:center}
+.side-closed:not(.is-wide) .side-edge-tab{display:flex;position:fixed;top:50%;right:0;transform:translateY(-50%);z-index:130;writing-mode:vertical-rl;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px 0 0 8px;padding:14px 7px;font-weight:700;font-size:13px;letter-spacing:.12em;box-shadow:-2px 2px 10px rgba(0,0,0,.2);cursor:pointer;min-height:44px}
+}
+@media (prefers-reduced-motion:reduce){
+#solidMode:not(.is-wide) .side,#planeMode:not(.is-wide) .side,#theoremMode:not(.is-wide) .side,#customMode:not(.is-wide) .side,#dataMode:not(.is-wide) .side,#numMode:not(.is-wide) .side,#graphMode:not(.is-wide) .side{transition:none}
+}
+@media print{.side-edge-tab{display:none!important}}
+</style>
 <link rel="canonical" href="https://sugakulab.pages.dev/" />
 <meta property="og:url" content="https://sugakulab.pages.dev/" />
 <meta property="og:image" content="https://sugakulab.pages.dev/og-image.png" />
@@ -5595,6 +5612,60 @@ var labelSvgIds=["presetSvg","custSvg","consSvg","thmSvg","ovlSvg","netSvg","cus
 var rafPend=false;
 function scheduleFix(){if(rafPend)return;rafPend=true;var run=function(){rafPend=false;labelSvgIds.forEach(function(id){try{fixLabels($(id))}catch(e){}})};if(window.requestAnimationFrame)requestAnimationFrame(run);else setTimeout(run,50)}
 if(window.MutationObserver)labelSvgIds.forEach(function(id){var s=$(id);if(s)new MutationObserver(scheduleFix).observe(s,{childList:true,subtree:true})});
+})();
+</script>
+<script>
+"use strict";
+/* ===== GeoGebra風サイド開閉（PC・通常表示）：道具パネルを右端からスライド開閉する =====
+   開く入口は3つ：右端の縦タブ／操作バーの「道具を開く」／（広く見る中では従来どおり）。
+   閉じる入口はパネル見出しの「閉じる」と操作バーのボタン。広く見る中は従来のドロワー動作に任せる。 */
+(function(){
+  var MODES=["solidMode","planeMode","theoremMode","customMode","dataMode","numMode","graphMode"];
+  function kick(id){
+    if(typeof wideRedraw==="function"){try{wideRedraw(id);return}catch(e){}}
+    try{window.dispatchEvent(new Event("resize"))}catch(e){}
+  }
+  function setSide(root,open){
+    var id=root.id,tab=root.querySelector(".side-edge-tab");
+    root.classList.add("side-anim");
+    if(open){
+      root.classList.remove("side-gone");
+      void root.offsetWidth; /* 閉じた位置からスライドさせるためのリフロー */
+      root.classList.remove("side-closed");
+    }else{
+      root.classList.add("side-closed");
+    }
+    if(tab)tab.setAttribute("aria-expanded",open?"true":"false");
+    root.querySelectorAll(".wide-tools-btn").forEach(function(b){if(!root.classList.contains("is-wide"))b.textContent="道具を開く"});
+    kick(id);
+    setTimeout(function(){kick(id)},150);
+    setTimeout(function(){
+      root.classList.remove("side-anim");
+      if(root.classList.contains("side-closed")&&!root.classList.contains("is-wide"))root.classList.add("side-gone");
+      kick(id);
+    },330);
+  }
+  MODES.forEach(function(id){
+    var root=document.getElementById(id);if(!root)return;
+    var side=root.querySelector("aside.side");if(!side)return;
+    var tab=document.createElement("button");
+    tab.type="button";
+    tab.className="side-edge-tab wide-edge-tab";
+    tab.textContent="道具・設定";
+    tab.setAttribute("aria-label","道具・設定のパネルを開く");
+    tab.setAttribute("aria-expanded","true");
+    tab.addEventListener("click",function(){
+      if(root.classList.contains("is-wide")){if(typeof toggleWideTools==="function")toggleWideTools(id)}
+      else setSide(root,true);
+    });
+    root.appendChild(tab);
+    root.querySelectorAll("[data-wide-tools]").forEach(function(b){
+      b.addEventListener("click",function(){
+        if(root.classList.contains("is-wide"))return; /* 広く見る中は既存のドロワー処理に任せる */
+        setSide(root,root.classList.contains("side-closed"));
+      });
+    });
+  });
 })();
 </script>
 </body>
