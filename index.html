@@ -103,25 +103,37 @@
 @media (max-width:600px){.hist-bar button{padding:8px 16px;font-size:15px}}
 @media print{.hist-bar{display:none!important}}
 /* ===== スマホ幅の「広く見る」（自由キャンバス）：帯を細く・情報カードを畳む・浮動バーを隠す ===== */
-@media (max-width:600px){
-  /* 1) 左の操作帯を細くし、ボタン名を1行に収めてキャンバスを広げる */
-  #customMode.is-wide #custWideStrip{width:100px;padding:8px 4px;gap:8px}
-  #customMode.is-wide .layout{padding:6px 6px 6px 106px}
-  #custWideStrip .viewbar{gap:5px}
-  #custWideStrip .c2d-actions{gap:5px}
-  #custWideStrip .btn{font-size:11.5px;padding:6px 1px;white-space:nowrap;line-height:1.3}
-  #custWideStrip .btn svg{display:none}
-  #custWideStrip #custResetAll,#custWideStrip #c3ResetAll{font-size:10px;letter-spacing:-.05em}
-  #custWideStrip #custDimBar{gap:5px;padding-top:8px}
-  #custWideStrip #custDimBar .seg button{font-size:11.5px;padding:7px 1px;white-space:nowrap}
-  #custWideStrip .cust-penbar{gap:5px;padding-top:8px}
-  #custWideStrip .cust-penbar .seg button{font-size:11.5px;padding:7px 1px;white-space:nowrap}
+@media (max-width:900px){
+  /* 1) 広く見るの操作帯は左帯をやめ、画面下に浮く横ドックにする。
+        左帯がキャンバスの幅を奪い、通常表示より狭くなる逆転をなくすため。
+        キャンバス本体は画面幅いっぱいに残し、ドックはその上に重ねる */
+  #customMode.is-wide #custWideStrip{top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));left:8px;right:8px;width:auto;height:auto;max-height:46dvh;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:10px;padding:8px;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.22);align-items:stretch}
+  #customMode.is-wide .layout{padding:6px}
+  #custWideStrip .viewbar{flex-direction:row;align-items:center;gap:6px;flex:none}
+  #custWideStrip .c2d-actions{flex-direction:row!important;flex-wrap:nowrap;gap:6px}
+  #custWideStrip #custDimBar{flex-direction:row;align-items:center;gap:6px;border-top:0;border-left:1px solid var(--line);padding:0 0 0 10px;flex:none;flex-wrap:nowrap;margin:0}
+  #custWideStrip #custDimBar .seg{flex-direction:row}
+  #custWideStrip #custDimBar .seg button{border-bottom:0;border-right:1px solid var(--line);white-space:nowrap;padding:8px 10px}
+  #custWideStrip #custDimBar .seg button:last-child{border-right:0}
+  #custWideStrip .cust-penbar{flex-direction:row;align-items:center;gap:6px;border-top:0;padding:0;flex:none}
+  #custWideStrip .cust-penbar .seg{flex-direction:row}
+  #custWideStrip .cust-penbar .seg button{border-bottom:0;border-right:1px solid var(--line);white-space:nowrap;padding:8px 10px}
+  #custWideStrip .cust-penbar .seg button:last-child{border-right:0}
+  #custWideStrip #custPenMsg{max-width:130px}
+  body.wide-on .hist-bar{display:none!important}
+}
+@media (max-width:900px){
+  /* 下ドック用にボタンを横並びの大きさへ（アイコンは階層1の目印として残す） */
+  #custWideStrip .btn{width:auto;font-size:12.5px;padding:8px 10px;white-space:nowrap;line-height:1.3;min-height:44px}
+  #custWideStrip #custResetAll,#custWideStrip #c3ResetAll{font-size:12px;letter-spacing:0}
+  #custWideStrip #custDimBar .seg button{font-size:12.5px;padding:8px 10px;white-space:nowrap;min-height:44px}
+  #custWideStrip .cust-penbar .seg button{font-size:12.5px;padding:8px 10px;white-space:nowrap;min-height:44px}
   #custWideStrip #custPenMsg{font-size:10.5px}
-  /* 帯が細くなった分、帯の右に出る固定パネルも左へ寄せる */
-  #customMode.is-wide #custExamplePanel{left:106px}
-  #customMode.is-wide #custSolidPanel{left:106px}
-  #customMode.is-wide #custTimeCard{left:106px;width:min(560px,calc(100vw - 118px))}
-  #customMode.is-wide #custResetConfirm,#customMode.is-wide #c3ResetConfirm{width:min(480px,calc(100vw - 118px))}
+  /* ドックは下に浮くので、固定パネルは画面左端から出す */
+  #customMode.is-wide #custExamplePanel{left:8px}
+  #customMode.is-wide #custSolidPanel{left:8px}
+  #customMode.is-wide #custTimeCard{left:8px;width:min(560px,calc(100vw - 16px))}
+  #customMode.is-wide #custResetConfirm,#customMode.is-wide #c3ResetConfirm{width:min(480px,calc(100vw - 16px))}
   /* 2) キャンバス上の情報カードを1行に畳む（状態文と見出しは隠し、グリッド／座標軸と表示リセットは残す） */
   #customMode.is-wide #custViewbox2d .vhead{flex-wrap:nowrap;padding:4px 8px;gap:6px;font-size:0;overflow-x:auto}
   #customMode.is-wide #custSelHead{display:none}
@@ -134,6 +146,65 @@
   /* 3) 広く見ている間は下中央の浮動バー（元に戻す／やり直し）を隠す（同じボタンが帯の中にある） */
   body.wide-on .hist-bar{display:none!important}
 }
+</style>
+<style>
+/* ===== ボタンの階層（全モード共通の文法） =====
+   第1層＝いまの作業の主操作（道具の切替・道具を開く）。塗りつぶし＋太字で、常時手の届く場所に置く。
+   第2層＝作業の補助（元に戻す／やり直し・お手本・選択中の図への変換ボタン）。枠線のみ。
+   第3層＝表示・設定の切替（.seg の切替・表示トグル・印刷などの出力）。枠線＋小さめで、主操作より目立たせない。
+   遷移＝画面の出入り（広く見る／通常表示に戻す）。広く見る中では右上の固定位置に塗りで出す（自由キャンバス）。
+   危険＝全部消すなどの破壊的操作。他と混ぜず、並びの末尾に離して置き、警告色で示す（実行前に確認カードが出る）。 */
+/* 見た目の実装（上の宣言と一致させる）：
+   第1層＝アクセント色の塗り＋その上の前景色（--accent-ink）＋太字。選択中は内側の輪で示す。
+   第2層＝枠線のみ（地は透明、文字は通常色、太さ600）。
+   第3層＝枠線＋小さめ（12.5px）＋控えめな文字色。選択中（.on）は従来の塗りを残し太字にする。
+   遷移＝第1層と同じ塗り。危険＝警告色（下の規則）。無効化されたボタンは各層の塗りを外し、従来の無効表示に戻す。 */
+button[data-tier="1"]:not(:disabled){background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+button[data-tier="1"].on:not(:disabled){box-shadow:inset 0 0 0 2px var(--accent-ink)}
+/* 択一グループ（.seg／道具グリッド／点の選択）の中の第1層は、未選択＝淡い塗り＋太字、選択中＝濃い塗り＋内側の輪。
+   全部を濃く塗ると選択中が判別できなくなるため、グループ内だけ濃淡で分ける（単独の第1層ボタンは常に濃い塗り）。 */
+.seg button[data-tier="1"]:not(.on):not(:disabled),.toolgrid button[data-tier="1"]:not(.on):not(:disabled),.ptbtns button[data-tier="1"]:not(.on):not(:disabled){background:var(--accent-soft);color:var(--ink);border-color:var(--accent)}
+button[data-tier="2"]:not(:disabled){background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:600}
+button[data-tier="2"].on:not(:disabled){background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+button[data-tier="3"]:not(.on):not(:disabled){background:transparent;color:var(--sub);border-color:var(--line);font-weight:500}
+button[data-tier="3"]:not(:disabled){font-size:12.5px}
+button[data-tier="3"].on:not(:disabled){font-weight:700}
+button[data-tier="nav"]:not(:disabled){background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.viewbar [data-tier="danger"],#custDimBar [data-tier="danger"]{margin-left:12px}
+/* 立体の「広く見る」：下のカード（展開図パターン・立体の情報）が縦を食い、キャンバスが通常表示より
+   小さくなっていた（実測：通常 972×521 に対し広く見る 1382×278）。広く見る間はキャンバスの高さを
+   画面基準で確保し、カード類はステージ内スクロールで下に回す。 */
+#solidMode.is-wide .stage{overflow-y:auto}
+#solidMode.is-wide .viewwrap{flex:none;height:calc(100dvh - 176px);min-height:400px}
+[data-tier="danger"],#custResetAll,#c3ResetAll{border-color:var(--warn)!important;color:var(--warn)!important;background:var(--warn-bg);font-weight:700}
+/* 自由キャンバス広く見る：帯（ドック）の中の並びを階層順にする。第1層の道具を先頭へ */
+#custWideStrip #custPenbar{order:1}
+#custWideStrip #custDimBar{order:2}
+#custWideStrip #custViewbar{order:3}
+#custWideStrip .cust-penbar::before{content:"道具";flex:none;align-self:center;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--sub)}
+#custWideStrip #custDimBar::before{content:"切替";flex:none;align-self:center;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--sub)}
+#custWideStrip .viewbar::before{content:"操作";flex:none;align-self:center;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--sub)}
+#custWideStrip .wide-tools-btn{order:1}
+#custWideStrip #custUndo{order:2}
+#custWideStrip #custRedo{order:3}
+#custWideStrip #custExample{order:4}
+#custWideStrip .print-btn{order:5}
+#custWideStrip #custResetAll{order:6;margin-left:12px}
+#custWideStrip #custDimBar .dim-actions .btn-wide{display:none!important}
+/* 遷移ボタンは帯から切り離し、右上に固定（押す場所が広く見る中で動かない） */
+#customMode.is-wide #custWideStrip .btn-wide{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:8px;left:auto;width:auto!important;min-height:44px;padding:8px 14px;z-index:165;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.25);font-size:13px}
+@media (min-width:901px){
+  /* PCの左帯では階層を縦に積む：第1層→切替→操作、危険は一番下に離す */
+  #custWideStrip .cust-penbar::before,#custWideStrip #custDimBar::before,#custWideStrip .viewbar::before{align-self:flex-start}
+  #custWideStrip .viewbar{border-top:1px solid var(--line);padding-top:10px}
+  #custWideStrip #custResetAll{margin-left:0;margin-top:14px}
+  #custWideStrip #c3ResetAll{margin-top:14px}
+}
+@media (max-width:900px){
+  /* 下ドックでは危険操作を右端に離す */
+  #custWideStrip #c3ResetAll{margin-left:12px}
+}
+@media print{#customMode.is-wide #custWideStrip .btn-wide{position:static;box-shadow:none}}
 </style>
 <style>
 /* ===== 文字の大きさ設定（標準／大きめ／最大） ===== */
@@ -10498,6 +10569,63 @@ sync();
     var t=e.target;
     if(t&&t.closest&&t.closest("#tabBar,#modeMenu,.mode-tabs,#moreSheet"))schedule(90);
   });
+})();
+</script>
+<script>
+/* ボタンの階層（全モード共通）：種類ごとに data-tier を付け、見た目の文法をそろえ、
+   さらに各モードの操作行（.viewbar／#custDimBar と、その中のボタン束）を階層順に並べ替える。
+   狙い：同じ種類のボタンは、モードが変わっても同じ階層・同じ並び順・同じ場所に来る。
+   並び順＝ 案内文 → 第1層（道具を開く／中身の切替） → 第2層（元に戻す・お手本・リセット）
+            → 第3層（表示の切替・トグル・印刷） → 補足文 → 遷移（広く見る） → 危険（全部消す、末尾に離す）
+   1=主操作（道具） / 2=補助（履歴・お手本・変換・リセット） / 3=表示・設定・出力 / nav=画面遷移 / danger=破壊的操作 */
+(function(){
+  var RANK={"1":1,"2":2,"3":3,"nav":4,"danger":5};
+  function isContentSwitch(id){return /^(subPreset|subCons|subOvl|dSub[A-Z]|nSub[A-Z]|dim2dBtn|dim3dBtn)/.test(id||"")}
+  function tag(){
+    document.querySelectorAll("button").forEach(function(b){
+      if(b.hasAttribute("data-tier"))return;
+      var id=b.id||"",txt=(b.textContent||"");
+      if(b.classList.contains("btn-wide")||b.hasAttribute("data-wide")){b.setAttribute("data-tier","nav");return}
+      if(id==="custResetAll"||id==="c3ResetAll"||txt.indexOf("全部消")>=0){b.setAttribute("data-tier","danger");return}
+      if(b.classList.contains("wide-tools-btn")||b.hasAttribute("data-wide-tools")){b.setAttribute("data-tier","1");return}
+      if(b.closest&&b.closest("#custPenbar")){b.setAttribute("data-tier","1");return}
+      if(isContentSwitch(id)){b.setAttribute("data-tier","1");return}
+      if(b.classList.contains("primary")){b.setAttribute("data-tier","1");return}
+      if(b.hasAttribute("data-tool")||(b.closest&&b.closest(".toolgrid"))||(b.closest&&b.closest(".ptbtns"))){b.setAttribute("data-tier","1");return}
+      if(b.closest&&b.closest(".netpatbtns")){b.setAttribute("data-tier","3");return}
+      if(/Undo|Redo/.test(id)||txt.indexOf("お手本")>=0||id==="custPenToSeg"||id==="custPenToCircle"||id==="opsPenToSeg"||id==="opsPenToCircle"||/Reset/.test(id)||txt.indexOf("リセット")>=0||txt.indexOf("最初の形に戻す")>=0||txt.indexOf("最初の表示にもどす")>=0){b.setAttribute("data-tier","2");return}
+      if(b.classList.contains("print-btn")){b.setAttribute("data-tier","3");return}
+      if(b.closest&&b.closest(".seg")){b.setAttribute("data-tier","3");return}
+      if(b.closest&&b.closest(".viewbar")){b.setAttribute("data-tier","3");return}
+    });
+  }
+  function tierOf(el){
+    if(el.tagName==="BUTTON"){var t=el.getAttribute("data-tier");return t?RANK[t]:2}
+    var bs=el.querySelectorAll?el.querySelectorAll("button"):null;
+    if(!bs||!bs.length){
+      if(el.classList&&(el.classList.contains("note")||el.classList.contains("d-note")))return 3.5;
+      return 0;
+    }
+    var best=null;
+    bs.forEach(function(b){var t=b.getAttribute("data-tier");if(t&&(best===null||RANK[t]<best))best=RANK[t]});
+    return best===null?2:best;
+  }
+  function sortKids(container){
+    var kids=Array.prototype.slice.call(container.children);
+    kids.forEach(function(k,i){k.__tierOrd=i});
+    kids.sort(function(a,b){var d=tierOf(a)-tierOf(b);return d!==0?d:a.__tierOrd-b.__tierOrd});
+    kids.forEach(function(k){container.appendChild(k);delete k.__tierOrd});
+  }
+  function organize(){
+    tag();
+    document.querySelectorAll(".viewbar, #custDimBar, .c2d-actions, .dim-actions, .ptbtns, .netpatbtns").forEach(sortKids);
+    document.querySelectorAll(".viewbar > *:not(.seg)").forEach(function(el){
+      if(el.querySelectorAll&&el.querySelectorAll(":scope > button").length>1)sortKids(el);
+    });
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",organize);else organize();
+  setTimeout(organize,800);
+  setTimeout(organize,2000);
 })();
 </script>
 </body>
