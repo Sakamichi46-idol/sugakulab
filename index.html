@@ -10871,5 +10871,125 @@ button.has-ico .ico svg [stroke-dasharray]{vector-effect:non-scaling-stroke}
   document.addEventListener("click",function(){setTimeout(iconify,350)},true);
 })();
 </script>
+<style>
+/* ===== 広く見る（自由キャンバス）：左帯を全幅で廃止し、下部フローティングドックへ統一＋ドックの出し入れ =====
+   道具・設定は右端タブのドロワーが前提なので、左帯は置かない。帯にあった操作は下ドックに一本化する。
+   元に戻す／やり直しはドックに出さず、下部の浮動バー（履歴バー）に一本化する。
+   「通常表示に戻す」はドックから独立した右上の固定ピルにし、ドックを畳んでも戻れるようにする。 */
+#customMode.is-wide #custWideStrip{top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));left:8px;right:8px;width:auto;height:auto;max-height:46dvh;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:10px;padding:8px;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.22);align-items:stretch;transition:transform .28s ease,opacity .28s ease,visibility 0s}
+#customMode.is-wide.dock-closed #custWideStrip{transform:translateY(calc(100% + 24px));opacity:0;visibility:hidden;pointer-events:none;transition:transform .28s ease,opacity .28s ease,visibility 0s .28s}
+#customMode.is-wide .layout{padding:8px}
+#customMode.is-wide #custExamplePanel{left:8px}
+#customMode.is-wide #custSolidPanel{left:8px}
+#customMode.is-wide #custTimeCard{left:8px;width:min(560px,calc(100vw - 16px))}
+#customMode.is-wide #custResetConfirm,#customMode.is-wide #c3ResetConfirm{width:min(480px,calc(100vw - 16px))}
+#custWideStrip .viewbar{flex-direction:row;align-items:center;gap:6px;flex:none;border-top:0;padding-top:0}
+#custWideStrip .c2d-actions{flex-direction:row!important;flex-wrap:nowrap;gap:6px}
+#custWideStrip .btn{width:auto;font-size:13px;padding:8px 10px;white-space:nowrap;line-height:1.3;min-height:44px}
+#custWideStrip #custResetAll{margin:0 0 0 12px}
+#custWideStrip #c3ResetAll{margin:0 0 0 12px}
+#custWideStrip #custDimBar{flex-direction:row;align-items:center;gap:6px;border-top:0;border-left:1px solid var(--line);padding:0 0 0 10px;flex:none;flex-wrap:nowrap;margin:0}
+#custWideStrip #custDimBar .seg{flex-direction:row}
+#custWideStrip #custDimBar .seg button{border-bottom:0;border-right:1px solid var(--line);white-space:nowrap;padding:8px 10px;min-height:44px;font-size:13px}
+#custWideStrip #custDimBar .seg button:last-child{border-right:0}
+#custWideStrip .cust-penbar{flex-direction:row;align-items:center;gap:6px;border-top:0;padding:0;flex:none}
+#custWideStrip .cust-penbar .seg{flex-direction:row}
+#custWideStrip .cust-penbar .seg button{border-bottom:0;border-right:1px solid var(--line);white-space:nowrap;padding:8px 10px;min-height:44px;font-size:13px}
+#custWideStrip .cust-penbar .seg button:last-child{border-right:0}
+#custWideStrip #custPenMsg{max-width:130px;font-size:10.5px}
+#custWideStrip .cust-penbar::before,#custWideStrip #custDimBar::before,#custWideStrip .viewbar::before{align-self:center}
+#customMode.c3d-on #custWideStrip #custDimBar .dim-actions{flex-direction:row!important;align-items:center;gap:6px;margin-left:0}
+#custWideStrip #custUndo,#custWideStrip #custRedo,#custWideStrip #c3Undo,#custWideStrip #c3Redo,#custWideStrip .btn-wide{display:none!important}
+.wide-exit-pill{display:none}
+#customMode.is-wide .wide-exit-pill{display:inline-flex;align-items:center;gap:7px;position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:8px;z-index:166;min-height:44px;padding:8px 14px;background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+#customMode.is-wide #custViewbox2d .vhead,#customMode.is-wide #c3Viewbox .vhead{padding-right:188px}
+body.wide-on:has(>#customMode.is-wide) .hist-bar{display:flex!important;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+body.wide-on:has(>#customMode.is-wide.dock-closed) .hist-bar{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.dock-fab{display:none}
+#customMode.is-wide.dock-closed .dock-fab{display:flex;position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:166;width:52px;height:52px;min-height:52px;border-radius:50%;align-items:center;justify-content:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;padding:0}
+#custWideStrip .dock-close-btn{order:9;flex:none;align-self:center;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer;padding:0;margin-left:2px}
+/* ===== 広く見る（他モード）：上部の操作バーを丸ボタンで出し入れできるようにする =====
+   畳んだ間は右下の丸ボタンと、その隣の「通常表示に戻す」ピルだけが残り、戻る導線は失わない。 */
+.wide-dock-fab,.wide-bar-exit{display:none}
+#solidMode.is-wide .wide-dock-fab,#planeMode.is-wide .wide-dock-fab,#theoremMode.is-wide .wide-dock-fab,#dataMode.is-wide .wide-dock-fab,#numMode.is-wide .wide-dock-fab,#graphMode.is-wide .wide-dock-fab{display:flex;position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:166;width:52px;height:52px;min-height:52px;border-radius:50%;align-items:center;justify-content:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;padding:0}
+#solidMode.is-wide.bar-closed .wide-bar-exit,#planeMode.is-wide.bar-closed .wide-bar-exit,#theoremMode.is-wide.bar-closed .wide-bar-exit,#dataMode.is-wide.bar-closed .wide-bar-exit,#numMode.is-wide.bar-closed .wide-bar-exit,#graphMode.is-wide.bar-closed .wide-bar-exit{display:inline-flex;position:fixed;right:76px;bottom:calc(17px + env(safe-area-inset-bottom,0px));z-index:166;align-items:center;gap:7px;min-height:44px;padding:8px 14px;background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+#solidMode.is-wide .viewbar,#planeMode.is-wide .viewbar,#theoremMode.is-wide .viewbar,#dataMode.is-wide .viewbar,#numMode.is-wide .viewbar,#graphMode.is-wide .viewbar{transition:opacity .25s ease,transform .25s ease,visibility 0s}
+#solidMode.is-wide.bar-closed .viewbar,#planeMode.is-wide.bar-closed .viewbar,#theoremMode.is-wide.bar-closed .viewbar,#dataMode.is-wide.bar-closed .viewbar,#numMode.is-wide.bar-closed .viewbar,#graphMode.is-wide.bar-closed .viewbar{position:absolute;left:8px;right:8px;top:8px;opacity:0;visibility:hidden;transform:translateY(-10px);pointer-events:none;transition:opacity .25s ease,transform .25s ease,visibility 0s .25s}
+@media (prefers-reduced-motion:reduce){
+  #customMode.is-wide #custWideStrip,#customMode.is-wide.dock-closed #custWideStrip{transition:none}
+  #solidMode.is-wide .viewbar,#planeMode.is-wide .viewbar,#theoremMode.is-wide .viewbar,#dataMode.is-wide .viewbar,#numMode.is-wide .viewbar,#graphMode.is-wide .viewbar{transition:none}
+}
+@media print{.wide-exit-pill,.dock-fab,.wide-dock-fab,.wide-bar-exit,#custWideStrip .dock-close-btn{display:none!important}}
+</style>
+<script>
+"use strict";
+/* ===== 広く見るのドック／操作バーの出し入れ（Appleマークアップ風） =====
+   自由キャンバス：下部ドックをスライドで出し入れ。畳んだ間は右下の丸ボタンだけが残る。
+   「通常表示に戻す」はドックの外（右上の固定ピル）に出し、畳んだ状態でも戻れるようにする。
+   他モード：上部の操作行を丸ボタンで出し入れ。畳んだ間は丸ボタン＋隣の「通常表示に戻す」ピルが残る。 */
+(function(){
+  var SLIDERS='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2.2" fill="var(--panel)"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2.2" fill="var(--panel)"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2.2" fill="var(--panel)"/></svg>';
+  var COMPRESS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"/></svg>';
+  var CHEVDOWN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  function mkBtn(cls,html,label){
+    var b=document.createElement("button");b.type="button";b.className=cls;b.innerHTML=html;
+    b.setAttribute("aria-label",label);b.title=label;return b;
+  }
+  var roots=[];
+  /* --- 自由キャンバス --- */
+  var croot=document.getElementById("customMode");
+  if(croot){
+    roots.push(croot);
+    var strip=document.getElementById("custWideStrip");
+    var closeBtn=mkBtn("dock-close-btn",CHEVDOWN,"操作ドックをしまう");
+    closeBtn.setAttribute("aria-expanded","true");
+    if(strip)strip.appendChild(closeBtn);
+    var fab=mkBtn("dock-fab",SLIDERS,"操作ドックを出す");
+    fab.setAttribute("aria-expanded","false");
+    croot.appendChild(fab);
+    var exitPill=mkBtn("wide-exit-pill",COMPRESS+"<span>通常表示に戻す</span>","通常表示に戻す");
+    croot.appendChild(exitPill);
+    function syncCust(){
+      var closed=croot.classList.contains("dock-closed");
+      fab.setAttribute("aria-expanded",closed?"true":"false");
+      closeBtn.setAttribute("aria-expanded",closed?"false":"true");
+    }
+    closeBtn.addEventListener("click",function(){croot.classList.add("dock-closed");syncCust()});
+    fab.addEventListener("click",function(){croot.classList.remove("dock-closed");syncCust()});
+    exitPill.addEventListener("click",function(){
+      var b=croot.querySelector('#custViewbar [data-wide="customMode"]');
+      if(b)b.click();
+    });
+  }
+  /* --- 他モード（操作行の出し入れ） --- */
+  ["solidMode","planeMode","theoremMode","dataMode","numMode","graphMode"].forEach(function(id){
+    var root=document.getElementById(id);if(!root)return;
+    roots.push(root);
+    var f=mkBtn("wide-dock-fab",SLIDERS,"操作バーを出し入れ");
+    f.setAttribute("aria-expanded","true");
+    root.appendChild(f);
+    var pill=mkBtn("wide-bar-exit",COMPRESS+"<span>通常表示に戻す</span>","通常表示に戻す");
+    root.appendChild(pill);
+    f.addEventListener("click",function(){
+      var closed=root.classList.toggle("bar-closed");
+      f.setAttribute("aria-expanded",closed?"false":"true");
+      if(window.requestAnimationFrame)requestAnimationFrame(function(){window.dispatchEvent(new Event("resize"))});
+      setTimeout(function(){window.dispatchEvent(new Event("resize"))},280);
+    });
+    pill.addEventListener("click",function(){
+      var b=root.querySelector('[data-wide="'+id+'"]');
+      if(b)b.click();
+    });
+  });
+  /* 広く見るを抜けたら、出し入れの状態は初期（出ている状態）に戻す */
+  setInterval(function(){
+    roots.forEach(function(r){
+      if(!r.classList.contains("is-wide")){
+        r.classList.remove("dock-closed");r.classList.remove("bar-closed");
+      }
+    });
+  },300);
+})();
+</script>
 </body>
 </html>
