@@ -12474,5 +12474,229 @@ body.menu-open .hist-bar{opacity:0!important;visibility:hidden!important;pointer
   .is-wide.wide-tools-open .zoom-cluster{display:none!important}
 }
 </style>
+<style>
+/* ===== スマホ幅（〜900px）：浮動要素を右下の1ボタン＋扇形メニューに統合 =====
+   サカミチアの推しフローティングボタン（.favfloat）と同じ作法にする。
+   いままでバラバラに浮いていた要素（ズームクラスタ ＋／－／⌂、バーの再表示丸ボタン）は
+   スマホ幅では全部しまい、主役は右下の丸ボタン1つだけにする。タップで上方向へ
+   ピル型の項目が時間差でふわっと広がり、もう一度タップで閉じる。
+   旧要素は DOM から消さず display:none にするだけ：新ボタンの項目は旧要素の
+   ボタンを .click() でそのまま呼ぶので、動作・状態・保存は従来と完全に同じ。
+   PC幅（>900px）は従来の配置のまま（このブロックは一切当てない）。 */
+.fav-fab{display:none}
+@media (max-width:900px){
+  .zoom-cluster{display:none!important}
+  #customMode .dock-fab{display:none!important}
+  #solidMode .wide-dock-fab,#planeMode .wide-dock-fab,#graphMode .wide-dock-fab{display:none!important}
+  .fav-fab{position:fixed;right:14px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:215;flex-direction:column;align-items:flex-end;gap:9px}
+  .fav-fab.on{display:flex;animation:favPop .5s cubic-bezier(.34,1.56,.64,1)}
+  .fav-fab.wide{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+  @keyframes favPop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
+  .fav-menu{display:flex;flex-direction:column;align-items:flex-end;gap:8px;visibility:hidden;transition:visibility 0s linear .3s}
+  .fav-fab.open .fav-menu{visibility:visible;transition:none}
+  .fav-item{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:9px 16px 9px 13px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:14px;font-weight:700;line-height:1.2;box-shadow:0 6px 18px rgba(15,25,45,.20);cursor:pointer;opacity:0;transform:translateY(12px) scale(.9);pointer-events:none;transition:opacity .2s ease,transform .26s cubic-bezier(.34,1.45,.64,1)}
+  .fav-fab.open .fav-item{opacity:1;transform:none;pointer-events:auto}
+  .fav-item:active{transform:scale(.95)}
+  .fav-item .fav-ic{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;font-size:17px;line-height:1;color:var(--accent);flex:none}
+  .fav-main{width:56px;height:56px;min-height:56px;border-radius:50%;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(15,25,45,.30);cursor:pointer;padding:0;flex:none}
+  .fav-main:active{transform:scale(.93)}
+  .fav-main .fav-ic-open{display:none}
+  .fav-fab.open .fav-main .fav-ic-open{display:flex}
+  .fav-fab.open .fav-main .fav-ic-shut{display:none}
+  .fav-main:focus-visible,.fav-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+}
+@media (prefers-reduced-motion:reduce){
+  .fav-fab.on{animation:none}
+  .fav-item{transition:none}
+}
+@media print{.fav-fab{display:none!important}}
+</style>
+<script>
+"use strict";
+/* ===== スマホ幅：右下の1ボタン＋扇形メニュー（浮動要素の統合） =====
+   対象はキャンバス系モード（作図・立体・図形／定規作図・関数）。
+   項目は状態に応じて出し分ける（使えない項目は出さない）：
+   ズームイン／ズームアウト／表示を初期化／バーを出す（畳んでいる時だけ）／
+   広く見る（通常表示）／通常表示に戻す（広く見る中）。
+   シート・ドロワー・案内パネルを開いている間はボタンごと隠す（従来の隠蔽原則を
+   このボタンに一本化）。別のバーが下に出ている間は、その高さ分だけ上へ逃がす。 */
+(function(){
+  var mq=window.matchMedia("(max-width: 900px)");
+  function $(id){return document.getElementById(id)}
+  function svgIcon(size,body,fill){
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+body+'</svg>';
+  }
+  function sliders(size,fill){
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2.2" fill="'+fill+'"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2.2" fill="'+fill+'"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2.2" fill="'+fill+'"/></svg>';
+  }
+  var IC_MAIN=sliders(26,"var(--accent)");
+  var IC_CLOSE=svgIcon(24,'<path d="M6 6l12 12M18 6L6 18"/>');
+  var IC_BAR=sliders(18,"var(--panel)");
+  var IC_EXPAND=svgIcon(18,'<path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/>');
+  var IC_COMPRESS=svgIcon(18,'<path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"/>');
+  var SVGKEY={custSvg:1,presetSvg:1,consSvg:1,ovlSvg:1,graphSvg:1};
+  /* いま画面に出ているキャンバスのズームクラスタを返す（平面はサブごとに切替） */
+  function activeCluster(root){
+    var cls=root.querySelectorAll(".zoom-cluster");
+    for(var i=0;i<cls.length;i++){
+      var host=cls[i].parentElement;if(!host)continue;
+      var svgs=host.querySelectorAll("svg");
+      for(var j=0;j<svgs.length;j++){
+        if(svgs[j].id&&SVGKEY[svgs[j].id]&&svgs[j].getClientRects().length)return cls[i];
+      }
+    }
+    return null;
+  }
+  function clusterBtn(root,idx){
+    var cl=activeCluster(root);if(!cl)return null;
+    var bs=cl.querySelectorAll("button");return bs[idx]||null;
+  }
+  /* 立体はズームクラスタが無いので、カメラの距離で寄る／引く */
+  function solidZoom(dir){
+    if(typeof camera==="undefined"||typeof controls==="undefined"||!camera||!controls)return;
+    var t=controls.target;if(!t)return;
+    var off=camera.position.clone().sub(t);
+    var len=off.length()*(dir>0?1/1.3:1.3);
+    len=Math.min(30,Math.max(2.2,len));
+    off.setLength(len);camera.position.copy(t).add(off);
+    if(controls.update)controls.update();
+  }
+  function solidCanZoom(){
+    return typeof camera!=="undefined"&&typeof controls!=="undefined"&&!!camera&&!!controls;
+  }
+  function barCollapsed(root){
+    if(root.id==="customMode")return root.classList.contains("note-closed")||root.classList.contains("dock-closed");
+    if(root.classList.contains("is-wide"))return root.classList.contains("bar-closed");
+    return root.classList.contains("note-closed");
+  }
+  function buildItems(rec){
+    var root=rec.root,wide=root.classList.contains("is-wide"),items=[];
+    var cl=activeCluster(root);
+    var solid=root.id==="solidMode";
+    var c3=root.id==="customMode"&&root.classList.contains("c3d-on");
+    if(cl||(solid&&solidCanZoom())){
+      items.push({act:"zin",label:"ズームイン",ic:"＋"});
+      items.push({act:"zout",label:"ズームアウト",ic:"－"});
+    }
+    if(cl||solid||c3)items.push({act:"reset",label:"表示を初期化",ic:"⌂"});
+    if(barCollapsed(root))items.push({act:"bar",label:"バーを出す",ic:IC_BAR});
+    items.push({act:"wide",label:wide?"通常表示に戻す":"広く見る",ic:wide?IC_COMPRESS:IC_EXPAND});
+    return items;
+  }
+  function applyDelays(rec){
+    var kids=rec.menu.children,n=kids.length;
+    for(var i=0;i<n;i++)kids[i].style.transitionDelay=rec.open?((n-1-i)*45)+"ms":"0ms";
+  }
+  function refreshItems(rec){
+    if(!rec.open)return; /* 閉じている間は項目を DOM に置かない（開く時に作る） */
+    var items=buildItems(rec);
+    var sig=items.map(function(it){return it.act+":"+it.label}).join("|");
+    if(sig===rec.sig)return;
+    rec.sig=sig;
+    rec.menu.innerHTML="";
+    items.forEach(function(it){
+      var b=document.createElement("button");b.type="button";b.className="fav-item";
+      b.setAttribute("role","menuitem");
+      var ic=document.createElement("span");ic.className="fav-ic";ic.setAttribute("aria-hidden","true");ic.innerHTML=it.ic;
+      var lb=document.createElement("span");lb.textContent=it.label;
+      b.appendChild(ic);b.appendChild(lb);
+      b.addEventListener("click",function(ev){ev.stopPropagation();doAct(rec,it.act)});
+      rec.menu.appendChild(b);
+    });
+    applyDelays(rec);
+  }
+  function setOpen(rec,open){
+    if(open){
+      rec.open=true;
+      clearTimeout(rec._ct);
+      rec.sig=null;refreshItems(rec); /* 状態に合った項目を作ってから広げる */
+      void rec.wrap.offsetWidth; /* 初期状態（透明・縮小）を確定させてから遷移させる */
+      rec.wrap.classList.add("open");
+    }else{
+      rec.open=false;
+      rec.wrap.classList.remove("open");
+      clearTimeout(rec._ct);
+      rec._ct=setTimeout(function(){if(!rec.open){rec.menu.innerHTML="";rec.sig=""}},340);
+    }
+    rec.main.setAttribute("aria-expanded",rec.open?"true":"false");
+    applyDelays(rec);
+  }
+  function doAct(rec,act){
+    var root=rec.root;
+    if(act==="zin"||act==="zout"){
+      if(root.id==="solidMode")solidZoom(act==="zin"?1:-1);
+      else{var zb=clusterBtn(root,act==="zin"?0:1);if(zb)zb.click()}
+      return; /* ズームは続けて押せるようメニューを開いたままにする */
+    }
+    if(act==="reset"){
+      if(root.id==="solidMode"){var rb=$("btnResetView");if(rb)rb.click()}
+      else if(root.id==="customMode"&&root.classList.contains("c3d-on")){var c3b=$("c3ResetView");if(c3b)c3b.click()}
+      else{var hb=clusterBtn(root,2);if(hb)hb.click()}
+      setOpen(rec,false);return;
+    }
+    if(act==="bar"){var f=root.querySelector(rec.fabSel);if(f)f.click();setOpen(rec,false);return}
+    if(act==="wide"){var wb=root.querySelector('[data-wide="'+root.id+'"]');if(wb)wb.click();setOpen(rec,false);return}
+  }
+  /* 別のバー（広く見るの下ドック等）が画面下に出ている間は、その高さ分だけ上へ逃がす */
+  function lift(rec){
+    var root=rec.root,liftPx=0;
+    if(root.classList.contains("is-wide")&&root.id==="customMode"&&!root.classList.contains("dock-closed")){
+      var strip=$("custWideStrip");
+      if(strip){
+        var sr=strip.getBoundingClientRect();
+        if(sr.height>0&&sr.bottom>window.innerHeight-90)liftPx=Math.max(liftPx,Math.round(window.innerHeight-sr.top)+10);
+      }
+    }
+    var want=liftPx?liftPx+"px":"";
+    if(rec.wrap.style.marginBottom!==want)rec.wrap.style.marginBottom=want;
+  }
+  function sync(rec){
+    var root=rec.root,show=false;
+    if(mq.matches&&!root.classList.contains("hidden")){
+      show=true;
+      if(document.body.classList.contains("menu-open"))show=false; /* 案内・設定パネル */
+      var ms=$("moreSheet");if(ms&&!ms.classList.contains("hidden"))show=false; /* もっと見るシート */
+      if(root.classList.contains("is-wide")){
+        if(root.classList.contains("wide-tools-open"))show=false; /* 広く見るのドロワー */
+      }else if(!root.classList.contains("side-closed"))show=false; /* 下シートを開いている間 */
+    }
+    var on=rec.wrap.classList.contains("on");
+    if(show&&!on)rec.wrap.classList.add("on");
+    else if(!show&&on){rec.wrap.classList.remove("on");if(rec.open)setOpen(rec,false)}
+    rec.wrap.classList.toggle("wide",root.classList.contains("is-wide"));
+    if(show){refreshItems(rec);lift(rec)}
+  }
+  var recs=[];
+  [["customMode",".dock-fab"],["solidMode",".wide-dock-fab"],["planeMode",".wide-dock-fab"],["graphMode",".wide-dock-fab"]].forEach(function(cfg){
+    var root=$(cfg[0]);if(!root)return;
+    var wrap=document.createElement("div");wrap.className="fav-fab";
+    var menu=document.createElement("div");menu.className="fav-menu";menu.setAttribute("role","menu");menu.setAttribute("aria-label","表示と操作");
+    var main=document.createElement("button");main.type="button";main.className="fav-main";
+    main.setAttribute("aria-label","表示と操作のメニューを開く");main.title="表示と操作";
+    main.setAttribute("aria-haspopup","true");main.setAttribute("aria-expanded","false");
+    var icShut=document.createElement("span");icShut.className="fav-ic-shut";icShut.setAttribute("aria-hidden","true");icShut.innerHTML=IC_MAIN;
+    var icOpen=document.createElement("span");icOpen.className="fav-ic-open";icOpen.setAttribute("aria-hidden","true");icOpen.innerHTML=IC_CLOSE;
+    main.appendChild(icShut);main.appendChild(icOpen);
+    wrap.appendChild(menu);wrap.appendChild(main);
+    root.appendChild(wrap);
+    var rec={root:root,fabSel:cfg[1],wrap:wrap,menu:menu,main:main,open:false,sig:""};
+    main.addEventListener("click",function(ev){ev.stopPropagation();setOpen(rec,!rec.open)});
+    recs.push(rec);
+  });
+  document.addEventListener("click",function(e){
+    if(e.target.closest&&e.target.closest(".fav-fab"))return;
+    recs.forEach(function(rec){if(rec.open)setOpen(rec,false)});
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape")recs.forEach(function(rec){if(rec.open)setOpen(rec,false)});
+  });
+  function syncAll(){recs.forEach(sync)}
+  document.addEventListener("click",function(){setTimeout(syncAll,90)},true);
+  window.addEventListener("resize",syncAll);
+  if(mq.addEventListener)mq.addEventListener("change",syncAll);
+  setInterval(syncAll,450);
+  syncAll();
+})();
+</script>
 </body>
 </html>
