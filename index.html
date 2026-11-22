@@ -11160,8 +11160,9 @@ button,summary,[role="button"]{transition:transform .13s ease-out,filter .13s ea
 #solidMode.is-wide.bar-closed .viewbar,#planeMode.is-wide.bar-closed .viewbar,#graphMode.is-wide.bar-closed .viewbar{transition:transform .3s var(--ease-app),opacity .3s var(--ease-app),visibility 0s .3s}
 #moreSheet{animation-duration:.32s;animation-timing-function:var(--ease-sheet)}
 .side.acc-active .card .acc-chev{transition:transform .3s var(--ease-app)}
-@keyframes accIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
-.side.acc-active .card.acc:not(.acc-closed)>.acc-body{animation:accIn .32s var(--ease-app)}
+/* 点滅対策（2026-11-23）：開いているカード本文への入場アニメーション（accIn）は、周期的な再描画のたびに
+   再生し直され、本文が約0.3秒周期で消えては戻る点滅になっていたため廃止。本文は常時そのまま表示する。 */
+.side.acc-active .card.acc:not(.acc-closed)>.acc-body{animation:none}
 @keyframes screenInR{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
 @keyframes screenInL{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
 #homeView.mv-r,#customMode.mv-r,#solidMode.mv-r,#planeMode.mv-r,#graphMode.mv-r,#theoremMode.mv-r,#dataMode.mv-r,#numMode.mv-r{animation:screenInR .3s var(--ease-app)}
