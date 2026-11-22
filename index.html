@@ -7113,7 +7113,7 @@ if(window.MutationObserver)labelSvgIds.forEach(function(id){var s=$(id);if(s)new
     var head=root.querySelector("aside.side .wide-drawer-head [data-wide-tools]");
     if(head&&!root.classList.contains("side-closed"))head.click();
   }
-  function wideBtn(){return root.querySelector('#custViewbar [data-wide="customMode"]')}
+  function wideBtn(){return root.querySelector('[data-wide="customMode"]')}
   function bind(proxyId,targetId,after){
     var p=$(proxyId);if(!p)return;
     p.addEventListener("click",function(){clickId(targetId);if(after)after();sync()});
@@ -7133,7 +7133,7 @@ if(window.MutationObserver)labelSvgIds.forEach(function(id){var s=$(id);if(s)new
     p.addEventListener("click",function(){closeSheet();clickEl(wideBtn())});
   });
   var op=$("opsPrint");
-  if(op)op.addEventListener("click",function(){clickEl(root.querySelector('#custViewbar [data-print="1"]'))});
+  if(op)op.addEventListener("click",function(){clickEl(root.querySelector('[data-print="1"]'))});
   function bindChk(proxyId,targetId){
     var p=$(proxyId),t=$(targetId);if(!p||!t)return;
     p.addEventListener("change",function(){
@@ -10957,7 +10957,7 @@ body.wide-on:has(>#customMode.is-wide.dock-closed) .hist-bar{bottom:calc(12px + 
     closeBtn.addEventListener("click",function(){croot.classList.add("dock-closed");syncCust()});
     fab.addEventListener("click",function(){croot.classList.remove("dock-closed");syncCust()});
     exitPill.addEventListener("click",function(){
-      var b=croot.querySelector('#custViewbar [data-wide="customMode"]');
+      var b=croot.querySelector('[data-wide="customMode"]');
       if(b)b.click();
     });
   }
@@ -10991,5 +10991,278 @@ body.wide-on:has(>#customMode.is-wide.dock-closed) .hist-bar{bottom:calc(12px + 
   },300);
 })();
 </script>
+<style>
+/* ===== ノートアプリ形をサイトの構造にする（通常表示＋広く見る共通） =====
+   キャンバス中心のモード（作図・立体・図形／定規作図・関数）では、操作を上部の細い浮動1行バーに集約する。
+   バーはキャンバス（見出し行の下）に重なる浮動で、場所を予約しない。見出し・説明・操作行をキャンバスの上に積まない。
+   左に元に戻す／やり直し、その横に道具アイコン、残り（お手本・印刷・全部消す・平面/立体切替・表示切替など）は「…」のパネルへ。
+   下部の元に戻す浮動バーはバーへ統合し、広く見るでも通常表示でも二重に出さない。
+   「通常表示に戻す」は右上の独立ピルのまま（見出し行のグリッド／座標軸・表示リセットとは重ならない位置）。 */
+/* --- 「…」パネル（共通） --- */
+.note-pop-wrap{position:relative;flex:none;display:inline-flex}
+.note-more-btn{font-weight:700;letter-spacing:.1em;min-width:44px;justify-content:center}
+.note-pop{position:absolute;top:calc(100% + 8px);right:0;z-index:220;display:flex;flex-direction:column;gap:5px;min-width:208px;max-width:min(78vw,300px);padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(15,25,20,.28)}
+.note-pop[hidden]{display:none!important}
+.note-pop .btn{width:100%;justify-content:flex-start;text-align:left;white-space:normal}
+.note-pop .seg{align-self:flex-start}
+.note-pop .note-pop-cap{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--sub);padding:1px 4px 0}
+/* --- 作図キャンバス：帯（custWideStrip）を通常表示でも使う1行バーにする --- */
+#customMode .stage{position:relative}
+#custWideStrip{display:none}
+@media (min-width:901px){#customMode #custWideStrip{display:flex}}
+#customMode.is-wide #custWideStrip{display:flex}
+#customMode #custWideStrip,#customMode.is-wide #custWideStrip{position:absolute;top:46px;left:2px;right:2px;bottom:auto;width:auto;height:54px;max-height:none;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:5px;padding:5px 8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;box-shadow:0 10px 26px rgba(15,25,20,.20);overflow:visible;z-index:80;transform:none;opacity:1;visibility:visible;transition:transform .26s ease,opacity .26s ease,visibility 0s}
+#customMode.dock-closed #custWideStrip,#customMode.note-closed #custWideStrip{transform:translateY(-16px);opacity:0;visibility:hidden;pointer-events:none;transition:transform .26s ease,opacity .26s ease,visibility 0s .26s}
+#customMode.note-closed .dock-fab{display:flex;position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:166;width:52px;height:52px;min-height:52px;border-radius:50%;align-items:center;justify-content:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;padding:0}
+#custWideStrip #custViewbar{order:1;display:flex;align-items:center;gap:4px;background:none;border:0;border-radius:0;padding:0;margin:0;flex:none}
+#custWideStrip #custViewbar .c2d-actions{display:inline-flex!important;flex-wrap:nowrap;gap:4px;margin-left:0!important}
+#custWideStrip #custPenbar{order:2;display:flex;align-items:center;gap:4px;background:none;border:0;padding:0;margin:0;flex:none}
+#custWideStrip #custDimBar{order:3;display:flex;align-items:center;gap:4px;background:none;border:0;padding:0;margin:0;flex:none}
+#customMode.c3d-on #custWideStrip #custDimBar{order:1}
+#customMode.c3d-on #custWideStrip #custDimBar .dim-actions{display:inline-flex!important;flex-direction:row;align-items:center;gap:4px;margin-left:0}
+#custWideStrip .note-pop-wrap{order:8}
+#custWideStrip .dock-close-btn{order:9}
+#custWideStrip .dock-close-btn svg{transform:rotate(180deg)}
+#custWideStrip .cust-penbar::before,#custWideStrip #custDimBar::before,#custWideStrip .viewbar::before{display:none!important}
+#custWideStrip #custIntro,#custWideStrip #custDimNote,#custWideStrip #custPenMsg{display:none!important}
+#custWideStrip .seg{border-radius:999px;flex:none}
+#custWideStrip .seg button{white-space:nowrap;min-height:42px;padding:6px 11px}
+#custWideStrip .btn{flex:none;min-height:42px;border-radius:999px;padding:6px 11px;font-size:13px;width:auto}
+/* バーの中では元に戻す／やり直しを出す（下の浮動バーと二重にしない） */
+#custWideStrip #custUndo,#custWideStrip #custRedo{display:inline-flex!important}
+#customMode.c3d-on #custWideStrip #custUndo,#customMode.c3d-on #custWideStrip #custRedo{display:none!important}
+#custWideStrip #c3Undo,#custWideStrip #c3Redo{display:none!important}
+#customMode.c3d-on #custWideStrip #c3Undo,#customMode.c3d-on #custWideStrip #c3Redo{display:inline-flex!important}
+/* 「…」の中の立体用ボタンは立体のときだけ、平面用は平面のときだけ */
+#customMode:not(.c3d-on) .note-pop #c3Example,#customMode:not(.c3d-on) .note-pop #c3ResetAll{display:none!important}
+#customMode.c3d-on .note-pop #custExample,#customMode.c3d-on .note-pop #custResetAll{display:none!important}
+/* 作図が主役のときは下部の元に戻す浮動バーを出さない（バーに統合済み） */
+body:has(#customMode:not(.hidden)) .hist-bar,body.wide-on:has(>#customMode.is-wide:not(.hidden)) .hist-bar{display:none!important}
+/* バーを浮動にしたぶん、通常表示（PC）のキャンバスを縦に広げる */
+@media (min-width:901px){
+  #customMode:not(.is-wide) #custSvg{height:clamp(480px,calc(100dvh - 238px),860px)}
+  #customMode:not(.is-wide) #c3Wrap{height:clamp(480px,calc(100dvh - 238px),860px)}
+}
+/* --- 立体・図形／定規作図・関数：操作行を上部の浮動1行バーにする（通常表示＋広く見る共通） --- */
+#solidMode .stage,#planeMode .stage,#graphMode .stage{position:relative}
+#solidMode .viewbar,#planeMode .viewbar,#graphMode .viewbar{position:absolute;top:46px;left:2px;right:2px;z-index:70;margin:0;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 8px;box-shadow:0 10px 26px rgba(15,25,20,.18);align-items:center;gap:6px;transition:transform .25s ease,opacity .25s ease,visibility 0s}
+#solidMode .viewbar::-webkit-scrollbar,#planeMode .viewbar::-webkit-scrollbar,#graphMode .viewbar::-webkit-scrollbar{display:none}
+#solidMode .viewbar .firsthint,#solidMode .viewbar .d-note,#planeMode .viewbar #planeHint,#graphMode .viewbar .firsthint,#graphMode .viewbar .d-note{display:none!important}
+#solidMode .viewbar .btn,#planeMode .viewbar .btn,#graphMode .viewbar .btn{flex:none;border-radius:999px;min-height:42px}
+#solidMode .viewbar .seg,#planeMode .viewbar .seg,#graphMode .viewbar .seg{flex:none;border-radius:999px}
+#solidMode .viewbar .seg button,#planeMode .viewbar .seg button,#graphMode .viewbar .seg button{min-height:42px;padding:6px 10px;white-space:nowrap}
+#solidMode .viewbar>span,#planeMode .viewbar>span,#graphMode .viewbar>span{flex:none}
+/* 元に戻す／やり直しバーをバー内に取り込んだときの姿 */
+.hist-bar.in-notebar{position:static;transform:none;box-shadow:none;border:0;background:transparent;padding:0;gap:4px;flex:none}
+.hist-bar.in-notebar button{font-size:0!important;gap:0;min-width:44px;justify-content:center;padding-left:8px;padding-right:8px}
+.note-pop-host{position:relative}
+.note-pop.pop-detached{position:absolute;left:auto;z-index:95}
+.hist-bar.in-notebar button{min-height:42px;padding:6px 12px;font-size:13.5px;border-radius:999px}
+/* 広く見る：操作行が畳まれたら上へ引っ込む（丸ボタンで出し入れ） */
+#solidMode.is-wide.bar-closed .viewbar,#planeMode.is-wide.bar-closed .viewbar,#graphMode.is-wide.bar-closed .viewbar{position:absolute;top:46px;left:2px;right:2px;transform:translateY(-16px);opacity:0;visibility:hidden;pointer-events:none;transition:transform .25s ease,opacity .25s ease,visibility 0s .25s}
+/* 広く見る：「通常表示に戻す」は右上の独立ピル（常時表示）。バー内の同ボタンは重複させない */
+#solidMode.is-wide .wide-bar-exit,#planeMode.is-wide .wide-bar-exit,#graphMode.is-wide .wide-bar-exit{display:inline-flex;position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:8px;bottom:auto;z-index:166;align-items:center;gap:7px;min-height:44px;padding:8px 14px;background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+#solidMode.is-wide .viewbar .btn-wide,#planeMode.is-wide .viewbar .btn-wide,#graphMode.is-wide .viewbar .btn-wide{display:none!important}
+#solidMode.is-wide.bar-closed .wide-bar-exit,#planeMode.is-wide.bar-closed .wide-bar-exit,#graphMode.is-wide.bar-closed .wide-bar-exit{display:inline-flex;position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:8px;bottom:auto;z-index:166;align-items:center;gap:7px;min-height:44px;padding:8px 14px;background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+/* 右上ピルと見出し行のボタン（最初の表示にもどす）が重ならないよう、広く見るでは見出し行の右に余白を確保 */
+#planeMode.is-wide .viewbox .vhead{padding-right:196px}
+/* スマホ幅：stageがdisplay:contentsになるモードでは、バーの基準をlayoutにする */
+@media (max-width:900px){
+  #solidMode:not(.is-wide) .layout,#graphMode:not(.is-wide) .layout{position:relative}
+  #solidMode .viewbar,#graphMode .viewbar{left:8px;right:8px}
+  #custWideStrip .btn{padding:6px 9px}
+  #custWideStrip .seg button{padding:6px 9px}
+}
+/* --- 読み物モード（定理・データ・数と式）：レイアウトは読み物のまま、操作行の見た目だけバーの形に揃える --- */
+#theoremMode .viewbar{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 10px;box-shadow:0 4px 14px rgba(15,25,20,.08)}
+#dataMode .viewbar,#numMode .viewbar{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 10px;box-shadow:0 4px 14px rgba(15,25,20,.08)}
+@media print{.note-pop-wrap,.note-pop{display:none!important}#custWideStrip{display:none!important}#solidMode .viewbar,#planeMode .viewbar,#graphMode .viewbar{position:static;box-shadow:none}}
+@media (prefers-reduced-motion:reduce){#customMode #custWideStrip,#solidMode .viewbar,#planeMode .viewbar,#graphMode .viewbar{transition:none}}
+</style>
+<script>
+"use strict";
+/* ===== ノートアプリ形：1行バーの組み立て（「…」集約・帯の常駐・履歴バーの取り込み） ===== */
+(function(){
+  function $(id){return document.getElementById(id)}
+  /* ---------- 「…」パネル ---------- */
+  var allPops=[];
+  function closePops(except){
+    allPops.forEach(function(rec){
+      if(rec.pop!==except){rec.pop.hidden=true;rec.btn.setAttribute("aria-expanded","false")}
+    });
+  }
+  function makePop(container,secondaries,capText,detach){
+    if(!container||container.querySelector(":scope > .note-pop-wrap"))return null;
+    var items=secondaries.filter(function(el){return !!el});
+    if(!items.length)return null;
+    var wrap=document.createElement("span");wrap.className="note-pop-wrap";
+    var btn=document.createElement("button");btn.type="button";btn.className="btn small note-more-btn";
+    btn.textContent="…";btn.title="その他の操作";btn.setAttribute("aria-label","その他の操作を開く");
+    btn.setAttribute("aria-haspopup","true");btn.setAttribute("aria-expanded","false");
+    var pop=document.createElement("span");pop.className="note-pop";pop.hidden=true;
+    pop.setAttribute("role","group");pop.setAttribute("aria-label","その他の操作");
+    if(capText){var cap=document.createElement("span");cap.className="note-pop-cap";cap.textContent=capText;pop.appendChild(cap)}
+    items.forEach(function(el){pop.appendChild(el)});
+    wrap.appendChild(btn);wrap.appendChild(pop);container.appendChild(wrap);
+    var host=null;
+    if(detach){
+      host=container.closest(".stage")||container.offsetParent||container.parentElement;
+      if(host){host.classList.add("note-pop-host");pop.classList.add("pop-detached");host.appendChild(pop)}
+    }
+    var rec={btn:btn,pop:pop};allPops.push(rec);
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var willOpen=pop.hidden;closePops(pop);
+      if(willOpen&&host){
+        var hr=host.getBoundingClientRect(),br=btn.getBoundingClientRect();
+        pop.style.top=(br.bottom-hr.top+8)+"px";
+        pop.style.right=Math.max(0,hr.right-br.right)+"px";
+      }
+      pop.hidden=!willOpen;btn.setAttribute("aria-expanded",willOpen?"true":"false");
+    });
+    pop.addEventListener("click",function(e){
+      if(e.target.closest&&e.target.closest("button")){pop.hidden=true;btn.setAttribute("aria-expanded","false")}
+    });
+    return rec;
+  }
+  document.addEventListener("click",function(e){
+    if(!(e.target.closest&&e.target.closest(".note-pop-wrap")))closePops(null);
+  });
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")closePops(null)});
+  /* ---------- 作図キャンバス：残りの操作を「…」へ ---------- */
+  var croot=$("customMode"),strip=$("custWideStrip");
+  if(croot&&strip){
+    var dimSeg=document.querySelector("#custDimBar .seg");
+    var wide2d=croot.querySelector("#custViewbar .btn-wide");
+    var wide3d=document.querySelector("#custDimBar .btn-wide");
+    if(wide2d)wide2d.classList.add("pop-wide-2d");
+    if(wide3d)wide3d.classList.add("pop-wide-3d");
+    makePop(strip,[
+      dimSeg,
+      $("custExample"),$("c3Example"),
+      croot.querySelector("#custViewbar .print-btn"),
+      croot.querySelector("#custViewbar .wide-tools-btn"),
+      wide2d,wide3d,
+      $("custResetAll"),$("c3ResetAll")
+    ],"その他の操作");
+    /* バーの出し入れ：通常表示でも畳めるよう、専用クラスでも状態を持つ（広く見る用クラスは従来どおり併用） */
+    var closeBtn=strip.querySelector(".dock-close-btn");
+    var fab=croot.querySelector(".dock-fab");
+    if(closeBtn)closeBtn.addEventListener("click",function(){croot.classList.add("note-closed")});
+    if(fab)fab.addEventListener("click",function(){croot.classList.remove("note-closed")});
+    /* 帯をstageの中へ移し、キャンバス基準の浮動にする */
+    var stage=croot.querySelector(".stage");
+    if(stage&&strip.parentNode!==stage)stage.insertBefore(strip,stage.firstChild);
+  }
+  /* ---------- 立体・図形／定規作図・関数：残りの操作を「…」へ ---------- */
+  function viewbarOf(id){var r=$(id);return r?r.querySelector(".viewbar"):null}
+  (function(){
+    var vb=viewbarOf("solidMode");
+    if(vb)makePop(vb,[$("btnResetView"),vb.querySelector(".print-btn")],"その他の操作",true);
+    vb=viewbarOf("planeMode");
+    if(vb)makePop(vb,[vb.querySelector(".wide-tools-btn"),vb.querySelector(".print-btn")],"その他の操作",true);
+    vb=viewbarOf("graphMode");
+    if(vb)makePop(vb,[$("gResetView"),$("gToggleInter"),$("gToggleVertex"),vb.querySelector(".print-btn")],"その他の操作",true);
+  })();
+  /* ---------- 作図キャンバスの帯の常駐（PC通常表示でも帯を使う） ---------- */
+  var custIds=["custViewbar","custDimBar","custPenbar"];
+  var custSpots=null,custInStrip=false;
+  function custRecord(){
+    custSpots={};
+    custIds.forEach(function(id){var e=$(id);if(e)custSpots[id]={p:e.parentNode,n:e.nextSibling}});
+  }
+  function custToStrip(){
+    if(!strip)return;
+    if(!custSpots)custRecord();
+    custIds.forEach(function(id){var e=$(id);if(e)strip.appendChild(e)});
+    var wrap=strip.querySelector(":scope > .note-pop-wrap");
+    var cb=strip.querySelector(":scope > .dock-close-btn");
+    if(wrap)strip.appendChild(wrap);
+    if(cb)strip.appendChild(cb);
+    custInStrip=true;
+  }
+  function custRestore(){
+    if(!custSpots)return;
+    for(var i=custIds.length-1;i>=0;i--){
+      var e=$(custIds[i]),s=custSpots[custIds[i]];
+      if(e&&s&&s.p){if(s.n&&s.n.parentNode===s.p)s.p.insertBefore(e,s.n);else s.p.appendChild(e)}
+    }
+    custInStrip=false;
+  }
+  /* ---------- 元に戻す／やり直しバーを、立体・図形・関数のバーへ取り込む ---------- */
+  var hist=$("histBar"),histHome=null;
+  if(hist){histHome={p:hist.parentNode,n:hist.nextSibling}}
+  var histHost=null;
+  function histSync(){
+    document.querySelectorAll(".wide-dock-fab").forEach(function(f){if(!f.getAttribute("aria-label"))f.setAttribute("aria-label","操作バーを出す")});
+    if(!hist)return;
+    var host=null;
+    ["solidMode","planeMode","graphMode"].forEach(function(id){
+      var r=$(id);
+      if(r&&!r.classList.contains("hidden"))host=r.querySelector(".viewbar");
+    });
+    if(host){
+      if(hist.parentNode!==host){host.insertBefore(hist,host.firstChild);hist.classList.add("in-notebar")}
+      histHost=host;
+    }else if(histHost){
+      if(histHome.p){if(histHome.n&&histHome.n.parentNode===histHome.p)histHome.p.insertBefore(hist,histHome.n);else histHome.p.appendChild(hist)}
+      hist.classList.remove("in-notebar");histHost=null;
+    }
+  }
+  /* ---------- 定期同期（モード切替・広く見る・幅の変化に追随） ---------- */
+  var mqDesk=window.matchMedia("(min-width:901px)");
+  function sync(){
+    if(croot&&strip){
+      var want=true; /* 帯はサイトの構造として常駐させる（通常表示・広く見る・全幅共通） */
+      var inStrip=strip.contains($("custViewbar"));
+      if(want&&!inStrip)custToStrip();
+      else if(!want&&inStrip&&custInStrip)custRestore();
+      else if(want&&inStrip)custInStrip=true;
+    }
+    histSync();
+  }
+  sync();
+  setInterval(sync,500);
+  if(window.addEventListener)window.addEventListener("resize",sync);
+})();
+</script>
+<style>
+/* ===== スマホ通常表示でも作図の1行バーを出す（履歴バーを隠す代わりの受け皿） =====
+   帯はキャンバス直上に置く1行バーとして表示し、元に戻す／やり直し・道具・「…」に常時届くようにする。
+   ボタンはアイコン主体（名前はtitle／aria-labelで担保）に詰め、1行に収める。 */
+@media (max-width:900px){
+  #customMode:not(.is-wide) .layout{position:relative}
+  #customMode:not(.is-wide) #custWideStrip{display:flex;position:absolute;top:10px;left:10px;right:10px;width:auto;height:54px;margin:0}
+  #customMode:not(.is-wide) #custWideStrip #custViewbar{display:flex}
+  #customMode:not(.is-wide) #custWideStrip #custPenbar{display:flex}
+  #customMode:not(.is-wide) #custWideStrip #custDimBar{display:flex}
+  #customMode:not(.is-wide).note-closed #custWideStrip{display:none}
+  #custWideStrip .btn,#custWideStrip .seg button{font-size:0!important;gap:0;padding:6px 10px!important;min-width:44px;justify-content:center}
+  #custWideStrip .note-more-btn{font-size:15px!important}
+  #custWideStrip .note-pop .btn{font-size:13.5px!important}
+  #customMode:not(.is-wide) .wide-fab{top:74px}
+}
+</style>
+<style>
+/* 「…」の中の「広く見る」は通常表示でだけ出す（広く見る中は右上の独立ピルが担う） */
+#customMode:not(.is-wide) .note-pop .btn-wide{display:inline-flex!important}
+#customMode.c3d-on .note-pop .pop-wide-2d{display:none!important}
+#customMode:not(.c3d-on) .note-pop .pop-wide-3d{display:none!important}
+@media (max-width:1280px){
+  #custWideStrip .btn,#custWideStrip .seg button{font-size:0!important;gap:0;min-width:44px;justify-content:center}
+  #custWideStrip .note-more-btn{font-size:15px!important}
+  #custWideStrip .note-pop .btn{font-size:13.5px!important;justify-content:flex-start}
+}
+@media (max-width:900px){
+  /* スマホの広く見る：右上ピルと見出し行（グリッド／座標軸・表示リセット）が被らないよう、余白とアイコン化で収める */
+  #customMode.is-wide #custViewbox2d .vhead{padding-right:152px}
+  #customMode.is-wide #custViewbox2d .vhead .panreset{font-size:0!important;min-width:40px;padding:6px 8px!important;justify-content:center}
+  #customMode.is-wide #custViewbox2d .vhead .cust-disp label{font-size:0!important;gap:2px;padding:4px 2px}
+  #customMode.is-wide #custViewbox2d .vhead .cust-disp{gap:4px}
+  /* 帯の中の道具セグメントは、選択中の塗りが角で欠けないよう丸みに合わせる */
+  #custWideStrip .seg{padding:3px}
+  #custWideStrip .seg button{border-radius:999px!important}
+}
+</style>
 </body>
 </html>
