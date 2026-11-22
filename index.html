@@ -11586,5 +11586,84 @@ button,summary,[role="button"]{transition:transform .13s ease-out,filter .13s ea
   },true);
 })();
 </script>
+<style>
+/* ===== 最終確認の仕上げ：再表示ボタンの定位置／「広く見る」入口の一本化／畳むボタンのバー内常駐 =====
+   1) 再表示ボタン（丸ボタン）の沈み込み対策：
+      従来の bottom:14px／z-index:166 は、下部タブバー（fixed／z-index:170／高さ約60px＋セーフエリア）の
+      裏に沈み、下端の白い欠片しか見えず押せなかった。上部へ逃がす応急指定（stage内の絶対配置）も、
+      スマホ幅では stage が display:contents になり配置基準が崩れて効かない。
+      → 通常表示では viewport 固定のまま、タブバーの高さ分だけ持ち上げ、z-index もタブバーより上にする。
+        全体が常に見え、そのまま押せる。広く見るではタブバー自体が消えるため従来位置（右下）のままでよい。
+   2) 立体・図形・関数の畳むボタンは、stage に浮かせるのをやめ、バーの実子（横スクロール部の外）に戻す。
+      バーの右端に実寸で場所を取り、スクロールする中身に隠れたり画面外へはみ出したりしない。
+      バー右端の58px予約（絶対配置前提の余白）は不要になるので戻す。
+   3) 「広く見る」入口は「…」の中だけに統一する（下のスクリプトが最終位置を保証する）。
+      万一バー側に残っても、通常表示ではバーの横スクロール部の中の同ボタンは出さない。 */
+#customMode.note-closed .dock-fab,#customMode.dock-closed .dock-fab{position:fixed!important;top:auto!important;right:14px!important;bottom:calc(76px + env(safe-area-inset-bottom,0px))!important;z-index:210!important}
+#customMode.is-wide.dock-closed .dock-fab{bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}
+#solidMode:not(.is-wide).note-closed .wide-dock-fab,#planeMode:not(.is-wide).note-closed .wide-dock-fab,#graphMode:not(.is-wide).note-closed .wide-dock-fab{position:fixed!important;top:auto!important;right:14px!important;bottom:calc(76px + env(safe-area-inset-bottom,0px))!important;z-index:210!important}
+#solidMode .viewbar .bar-close-btn,#planeMode .viewbar .bar-close-btn,#graphMode .viewbar .bar-close-btn{position:static!important;flex:none;align-self:center;margin-left:2px;box-shadow:none}
+#solidMode .viewbar,#planeMode .viewbar,#graphMode .viewbar{padding-right:8px}
+#solidMode:not(.is-wide) .bar-scroll .btn-wide,#planeMode:not(.is-wide) .bar-scroll .btn-wide,#graphMode:not(.is-wide) .bar-scroll .btn-wide{display:none!important}
+@media print{#customMode.note-closed .dock-fab,#customMode.dock-closed .dock-fab,#solidMode:not(.is-wide).note-closed .wide-dock-fab,#planeMode:not(.is-wide).note-closed .wide-dock-fab,#graphMode:not(.is-wide).note-closed .wide-dock-fab{display:none!important}}
+</style>
+<script>
+"use strict";
+/* ===== 最終確認の仕上げ（JS）：畳むボタンをバーの実子へ／「広く見る」入口を「…」へ保証 =====
+   既存の組み立てスクリプトの実行順や再配置に左右されないよう、末尾で確定させ、短い間隔で再確認する。 */
+(function(){
+  function $(id){return document.getElementById(id)}
+  /* データモード用の「…」パネル（他モードと同じ見た目・作法で用意する） */
+  function buildDataPop(root){
+    var vb=root.querySelector(".viewbar");if(!vb)return null;
+    var wrap=document.createElement("span");wrap.className="note-pop-wrap";
+    var btn=document.createElement("button");btn.type="button";btn.className="btn small note-more-btn";
+    btn.textContent="…";btn.title="その他の操作";btn.setAttribute("aria-label","その他の操作を開く");
+    btn.setAttribute("aria-haspopup","true");btn.setAttribute("aria-expanded","false");
+    var pop=document.createElement("span");pop.className="note-pop";pop.hidden=true;
+    pop.setAttribute("role","group");pop.setAttribute("aria-label","その他の操作");
+    var cap=document.createElement("span");cap.className="note-pop-cap";cap.textContent="その他の操作";pop.appendChild(cap);
+    wrap.appendChild(btn);wrap.appendChild(pop);vb.appendChild(wrap);
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var willOpen=pop.hidden;
+      document.querySelectorAll(".note-pop").forEach(function(p){if(p!==pop){p.hidden=true}});
+      pop.hidden=!willOpen;btn.setAttribute("aria-expanded",willOpen?"true":"false");
+    });
+    pop.addEventListener("click",function(e){
+      if(e.target.closest&&e.target.closest("button")){pop.hidden=true;btn.setAttribute("aria-expanded","false")}
+    });
+    document.addEventListener("click",function(e){
+      if(!(e.target.closest&&e.target.closest(".note-pop-wrap"))){pop.hidden=true;btn.setAttribute("aria-expanded","false")}
+    });
+    return pop;
+  }
+  function settle(){
+    /* 立体・図形・関数：畳むボタンをバーの実子（横スクロール部の外・末尾）へ */
+    ["solidMode","planeMode","graphMode"].forEach(function(id){
+      var root=$(id);if(!root)return;
+      var vb=root.querySelector(".viewbar");if(!vb)return;
+      var cb=root.querySelector(".bar-close-btn");
+      if(cb&&cb.parentNode!==vb)vb.appendChild(cb);
+      /* 「広く見る」は「…」の中だけに置く */
+      var pop=root.querySelector(".note-pop");
+      var wideBtn=root.querySelector(".btn-wide");
+      if(pop&&wideBtn&&wideBtn.parentNode!==pop)pop.appendChild(wideBtn);
+    });
+    /* データ：入口は「…」の中の1か所だけにする */
+    var droot=$("dataMode");
+    if(droot){
+      var dpop=droot.querySelector(".note-pop");
+      var dwide=droot.querySelector(".btn-wide");
+      if(dwide&&(!dpop||dwide.parentNode!==dpop)){
+        if(!dpop)dpop=buildDataPop(droot);
+        if(dpop&&dwide.parentNode!==dpop)dpop.appendChild(dwide);
+      }
+    }
+  }
+  settle();
+  setInterval(settle,700);
+})();
+</script>
 </body>
 </html>
