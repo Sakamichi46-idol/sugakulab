@@ -7134,7 +7134,19 @@ if(window.MutationObserver)labelSvgIds.forEach(function(id){var s=$(id);if(s)new
       sync();
     });
   }
-  bindChk("opsGrid","custGrid");bindChk("opsAxes","custAxes");
+  bindChk("opsAxes","custAxes");
+  /* グリッドの代理チェックボックス：本体（custGrid）は背景パターンのセレクト
+     （方眼／ドット／等角／なし）なので、checked の代入では切り替わらない。
+     チェック＝方眼、オフ＝なし としてセレクトの値を切り替える。 */
+  (function(){
+    var p=$("opsGrid"),t=$("custGrid");if(!p||!t)return;
+    p.addEventListener("change",function(){
+      if(t.tagName==="SELECT")t.value=p.checked?"grid":"none";
+      else t.checked=p.checked;
+      t.dispatchEvent(new Event("change"));
+      sync();
+    });
+  })();
   function tog(proxyId,targetId){
     var p=$(proxyId),t=$(targetId);if(!p||!t)return;
     p.classList.toggle("on",t.classList.contains("on"));
@@ -7148,7 +7160,7 @@ if(window.MutationObserver)labelSvgIds.forEach(function(id){var s=$(id);if(s)new
     tog("opsDim2d","dim2dBtn");tog("opsDim3d","dim3dBtn");
     tog("opsToolMove","custToolMove");tog("opsToolPen","custToolPen");tog("opsToolEraser","custToolEraser");
     var g=$("custGrid"),a=$("custAxes"),og=$("opsGrid"),oa=$("opsAxes");
-    if(g&&og)og.checked=g.checked;
+    if(g&&og)og.checked=(g.tagName==="SELECT"?(g.value!=="none"):!!g.checked);
     if(a&&oa)oa.checked=a.checked;
     var pr=$("panResetCust"),opr=$("opsPanReset");
     if(pr&&opr)opr.disabled=!!pr.disabled;
