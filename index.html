@@ -12407,5 +12407,72 @@ body.menu-open .wide-bar-exit{opacity:0!important;visibility:hidden!important;po
       文はビューポート内に収まる幅で折り返す。 */
 #graphMode .viewbox>p.m-only{max-width:calc(100vw - 36px);box-sizing:border-box}
 </style>
+<style>
+/* ===== 重なり総点検（2026-11-23）：パネルを開いている間は、裏に回る浮動要素を隠す =====
+   実機スクショで確認された被りへの対処。原則は従来の修正（案内・設定パネル表示中は
+   バーとピルを隠す／畳んだ再表示ボタンは左下へ逃がす）と統一する：
+   シートやドロワーが開いている間だけ、その上に重なって操作を邪魔する浮動要素を隠し、
+   閉じればそのまま戻る。隠すのは「パネルの裏に回る側」だけで、パネル自身の操作
+   （閉じる・各カードのボタン）は一切変えない。
+
+   1) 下シート（〜900px・通常表示）を開いている間：
+      ズームクラスタは position:fixed／z-index:205、バーの再表示丸ボタン（スライダー
+      アイコン）は z-index:210 で、シート（z-index:170）より上に出てしまい、シート内の
+      ボタン（「選択中の点を消す」等）の上に重なっていた。シートが開いている間
+      （モードルートに .side-closed が無い間）は両方を隠す。全モード共通。 */
+@media (max-width:900px){
+  #solidMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  #planeMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  #theoremMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  #customMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  #dataMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  #numMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  #graphMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  #solidMode:not(.is-wide):not(.side-closed) .dock-fab,
+  #planeMode:not(.is-wide):not(.side-closed) .dock-fab,
+  #theoremMode:not(.is-wide):not(.side-closed) .dock-fab,
+  #customMode:not(.is-wide):not(.side-closed) .dock-fab,
+  #dataMode:not(.is-wide):not(.side-closed) .dock-fab,
+  #numMode:not(.is-wide):not(.side-closed) .dock-fab,
+  #graphMode:not(.is-wide):not(.side-closed) .dock-fab,
+  #solidMode:not(.is-wide):not(.side-closed) .wide-dock-fab,
+  #planeMode:not(.is-wide):not(.side-closed) .wide-dock-fab,
+  #theoremMode:not(.is-wide):not(.side-closed) .wide-dock-fab,
+  #customMode:not(.is-wide):not(.side-closed) .wide-dock-fab,
+  #dataMode:not(.is-wide):not(.side-closed) .wide-dock-fab,
+  #numMode:not(.is-wide):not(.side-closed) .wide-dock-fab,
+  #graphMode:not(.is-wide):not(.side-closed) .wide-dock-fab{display:none!important}
+}
+/* 2) 広く見るの右ドロワーを開いている間（全幅共通）：
+      「通常表示に戻す」ピル（z-index:165/166）はドロワー（z-index:140）より上に出て、
+      ドロワー見出しの「閉じる」ボタンをすっぽり覆っていた。再表示丸ボタンと
+      ズームクラスタ、下部の履歴バーも、ドロワーを開いている間は隠す。
+      戻る導線はドロワーを閉じればそのまま復活する。 */
+.is-wide.wide-tools-open .wide-exit-pill,
+.is-wide.wide-tools-open .wide-bar-exit,
+.is-wide.wide-tools-open .dock-fab,
+.is-wide.wide-tools-open .wide-dock-fab,
+.is-wide.wide-tools-open .zoom-cluster{display:none!important}
+body:has(.is-wide.wide-tools-open) .hist-bar{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+/* 3) 「もっと見る」シートを開いている間（〜900px：シートは下部全幅で z-index:175）：
+      ズームクラスタ（205）と再表示丸ボタン（210）がシートの行（数と式／全体の案内 等）の
+      右端の上に重なっていたので、開いている間は隠す。 */
+@media (max-width:900px){
+  body:has(#moreSheet:not(.hidden)) .zoom-cluster,
+  body:has(#moreSheet:not(.hidden)) .dock-fab,
+  body:has(#moreSheet:not(.hidden)) .wide-dock-fab{display:none!important}
+}
+/* 4) 「案内・設定」パネルを開いている間：既存の隠蔽（浮動バー／ピル）に合わせ、
+      ズームクラスタ・再表示丸ボタン・履歴バーも隠す。パネル（topbar の z-index:30 の
+      文脈）より浮動要素の z-index が大きいため、背の高いパネルでは下端に重なり得た。 */
+body.menu-open .zoom-cluster,
+body.menu-open .dock-fab,
+body.menu-open .wide-dock-fab,
+body.menu-open .hist-bar{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+@media print{
+  #solidMode:not(.is-wide):not(.side-closed) .zoom-cluster,
+  .is-wide.wide-tools-open .zoom-cluster{display:none!important}
+}
+</style>
 </body>
 </html>
